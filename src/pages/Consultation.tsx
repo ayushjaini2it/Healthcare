@@ -52,13 +52,23 @@ const Consultation: React.FC = () => {
       const patientsData = await supabaseServices.patientServices.getAllPatients()
       setPatients(patientsData || [])
       
+      
       // Fetch all doctors from Supabase
       const { data: doctorsData } = await supabase
         .from('users')
         .select('*')
         .eq('role', 'doctor')
-      
-      setDoctors(doctorsData || [])
+
+      // Map to expected User structure
+      setDoctors(
+        (doctorsData || []).map((doc: any) => ({
+          id: doc.id,
+          name: doc.full_name || doc.name || '',
+          email: doc.email,
+          role: doc.role,
+          department: doc.department || doc.specialization || ''
+        }))
+      )
     } catch (error) {
       console.error('Error loading data:', error)
       setErrorMessage('Failed to load patient and doctor data')
