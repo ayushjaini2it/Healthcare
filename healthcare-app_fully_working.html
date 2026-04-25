@@ -1,0 +1,2851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Healthcare Supply Chain Management System - Complete patient flow management">
+    <meta name="keywords" content="healthcare, medical, patient management, hospital, clinic">
+    <meta name="author" content="Healthcare SCM Team">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="Healthcare Supply Chain Management">
+    <meta property="og:description" content="Complete healthcare management system for patient flow, consultations, and treatment">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="/healthcare-scm-preview.jpg">
+    <meta name="theme-color" content="#8b5cf6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Healthcare SCM">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    
+    <title>Healthcare Supply Chain Management</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- jsPDF for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <!-- Custom Tailwind Config -->
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: { 50: '#f5f3ff', 100: '#ede9fe', 200: '#ddd6fe', 300: '#c4b5fd', 400: '#a78bfa', 500: '#8b5cf6', 600: '#7c3aed', 700: '#6d28d9', 800: '#5b21b6', 900: '#4c1d95' },
+              secondary: { 50: '#ecfdf5', 100: '#d1fae5', 200: '#a7f3d0', 300: '#6ee7b7', 400: '#34d399', 500: '#10b981', 600: '#059669', 700: '#047857', 800: '#065f46', 900: '#064e3b' },
+              accent: { 50: '#fef2f2', 100: '#fee2e2', 200: '#fecaca', 300: '#fca5a5', 400: '#f87171', 500: '#ef4444', 600: '#dc2626', 700: '#b91c1c', 800: '#991b1b', 900: '#7f1d1d' }
+            },
+            fontFamily: { 'sans': ['Inter', 'system-ui', 'sans-serif'] }
+          }
+        }
+      }
+    </script>
+    
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f9fafb;
+            --bg-tertiary: #f3f4f6;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --text-tertiary: #9ca3af;
+            --border-color: #e5e7eb;
+            --card-bg: #ffffff;
+            --sidebar-bg: #ffffff;
+            --header-bg: #ffffff;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #111827;
+            --bg-secondary: #1f2937;
+            --bg-tertiary: #374151;
+            --text-primary: #f9fafb;
+            --text-secondary: #d1d5db;
+            --text-tertiary: #9ca3af;
+            --border-color: #374151;
+            --card-bg: #1f2937;
+            --sidebar-bg: #1f2937;
+            --header-bg: #1f2937;
+        }
+
+        body {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .loading-spinner {
+            border: 3px solid var(--bg-tertiary);
+            border-top: 3px solid #8b5cf6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .sidebar-active { background-color: #ede9fe; border-right: 4px solid #8b5cf6; }
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(139, 92, 246, 0.15); }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Dark mode specific styles */
+        [data-theme="dark"] .card {
+            background-color: var(--card-bg);
+            border-color: var(--border-color);
+        }
+
+        [data-theme="dark"] .sidebar {
+            background-color: var(--sidebar-bg);
+        }
+
+        [data-theme="dark"] .header {
+            background-color: var(--header-bg);
+            border-color: var(--border-color);
+        }
+
+        [data-theme="dark"] input,
+        [data-theme="dark"] select,
+        [data-theme="dark"] textarea {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+        }
+
+        [data-theme="dark"] .bg-white {
+            background-color: var(--card-bg) !important;
+        }
+
+        [data-theme="dark"] .bg-gray-50 {
+            background-color: var(--bg-tertiary) !important;
+        }
+
+        [data-theme="dark"] .text-gray-900 {
+            color: var(--text-primary) !important;
+        }
+
+        [data-theme="dark"] .text-gray-600 {
+            color: var(--text-secondary) !important;
+        }
+
+        [data-theme="dark"] .text-gray-500 {
+            color: var(--text-tertiary) !important;
+        }
+
+        [data-theme="dark"] .border-gray-200 {
+            border-color: var(--border-color) !important;
+        }
+
+        [data-theme="dark"] .border-gray-300 {
+            border-color: var(--border-color) !important;
+        }
+
+        /* Theme toggle button */
+        .theme-toggle {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle-slider {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+ 
+        [data-theme="dark"] .theme-toggle-slider {
+            transform: translateX(30px);
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.05);
+        }
+
+        /* Simple Animations Only */
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            75% {
+                transform: scale(1.05);
+            }
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: -1000px 0;
+            }
+            100% {
+                background-position: 1000px 0;
+            }
+        }
+
+        .animate-slide-up {
+            animation: slideInUp 0.5s ease-out;
+        }
+
+        .animate-slide-left {
+            animation: slideInLeft 0.6s ease-out;
+        }
+
+        .animate-slide-right {
+            animation: slideInRight 0.6s ease-out;
+        }
+
+        .animate-scale-in {
+            animation: scaleIn 0.4s ease-out;
+        }
+
+        .animate-pulse {
+            animation: pulse 2s infinite;
+        }
+
+        .animate-shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            background-size: 1000px 100%;
+            animation: shimmer 2s infinite;
+        }
+
+        /* Colorful animation variants */
+        .animate-slide-up-rainbow {
+            animation: slideInUp 0.5s ease-out, colorWave 3s ease-in-out;
+        }
+
+        .animate-slide-left-rainbow {
+            animation: slideInLeft 0.6s ease-out, colorWave 2.5s ease-in-out;
+        }
+
+        .animate-slide-right-rainbow {
+            animation: slideInRight 0.6s ease-out, colorWave 2.5s ease-in-out;
+        }
+
+        .animate-scale-in-rainbow {
+            animation: scaleIn 0.4s ease-out, gradientShift 2s ease-in-out;
+        }
+
+        .animate-pulse-rainbow {
+            animation: pulse 2s infinite, rainbowBorder 3s ease-in-out;
+        }
+
+        .animate-shimmer-rainbow {
+            background: linear-gradient(90deg, 
+                rgba(255,0,100,0.3), rgba(255,127,0,0.3), 
+                rgba(0,255,0,0.3), rgba(0,0,255,0.3), 
+                rgba(255,0,255,0.3));
+            background-size: 1000px 100%;
+            animation: shimmer 2s infinite, colorWave 4s ease-in-out;
+        }
+
+        .animate-neon-glow {
+            animation: neonGlow 2s ease-in-out infinite alternate;
+        }
+
+        .animate-gradient-bg {
+            animation: gradientShift 4s ease-in-out infinite alternate;
+        }
+
+        .animate-rainbow-border {
+            animation: rainbowBorder 3s ease-in-out infinite;
+            border-width: 3px;
+            border-style: solid;
+        }
+
+        .animate-color-shift {
+            animation: colorWave 2s ease-in-out infinite;
+        }
+
+        .animate-bounce-color {
+            animation: bounce 1s ease-in-out infinite alternate;
+        }
+
+        /* Advanced colorful variants */
+        .animate-aurora {
+            animation: auroraEffect 4s ease-in-out infinite alternate;
+        }
+
+        .animate-spectrum {
+            animation: spectrumShift 5s ease-in-out infinite;
+        }
+
+        .animate-rainbow-pulse {
+            animation: rainbowPulse 3s ease-in-out infinite;
+        }
+
+        .animate-crystal-glow {
+            animation: crystalGlow 3s ease-in-out infinite alternate;
+        }
+
+        .animate-fire-effect {
+            animation: fireEffect 2s ease-in-out infinite alternate;
+        }
+
+        .animate-ocean-wave {
+            animation: oceanWave 4s ease-in-out infinite;
+        }
+
+        .animate-prism {
+            background: linear-gradient(45deg, 
+                rgba(255,0,150,0.2), rgba(255,127,0,0.2), 
+                rgba(0,255,255,0.2), rgba(0,0,255,0.2));
+            clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 50% 100%);
+            animation: rotate 8s linear infinite;
+        }
+
+        .animate-galaxy {
+            background: radial-gradient(circle, 
+                rgba(138,43,226,0.3), rgba(30,144,255,0.3), 
+                rgba(255,0,128,0.3));
+            animation: galaxySpin 20s linear infinite;
+        }
+
+        @keyframes galaxySpin {
+            0% { transform: rotate(0deg) scale(1); }
+            100% { transform: rotate(360deg) scale(1.1); }
+        }
+
+        .animate-matrix {
+            background: linear-gradient(45deg, #00ff00, #00ff88, #00ffff, #0088ff);
+            background-size: 200% 200%;
+            animation: matrixMove 3s ease-in-out infinite;
+        }
+
+        @keyframes matrixMove {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .animate-psychedelic {
+            background: linear-gradient(45deg, 
+                #ff00ff, #ff00aa, #ff00ff, #aa00ff, #ff00aa, #ff00ff, #aa00ff, #ff00ff, #ff00aa, #ff00ff);
+            animation: psychedelic 2s ease-in-out infinite;
+        }
+
+        @keyframes psychedelic {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.1) rotate(90deg); }
+            50% { transform: scale(1) rotate(180deg); }
+            75% { transform: scale(1.1) rotate(270deg); }
+            100% { transform: scale(1) rotate(360deg); }
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0) scale(1);
+            }
+            50% {
+                transform: translateY(-10px) scale(1.1);
+            }
+        }
+
+        /* Simple transitions for all interactive elements */
+        * {
+            transition: all 0.3s ease;
+        }
+
+        /* Basic hover effects */
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Button animations */
+        .btn-animate {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .btn-animate::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(139, 92, 246, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn-animate:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        /* Loading skeleton animation */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+
+        /* Counter animation */
+        .counter-animate {
+            display: inline-block;
+            animation: scaleIn 0.6s ease-out;
+        }
+
+        /* Status badge animations */
+        .status-badge {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .status-badge::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        /* Form field animations */
+        .form-field-animate {
+            transition: all 0.3s ease;
+        }
+
+        .form-field-animate:focus {
+            transform: scale(1.02);
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3);
+        }
+    </style>
+</head>
+<body class="font-sans antialiased bg-gray-50">
+    <div id="app">
+        <!-- Loading State -->
+        <div id="loading" class="flex items-center justify-center min-h-screen">
+            <div class="text-center">
+                <div class="loading-spinner mx-auto mb-4"></div>
+                <h2 class="text-xl font-semibold text-gray-900 mb-2">Loading Healthcare System</h2>
+                <p class="text-gray-600">Please wait while we prepare your dashboard...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Healthcare App State Management
+        const state = {
+            currentView: 'dashboard',
+            theme: localStorage.getItem('theme') || 'light',
+            patients: [],
+            consultations: [],
+            diagnoses: [],
+            treatments: [],
+            medications: [],
+            bills: [],
+            discharges: [],
+            feedback: [],
+            stats: {
+                totalPatients: 1234,
+                activeConsultations: 45,
+                pendingDiagnoses: 23,
+                dischargesToday: 18
+            }
+        };
+
+      
+        // Sample Data
+        const sampleData = {
+            patients: [
+                { id: '1', name: 'Manas Tiwari', age: 22, gender: 'male', email: 'manastiwari3@gmail.com', phone: '9696517336', status: 'registered', registrationDate: '2026-02-15' },
+                { id: '2', name: 'Aryan Seth', age: 19, gender: 'male', email: 'setharyan56@gmail.com', phone: '9065067490', status: 'in_consultation', registrationDate: '2026-03-14' },
+                { id: '3', name: 'shravni', age: 19, gender: 'female', email: 'shravni74@gmail.com', phone: '9699410695', status: 'diagnosed', registrationDate: '2026-04-13' },
+                { id: '4', name: 'Rohan Kumar', age: 28, gender: 'male', email: 'rohankumar789@gmail.com', phone: '9876543210', status: 'in_treatment', registrationDate: '2026-02-10' },
+                { id: '5', name: 'Priya Sharma', age: 35, gender: 'female', email: 'priya.sharma456@gmail.com', phone: '9123456789', status: 'discharged', registrationDate: '2026-01-20' },
+                { id: '6', name: 'Amit Patel', age: 42, gender: 'male', email: 'amit.patatel123@gmail.com', phone: '8765432109', status: 'in_surgery', registrationDate: '2026-03-05' },
+                { id: '7', name: 'Neha Gupta', age: 31, gender: 'female', email: 'neha.gupta789@gmail.com', phone: '7654321098', status: 'in_pharmacy', registrationDate: '2026-02-18' },
+                { id: '8', name: 'Vikram Singh', age: 55, gender: 'male', email: 'vikram.singh321@gmail.com', phone: '6543210987', status: 'in_billing', registrationDate: '2026-01-25' }
+            ],
+            consultations: [
+                { id: '1', patientId: '1', patientName: 'Manas Tiwari', doctor: 'Dr. Rajesh Kumar', specialty: 'Cardiology', date: '2026-04-15', time: '10:30 AM', status: 'in_progress', symptoms: 'Chest pain, shortness of breath' },
+                { id: '2', patientId: '2', patientName: 'Aryan Seth', doctor: 'Dr. Priya Sharma', specialty: 'Neurology', date: '2026-04-15', time: '09:15 AM', status: 'completed', symptoms: 'Headaches, dizziness' },
+                { id: '3', patientId: '3', patientName: 'shravni', doctor: 'Dr. Amit Patel', specialty: 'Orthopedics', date: '2026-04-15', time: '11:45 AM', status: 'waiting', symptoms: 'Knee pain, difficulty walking' },
+                { id: '4', patientId: '4', patientName: 'Rohan Kumar', doctor: 'Dr. Sneha Deshmukh', specialty: 'Pediatrics', date: '2026-04-15', time: '02:30 PM', status: 'scheduled', symptoms: 'Fever, cough, cold symptoms' },
+                { id: '5', patientId: '5', patientName: 'Priya Sharma', doctor: 'Dr. Mahesh Deshpande', specialty: 'General Medicine', date: '2026-04-14', time: '03:45 PM', status: 'completed', symptoms: 'Routine checkup, blood pressure issues' }
+            ],
+            diagnoses: [
+                { id: '1', consultationId: '2', patientName: 'Aryan Seth', diagnosis: 'Migraine with aura', severity: 'moderate', date: '2026-04-15', doctor: 'Dr. Priya Sharma', treatment: 'Prescribed pain relievers and preventive medication', followUp: '2026-04-22' },
+                { id: '2', consultationId: '1', patientName: 'Manas Tiwari', diagnosis: 'Hypertension Stage 2', severity: 'high', date: '2026-04-15', doctor: 'Dr. Rajesh Kumar', treatment: 'ACE inhibitors prescribed, lifestyle changes recommended', followUp: '2026-04-18' },
+                { id: '3', consultationId: '3', patientName: 'shravni', diagnosis: 'Osteoarthritis left knee', severity: 'moderate', date: '2026-04-15', doctor: 'Dr. Amit Patel', treatment: 'Anti-inflammatory medication, physical therapy recommended', followUp: '2026-04-20' },
+                { id: '4', consultationId: '5', patientName: 'Priya Sharma', diagnosis: 'Essential hypertension', severity: 'mild', date: '2026-04-14', doctor: 'Dr. Mahesh Deshpande', treatment: 'Dietary changes, exercise plan, monitoring', followUp: '2026-04-21' }
+            ],
+            treatments: [
+                { id: '1', diagnosisId: '2', patientName: 'Aryan Seth', treatment: 'Sumatriptan 50mg', dosage: 'As needed for migraine', duration: '30 days', startDate: '2026-04-15', status: 'ongoing' },
+                { id: '2', diagnosisId: '1', patientName: 'Manas Tiwari', treatment: 'Lisinopril 10mg', dosage: 'Once daily', duration: '90 days', startDate: '2026-04-15', status: 'ongoing' },
+                { id: '3', diagnosisId: '3', patientName: 'shravni', treatment: 'Ibuprofen 400mg', dosage: 'Three times daily with food', duration: '14 days', startDate: '2026-04-15', status: 'ongoing' },
+                { id: '4', diagnosisId: '4', patientName: 'Rohan Kumar', treatment: 'Paracetamol syrup', dosage: '5ml every 6 hours', duration: '7 days', startDate: '2026-04-15', status: 'completed' }
+            ],
+            medications: [
+                { id: '1', patientName: 'Aryan Seth', medication: 'Sumatriptan', dosage: '50mg tablets', quantity: 10, dispensedDate: '2026-04-15', pharmacist: 'Dr. Mehta', status: 'dispensed' },
+                { id: '2', patientName: 'Manas Tiwari', medication: 'Lisinopril', dosage: '10mg tablets', quantity: 30, dispensedDate: '2026-04-15', pharmacist: 'Dr. Sharma', status: 'dispensed' },
+                { id: '3', patientName: 'shravni', medication: 'Ibuprofen', dosage: '400mg tablets', quantity: 20, dispensedDate: '2026-04-15', pharmacist: 'Dr. Patel', status: 'pending' },
+                { id: '4', patientName: 'Priya Sharma', medication: 'Vitamin D supplements', dosage: '1000 IU capsules', quantity: 60, dispensedDate: '2026-04-14', pharmacist: 'Dr. Gupta', status: 'dispensed' }
+            ],
+            bills: [
+                { id: '1', patientName: 'Manas Tiwari', totalAmount: 5450, status: 'paid', paymentDate: '2026-04-15', paymentMethod: 'Insurance', items: 3, doctor: 'Dr. Rajesh Kumar' },
+                { id: '2', patientName: 'Aryan Seth', totalAmount: 2250, status: 'pending', paymentDate: null, paymentMethod: null, items: 2, doctor: 'Dr. Priya Sharma' },
+                { id: '3', patientName: 'shravni', totalAmount: 3200, status: 'partial', paymentDate: '2026-04-10', paymentMethod: 'Cash', items: 4, doctor: 'Dr. Amit Patel' },
+                { id: '4', patientName: 'Rohan Kumar', totalAmount: 1800, status: 'paid', paymentDate: '2026-04-14', paymentMethod: 'Credit Card', items: 2, doctor: 'Dr. Sneha Deshmukh' }
+            ],
+            discharges: [
+                { id: '1', patientName: 'Priya Sharma', admissionDate: '2026-04-10', dischargeDate: '2026-04-14', totalDays: 4, finalDiagnosis: 'Essential hypertension', treatment: 'Medication, lifestyle changes', doctor: 'Dr. Mahesh Deshpande', roomType: 'Private', billStatus: 'paid' },
+                { id: '2', patientName: 'Rohan Kumar', admissionDate: '2026-04-12', dischargeDate: '2026-04-15', totalDays: 3, finalDiagnosis: 'Viral fever', treatment: 'Antiviral medication, fluids', doctor: 'Dr. Sneha Deshmukh', roomType: 'General', billStatus: 'paid' },
+                { id: '3', patientName: 'Amit Patel', admissionDate: '2026-04-05', dischargeDate: '2026-04-15', totalDays: 10, finalDiagnosis: 'Pneumonia', treatment: 'IV antibiotics, oxygen therapy', doctor: 'Dr. Vikram Singh', roomType: 'ICU', billStatus: 'insurance_processing' }
+            ],
+            feedback: [
+                { id: '1', patientName: 'Priya Sharma', rating: 5, service: 'General Medicine', doctor: 'Dr. Mahesh Deshpande', date: '2026-04-14', comments: 'Excellent care, very thorough examination, clear instructions provided', responseDate: '2026-04-15' },
+                { id: '2', patientName: 'Rohan Kumar', rating: 4, service: 'Pediatrics', doctor: 'Dr. Sneha Deshmukh', date: '2026-04-15', comments: 'Good care but long waiting time, doctor was very patient with child', responseDate: '2026-04-16' },
+                { id: '3', patientName: 'Manas Tiwari', rating: 5, service: 'Cardiology', doctor: 'Dr. Rajesh Kumar', date: '2026-04-15', comments: 'Outstanding care, doctor explained everything clearly, treatment working well', responseDate: '2026-04-18' }
+            ],
+            
+            consultations: [
+                { id: '1', patientId: '1', doctor: 'Dr. Sarah Wilson', date: '2026-04-15', symptoms: 'Chest pain, shortness of breath', status: 'completed' },
+                { id: '2', patientId: '2', doctor: 'Dr. Michael Chen', date: '2026-04-15', symptoms: 'Fever, cough', status: 'in_progress' }
+            ],
+            recentFeedback: [
+                { id: '1', patientName: 'Mansi Patil', rating: 5, category: 'overall', comments: 'Excellent care and professional staff. Very satisfied with the treatment.', date: '2024-01-15' },
+                { id: '2', patientName: 'Shravni Patukle', rating: 4, category: 'facility', comments: 'Good facilities and care. Staff was very helpful during my stay.', date: '2024-01-14' },
+                { id: '3', patientName: 'Himesh', rating: 5, category: 'treatment', comments: 'Great treatment and quick recovery. Doctors are very experienced.', date: '2024-01-13' }
+            ],
+            puneHospitals: [
+                {
+                    id: '1',
+                    name: 'Jehangir Hospital',
+                    location: 'Sassoon Road, Pune',
+                    rating: 4.8,
+                    specialty: 'Multi-Specialty',
+                    doctors: [
+                        { id: 'd1', name: 'Dr. Rajesh Kumar', specialty: 'Cardiology', experience: '15 years', rating: 4.9, availability: 'Mon-Wed-Fri' },
+                        { id: 'd2', name: 'Dr. Priya Sharma', specialty: 'Neurology', experience: '12 years', rating: 4.7, availability: 'Tue-Thu-Sat' },
+                        { id: 'd3', name: 'Dr. Amit Patel', specialty: 'Orthopedics', experience: '18 years', rating: 4.8, availability: 'Mon-Thu-Fri' },
+                        { id: 'd4', name: 'Dr. Sneha Deshmukh', specialty: 'Pediatrics', experience: '10 years', rating: 4.6, availability: 'Daily' }
+                    ]
+                },
+                {
+                    id: '2',
+                    name: 'Sahyadri Hospital',
+                    location: 'Karve Road, Pune',
+                    rating: 4.7,
+                    specialty: 'Multi-Specialty',
+                    doctors: [
+                        { id: 'd5', name: 'Dr. Vikram Singh', specialty: 'Cardiology', experience: '20 years', rating: 4.8, availability: 'Mon-Wed-Fri' },
+                        { id: 'd6', name: 'Dr. Anjali Nair', specialty: 'Gynecology', experience: '14 years', rating: 4.9, availability: 'Tue-Thu-Sat' },
+                        { id: 'd7', name: 'Dr. Rahul Mehta', specialty: 'General Surgery', experience: '16 years', rating: 4.7, availability: 'Daily' },
+                        { id: 'd8', name: 'Dr. Kavita Joshi', specialty: 'Dermatology', experience: '11 years', rating: 4.5, availability: 'Mon-Thu' }
+                    ]
+                },
+                {
+                    id: '3',
+                    name: 'Ruby Hall Clinic',
+                    location: 'Sassoon Road, Pune',
+                    rating: 4.6,
+                    specialty: 'Multi-Specialty',
+                    doctors: [
+                        { id: 'd9', name: 'Dr. Sanjay Gupta', specialty: 'Pulmonology', experience: '13 years', rating: 4.7, availability: 'Mon-Wed-Fri' },
+                        { id: 'd10', name: 'Dr. Meera Iyer', specialty: 'Endocrinology', experience: '15 years', rating: 4.8, availability: 'Tue-Thu-Sat' },
+                        { id: 'd11', name: 'Dr. Arjun Reddy', specialty: 'Urology', experience: '17 years', rating: 4.6, availability: 'Daily' },
+                        { id: 'd12', name: 'Dr. Pooja Kulkarni', specialty: 'Psychiatry', experience: '9 years', rating: 4.5, availability: 'Mon-Thu' }
+                    ]
+                },
+                {
+                    id: '4',
+                    name: 'Deenanath Mangeshkar Hospital',
+                    location: 'Erandwane, Pune',
+                    rating: 4.9,
+                    specialty: 'Multi-Specialty',
+                    doctors: [
+                        { id: 'd13', name: 'Dr. Ashok Bhandarkar', specialty: 'Cardiology', experience: '25 years', rating: 4.9, availability: 'Mon-Wed-Fri' },
+                        { id: 'd14', name: 'Dr. Nina Kulkarni', specialty: 'Oncology', experience: '20 years', rating: 4.8, availability: 'Tue-Thu-Sat' },
+                        { id: 'd15', name: 'Dr. Prasad Joshi', specialty: 'Neurosurgery', experience: '22 years', rating: 4.9, availability: 'Daily' },
+                        { id: 'd16', name: 'Dr. Rani Singh', specialty: 'Pediatrics', experience: '12 years', rating: 4.7, availability: 'Mon-Thu-Fri' }
+                    ]
+                },
+                {
+                    id: '5',
+                    name: 'KEM Hospital',
+                    location: 'Rasta Peth, Pune',
+                    rating: 4.5,
+                    specialty: 'Multi-Specialty',
+                    doctors: [
+                        { id: 'd17', name: 'Dr. Mahesh Deshpande', specialty: 'General Medicine', experience: '18 years', rating: 4.6, availability: 'Daily' },
+                        { id: 'd18', name: 'Dr. Anita Shinde', specialty: 'Obstetrics', experience: '14 years', rating: 4.7, availability: 'Mon-Thu-Sat' },
+                        { id: 'd19', name: 'Dr. Vijay Patil', specialty: 'Gastroenterology', experience: '16 years', rating: 4.5, availability: 'Tue-Wed-Fri' },
+                        { id: 'd20', name: 'Dr. Swati Bhosale', specialty: 'Ophthalmology', experience: '11 years', rating: 4.4, availability: 'Mon-Thu' }
+                    ]
+                },
+                {
+                    id: '6',
+                    name: 'Columbia Asia Hospital',
+                    location: 'Kalyani Nagar, Pune',
+                    rating: 4.4,
+                    specialty: 'Multi-Specialty',
+                    doctors: [
+                        { id: 'd21', name: 'Dr. Rohan Sharma', specialty: 'Internal Medicine', experience: '12 years', rating: 4.5, availability: 'Daily' },
+                        { id: 'd22', name: 'Dr. Divya Patel', specialty: 'Rheumatology', experience: '10 years', rating: 4.3, availability: 'Mon-Wed-Fri' },
+                        { id: 'd23', name: 'Dr. Karan Singh', specialty: 'Nephrology', experience: '15 years', rating: 4.6, availability: 'Tue-Thu-Sat' },
+                        { id: 'd24', name: 'Dr. Neha Agarwal', specialty: 'ENT', experience: '8 years', rating: 4.2, availability: 'Mon-Thu' }
+                    ]
+                }
+            ],
+            appointments: []
+        };
+
+        // Initialize app
+        function initApp() {
+            state.patients = sampleData.patients;
+            state.consultations = sampleData.consultations;
+            state.diagnoses = sampleData.diagnoses;
+            state.treatments = sampleData.treatments;
+            state.medications = sampleData.medications;
+            state.bills = sampleData.bills;
+            state.discharges = sampleData.discharges;
+            state.feedback = sampleData.feedback;
+            state.hospitals = sampleData.puneHospitals;
+            state.appointments = sampleData.appointments;
+            
+            // Update stats based on real data
+            state.stats = {
+                totalPatients: sampleData.patients.length,
+                activeConsultations: sampleData.consultations.filter(c => c.status === 'in_progress' || c.status === 'waiting').length,
+                pendingDiagnoses: sampleData.diagnoses.filter(d => d.severity === 'high' || d.severity === 'moderate').length,
+                dischargesToday: sampleData.discharges.filter(d => new Date(d.dischargeDate).toDateString() === new Date().toDateString()).length
+            };
+            
+            // Apply saved theme
+            applyTheme(state.theme);
+            
+            renderApp();
+        }
+
+        // Theme Management
+        function toggleTheme() {
+            const newTheme = state.theme === 'light' ? 'dark' : 'light';
+            state.theme = newTheme;
+            localStorage.setItem('theme', newTheme);
+            applyTheme(newTheme);
+            renderApp();
+        }
+
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                document.body.classList.add('dark-mode');
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+                document.body.classList.remove('dark-mode');
+            }
+        }
+
+        // Main App Renderer
+        function renderApp() {
+            const app = document.getElementById('app');
+            app.innerHTML = `
+                <div class="flex min-h-screen">
+                    ${renderSidebar()}
+                    <div class="flex-1">
+                        ${renderHeader()}
+                        <main class="p-8 animate-slide-up">
+                            ${renderCurrentView()}
+                        </main>
+                    </div>
+                </div>
+            `;
+            attachEventListeners();
+        }
+
+        // Sidebar Component
+        function renderSidebar() {
+            const navigation = [
+                { name: 'Dashboard', href: 'dashboard', icon: 'Home' },
+                { name: 'Patient Entry', href: 'registration', icon: 'UserCheck' },
+                { name: 'Registration', href: 'registration', icon: 'Users' },
+                { name: 'Consultation', href: 'consultation', icon: 'Stethoscope' },
+                { name: 'Diagnosis', href: 'diagnosis', icon: 'Microscope' },
+                { name: 'Treatment', href: 'treatment', icon: 'Activity' },
+                { name: 'Pharmacy', href: 'pharmacy', icon: 'Pill' },
+                { name: 'Billing', href: 'billing', icon: 'CreditCard' },
+                { name: 'Discharge', href: 'discharge', icon: 'FileText' },
+                { name: 'Appointment Booking', href: 'appointments', icon: 'Calendar' },
+                { name: 'Feedback', href: 'feedback', icon: 'MessageSquare' }
+            ];
+
+            return `
+                <div class="sidebar w-64 bg-white shadow-lg min-h-screen animate-slide-left">
+                    <div class="p-6 gradient-bg">
+                        <h1 class="text-2xl font-bold text-white animate-scale-in">Healthcare SCM</h1>
+                        <p class="text-sm text-purple-100 mt-1">Supply Chain Management</p>
+                    </div>
+                    <nav class="mt-6">
+                        ${navigation.map((item, index) => `
+                            <button onclick="navigateTo('${item.href}')" 
+                                    class="sidebar-item w-full flex items-center px-6 py-3 text-sm font-medium transition-colors ${
+                                        state.currentView === item.href ? 'sidebar-active text-primary-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    }" style="animation-delay: ${index * 0.1}s">
+                                <i data-lucide="${item.icon}" class="h-5 w-5 mr-3"></i>
+                                ${item.name}
+                            </button>
+                        `).join('')}
+                    </nav>
+                </div>
+            `;
+        }
+
+        // Header Component
+        function renderHeader() {
+            const currentPage = getCurrentPageName();
+            const currentTheme = state.theme;
+            return `
+                <header class="header bg-White shadow-sm border-b border-gray-200 header-animate">
+                    <div class="px-8 py-4">
+                        <div class="flex items-center justify-between">
+                            <div class="animate-slide-left">
+                                <h2 class="text-xl font-semibold text-gray-900">${currentPage}</h2>
+                                <p class="text-sm text-gray-600 mt-1">Healthcare Service Supply Chain Management</p>
+                            </div>
+                            <div class="flex items-center space-x-4">
+                                <span class="text-sm text-gray-600">
+                                    ${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                                </span>
+                                <div class="theme-toggle" onclick="toggleTheme()" title="Toggle ${currentTheme === 'light' ? 'dark' : 'light'} mode">
+                                    <div class="theme-toggle-slider">
+                                        <i data-lucide="${currentTheme === 'light' ? 'Sun' : 'Moon'}" class="h-4 w-4 text-purple-600"></i>
+                                    </div>
+                                </div>
+                                <div class="h-8 w-8 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center">
+                                    <span class="text-white text-sm font-medium">A</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+            `;
+        }
+
+        // Current View Renderer
+        function renderCurrentView() {
+            switch(state.currentView) {
+                case 'dashboard': return renderDashboard();
+                case 'registration': return renderPatientRegistration();
+                case 'consultation': return renderConsultation();
+                case 'diagnosis': return renderDiagnosis();
+                case 'treatment': return renderTreatment();
+                case 'pharmacy': return renderPharmacy();
+                case 'billing': return renderBilling();
+                case 'discharge': return renderDischarge();
+                case 'appointments': return renderAppointmentBooking();
+                case 'feedback': return renderFeedback();
+                default: return renderDashboard();
+            }
+        }
+
+        // Dashboard View
+        function renderDashboard() {
+            return `
+                <div class="space-y-6 fade-in">
+                    <div class="animate-slide-up">
+                        <h1 class="text-3xl font-bold text-gray-900">Healthcare Supply Chain Dashboard</h1>
+                        <p class="text-gray-600 mt-2">Monitor and manage patient flow through healthcare system</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        ${renderStatCard('Total Patients', state.stats.totalPatients, '+12%', 'Users', 'purple')}
+                        ${renderStatCard('Active Consultations', state.stats.activeConsultations, '+8%', 'Stethoscope', 'teal')}
+                        ${renderStatCard('Pending Diagnoses', state.stats.pendingDiagnoses, '-3%', 'Activity', 'blue')}
+                        ${renderStatCard('Discharges Today', state.stats.dischargesToday, '+15%', 'FileText', 'pink')}
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="card bg-white rounded-lg shadow-md p-6 card-hover">
+                            <h2 class="text-xl font-semibold text-gray-900 mb-4">Recent Patients</h2>
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-gray-900">Manas Tiwari</p>
+                                            <p class="text-sm text-gray-600">registered</p>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="text-sm text-gray-500">2026-02-15</p>
+                                            <button class="text-primary-600 hover:text-primary-700 text-sm">View Details</button>
+                                        </div>
+                                    </div>
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-gray-900">Aryan Seth</p>
+                                            <p class="text-sm text-gray-600">in_consultation</p>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="text-sm text-gray-500">2026-03-14</p>
+                                            <button class="text-primary-600 hover:text-primary-700 text-sm">View Details</button>
+                                        </div>
+                                    </div>
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-gray-900">shravni</p>
+                                            <p class="text-sm text-gray-600">diagnosed</p>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="text-sm text-gray-500">2026-04-13</p>
+                                            <button class="text-primary-600 hover:text-primary-700 text-sm">View Details</button>
+                                        </div>
+                                    </div>
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-gray-900">Rohan Kumar</p>
+                                            <p class="text-sm text-gray-600">in_treatment</p>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="text-sm text-gray-500">2026-02-10</p>
+                                            <button class="text-primary-600 hover:text-primary-700 text-sm">View Details</button>
+                                        </div>
+                                    </div>
+                            </div>
+                        </div>
+
+                        <div class="card bg-white rounded-lg shadow-md p-6">
+                            <h2 class="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h2>
+                            <div class="grid grid-cols-2 gap-4">
+                                <button onclick="navigateTo('registration')" class="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-4 py-3 rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all font-medium shadow-lg text-center">
+                                    <i data-lucide="UserPlus" class="h-5 w-5 inline mr-2"></i>
+                                    Register New Patient
+                                </button>
+                                <button onclick="navigateTo('consultation')" class="bg-gradient-to-r from-teal-500 to-teal-600 text-white px-4 py-3 rounded-lg hover:from-teal-600 hover:to-teal-700 transition-all font-medium shadow-lg text-center">
+                                    <i data-lucide="Stethoscope" class="h-5 w-5 inline mr-2"></i>
+                                    Start Consultation
+                                </button>
+                                <button onclick="navigateTo('diagnosis')" class="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-3 rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all font-medium shadow-lg text-center">
+                                    <i data-lucide="Microscope" class="h-5 w-5 inline mr-2"></i>
+                                    Order Tests
+                                </button>
+                                <button onclick="navigateTo('pharmacy')" class="bg-gradient-to-r from-pink-500 to-pink-600 text-white px-4 py-3 rounded-lg hover:from-pink-600 hover:to-pink-700 transition-all font-medium shadow-lg text-center">
+                                    <i data-lucide="Pill" class="h-5 w-5 inline mr-2"></i>
+                                    Dispense Medication
+                                </button>
+                                <button onclick="navigateTo('billing')" class="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-4 py-3 rounded-lg hover:from-amber-600 hover:to-amber-700 transition-all font-medium shadow-lg text-center">
+                                    <i data-lucide="CreditCard" class="h-5 w-5 inline mr-2"></i>
+                                    Process Payment
+                                </button>
+                                <button onclick="navigateTo('discharge')" class="bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-3 rounded-lg hover:from-green-600 hover:to-green-700 transition-all font-medium shadow-lg text-center">
+                                    <i data-lucide="FileText" class="h-5 w-5 inline mr-2"></i>
+                                    Discharge Patient
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Patient Registration View
+        function renderPatientRegistration() {
+            return `
+                <div class="max-w-4xl mx-auto space-y-6 fade-in">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">Patient Registration</h1>
+                        <p class="text-gray-600 mt-2">Register a new patient in the healthcare system</p>
+                    </div>
+
+                    <div class="card bg-white rounded-lg shadow-md p-6">
+                        <form onsubmit="handlePatientRegistration(event)" class="space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
+                                    <input type="text" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Enter first name" />
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Last Name *</label>
+                                    <input type="text" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Enter last name" />
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Age *</label>
+                                    <input type="number" required min="0" max="150" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Enter age" />
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Gender *</label>
+                                    <select required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                        <option value="">Select gender</option>
+                                        <option value="male">Male</option>
+                                        <option value="female">Female</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+                                    <input type="email" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="patient@example.com" />
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Phone *</label>
+                                    <input type="tel" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="(555) 123-4567" />
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Address *</label>
+                                <input type="text" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="123 Main St, City, State 12345" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Medical History</label>
+                                <textarea rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="List any relevant medical conditions..."></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Allergies</label>
+                                <textarea rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="List any known allergies..."></textarea>
+                            </div>
+                            <div class="flex justify-end space-x-4">
+                                <button type="button" onclick="clearRegistrationForm()" class="btn-secondary bg-gray-200 text-gray-900 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors font-medium">Clear Form</button>
+                                <button type="submit" class="btn-primary bg-gradient-to-r from-purple-500 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all font-medium shadow-lg">Register Patient</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Consultation View
+        function renderConsultation() {
+            return `
+                <div class="max-w-6xl mx-auto space-y-6 fade-in">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">Patient Consultation</h1>
+                        <p class="text-gray-600 mt-2">Conduct patient consultation and record vital signs and symptoms</p>
+                    </div>
+
+                    <div class="card bg-white rounded-lg shadow-md p-6">
+                        <form class="space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Select Patient *</label>
+                                    <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                        <option value="">Choose a patient</option>
+                                        ${state.patients.map(patient => `
+                                            <option value="${patient.id}">${patient.name} - ${patient.age} years (${patient.status})</option>
+                                        `).join('')}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Select Doctor *</label>
+                                    <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                        <option value="">Choose a doctor</option>
+                                        <option value="dr-wilson">Dr. Sarah Wilson</option>
+                                        <option value="dr-chen">Dr. Michael Chen</option>
+                                        <option value="dr-davis">Dr. Emily Davis</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Blood Pressure *</label>
+                                    <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="120/80 mmHg" />
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Heart Rate (bpm) *</label>
+                                    <input type="number" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="72" />
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Temperature (°C) *</label>
+                                    <input type="number" step="0.1" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="36.6" />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Symptoms *</label>
+                                <textarea rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Describe patient symptoms in detail..."></textarea>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Preliminary Diagnosis *</label>
+                                <textarea rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Enter preliminary diagnosis..."></textarea>
+                            </div>
+
+                            <div class="flex justify-end space-x-4">
+                                <button type="button" class="btn-secondary bg-gray-200 text-gray-900 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors font-medium">Clear Form</button>
+                                <button type="submit" class="btn-primary bg-gradient-to-r from-teal-500 to-teal-600 text-white px-4 py-2 rounded-lg hover:from-teal-600 hover:to-teal-700 transition-all font-medium shadow-lg">Complete Consultation</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Diagnosis View
+        function renderDiagnosis() {
+            return `
+                <div class="max-w-7xl mx-auto space-y-6 fade-in">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">Diagnosis & Testing</h1>
+                        <p class="text-gray-600 mt-2">Order laboratory tests and imaging studies for patient diagnosis</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div class="lg:col-span-2">
+                            <div class="card bg-white rounded-lg shadow-md p-6">
+                                <h2 class="text-xl font-semibold text-gray-900 mb-6">Order Diagnostic Test</h2>
+                                <form class="space-y-6">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Patient *</label>
+                                            <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                                <option value="">Select patient</option>
+                                                ${state.patients.map(patient => `
+                                                    <option value="${patient.id}">${patient.name}</option>
+                                                `).join('')}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Test Type *</label>
+                                            <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                                <option value="lab">Laboratory Tests</option>
+                                                <option value="imaging">Imaging Studies</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Test Name *</label>
+                                        <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                            <option value="">Select a test</option>
+                                            <option value="cbc">Complete Blood Count (CBC)</option>
+                                            <option value="cmp">Comprehensive Metabolic Panel</option>
+                                            <option value="chest-xray">Chest X-Ray</option>
+                                            <option value="ct-scan">CT Scan</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Priority *</label>
+                                        <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                            <option value="routine">Routine</option>
+                                            <option value="urgent">Urgent</option>
+                                            <option value="stat">STAT (Immediate)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Test Instructions *</label>
+                                        <textarea rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Provide specific instructions..."></textarea>
+                                    </div>
+                                    <div class="flex justify-end space-x-4">
+                                        <button type="button" class="btn-secondary bg-gray-200 text-gray-900 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors font-medium">Clear Form</button>
+                                        <button type="submit" class="btn-primary bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all font-medium shadow-lg">Order Test</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="lg:col-span-1">
+                            <div class="card bg-white rounded-lg shadow-md p-6">
+                                <h2 class="text-xl font-semibold text-gray-900 mb-6">Recent Tests</h2>
+                                <div class="space-y-4">
+                                    <div class="border border-gray-200 rounded-lg p-4 hover:border-purple-300 transition-colors cursor-pointer" onclick="viewTestReport(&quot;Mansi Patil&quot;, &quot;Complete Blood Count&quot;, &quot;2024-01-15&quot;, &quot;completed&quot;)">
+                                        <h4 class="font-medium text-gray-900">Mansi Patil</h4>
+                                        <p class="text-sm text-gray-600 mt-1">Complete Blood Count</p>
+                                        <div class="mt-2 flex items-center justify-between">
+                                            <span class="text-xs text-gray-500">2024-01-15</span>
+                                            <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">Completed</span>
+                                        </div>
+                                        <div class="mt-3 text-right">
+                                            <button class="text-primary-600 hover:text-primary-700 text-sm font-medium">View Report →</button>
+                                        </div>
+                                    </div>
+                                    <div class="border border-gray-200 rounded-lg p-4 hover:border-purple-300 transition-colors cursor-pointer" onclick="viewTestReport(&quot;Shravni Patukle&quot;, &quot;Chest X-Ray&quot;, &quot;2024-01-14&quot;, &quot;completed&quot;)">
+                                        <h4 class="font-medium text-gray-900">Shravni Patukle</h4>
+                                        <p class="text-sm text-gray-600 mt-1">Chest X-Ray</p>
+                                        <div class="mt-2 flex items-center justify-between">
+                                            <span class="text-xs text-gray-500">2024-01-14</span>
+                                            <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">Completed</span>
+                                        </div>
+                                        <div class="mt-3 text-right">
+                                            <button class="text-primary-600 hover:text-primary-700 text-sm font-medium">View Report →</button>
+                                        </div>
+                                    </div>
+                                    <div class="border border-gray-200 rounded-lg p-4 hover:border-purple-300 transition-colors cursor-pointer" onclick="viewTestReport('Himesh', 'CT Scan', '2024-01-13', 'in_progress')">
+                                        <h4 class="font-medium text-gray-900">Himesh</h4>
+                                        <p class="text-sm text-gray-600 mt-1">CT Scan</p>
+                                        <div class="mt-2 flex items-center justify-between">
+                                            <span class="text-xs text-gray-500">2024-01-13</span>
+                                            <span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">In Progress</span>
+                                        </div>
+                                        <div class="mt-3 text-right">
+                                            <button class="text-primary-600 hover:text-primary-700 text-sm font-medium">View Report →</button>
+                                        </div>
+                                    </div>
+                                    <div class="border border-gray-200 rounded-lg p-4 hover:border-purple-300 transition-colors cursor-pointer" onclick="viewTestReport('Lokesh', 'MRI', '2024-01-12', 'completed')">
+                                        <h4 class="font-medium text-gray-900">Lokesh</h4>
+                                        <p class="text-sm text-gray-600 mt-1">MRI</p>
+                                        <div class="mt-2 flex items-center justify-between">
+                                            <span class="text-xs text-gray-500">2024-01-12</span>
+                                            <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">Completed</span>
+                                        </div>
+                                        <div class="mt-3 text-right">
+                                            <button class="text-primary-600 hover:text-primary-700 text-sm font-medium">View Report →</button>
+                                        </div>
+                                    </div>
+                                                                    </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Treatment View
+        function renderTreatment() {
+            return `
+                <div class="max-w-6xl mx-auto space-y-6 fade-in">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">Treatment Decision</h1>
+                        <p class="text-gray-600 mt-2">Create comprehensive treatment plans including medications and procedures</p>
+                    </div>
+
+                    <div class="card bg-white rounded-lg shadow-md p-6">
+                        <h2 class="text-xl font-semibold text-gray-900 mb-6">Create Treatment Plan</h2>
+                        <form class="space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Patient *</label>
+                                    <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                        <option value="">Select patient</option>
+                                        ${state.patients.map(patient => `
+                                            <option value="${patient.id}">${patient.name}</option>
+                                        `).join('')}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Consultation *</label>
+                                    <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                        <option value="">Select consultation</option>
+                                        ${state.consultations.map(consultation => `
+                                            <option value="${consultation.id}">${consultation.date} - ${consultation.doctor}</option>
+                                        `).join('')}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Diagnosis *</label>
+                                    <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                        <option value="">Select diagnosis</option>
+                                        ${state.diagnoses.map(diagnosis => `
+                                            <option value="${diagnosis.id}">${diagnosis.diagnosis}</option>
+                                        `).join('')}
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Treatment Plan *</label>
+                                <textarea rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Describe the comprehensive treatment approach..."></textarea>
+                            </div>
+                            <div class="border border-gray-200 rounded-lg p-4">
+                                <h3 class="text-lg font-medium text-gray-900 mb-4">Medication Prescription</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Medication Name *</label>
+                                        <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="e.g., Lisinopril" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Dosage *</label>
+                                        <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="e.g., 10mg" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Frequency *</label>
+                                        <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="e.g., Twice daily" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Duration *</label>
+                                        <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="e.g., 30 days" />
+                                    </div>
+                                </div>
+                                <div class="mt-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Medication Instructions *</label>
+                                    <textarea rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Specific instructions for medication administration..."></textarea>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Procedures</label>
+                                <textarea rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="List any medical procedures required..."></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Follow-up Date *</label>
+                                <input type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                            </div>
+                            <div class="flex justify-end space-x-4">
+                                <button type="button" class="btn-secondary bg-gray-200 text-gray-900 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors font-medium">Clear Form</button>
+                                <button type="submit" class="btn-primary bg-gradient-to-r from-purple-500 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all font-medium shadow-lg">Create Treatment Plan</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Pharmacy View
+        function renderPharmacy() {
+            return `
+                <div class="max-w-7xl mx-auto space-y-6 fade-in">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">Pharmacy & Medication</h1>
+                        <p class="text-gray-600 mt-2">Manage medication dispensing and inventory for patients</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div class="lg:col-span-2">
+                            <div class="card bg-white rounded-lg shadow-md p-6">
+                                <h2 class="text-xl font-semibold text-gray-900 mb-6">Dispense Medication</h2>
+                                <form class="space-y-6">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Patient *</label>
+                                            <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                                <option value="">Select patient</option>
+                                                ${state.patients.map(patient => `
+                                                    <option value="${patient.id}">${patient.name}</option>
+                                                `).join('')}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Prescription *</label>
+                                            <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                                <option value="">Select prescription</option>
+                                                ${state.medications.map(medication => `
+                                                    <option value="${medication.id}">${medication.patientName} - ${medication.medication}</option>
+                                                `).join('')}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Medication *</label>
+                                        <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                            <option value="">Select medication</option>
+                                            
+                                            <option value="1">Lisinopril (Stock: 150 tablets)</option>
+                                            <option value="2">Amoxicillin (Stock: 200 capsules)</option>
+                                            <option value="3">Metformin (Stock: 75 tablets)</option>
+                                            <option value="4">Atorvastatin (Stock: 120 tablets)</option>
+                                            <option value="5">Paracetamol (Stock: 300 tablets)</option>
+                                            <option value="6">Ibuprofen (Stock: 180 tablets)</option>
+                                            <option value="7">Amlodipine (Stock: 95 tablets)</option>
+                                            <option value="8">Omeprazole (Stock: 140 capsules)</option>
+                                            <option value="9">Azithromycin (Stock: 60 tablets)</option>
+                                            <option value="10">Ciprofloxacin (Stock: 85 tablets)</option>
+                                            <option value="11">Losartan (Stock: 110 tablets)</option>
+                                            <option value="12">Cetirizine (Stock: 200 tablets)</option>
+                                            <option value="13">Doxycycline (Stock: 70 capsules)</option>
+                                            <option value="14">Pantoprazole (Stock: 130 tablets)</option>
+                                            <option value="15">Clopidogrel (Stock: 90 tablets)</option>
+                                            <option value="16">Aspirin (Stock: 300 tablets)</option>
+                                            <option value="17">Prednisone (Stock: 80 tablets)</option>
+                                            <option value="18">Warfarin (Stock: 25 tablets)</option>
+                                            <option value="19">Furosemide (Stock: 110 tablets)</option>
+                                            <option value="20">Hydrochlorothiazide (Stock: 95 tablets)</option>
+                                            <option value="21">Amlodipine (Stock: 140 tablets)</option>
+                                            <option value="22">Metoprolol (Stock: 85 tablets)</option>
+                                            <option value="23">Gabapentin (Stock: 70 capsules)</option>
+                                            <option value="24">Sertraline (Stock: 55 tablets)</option>
+                                            <option value="25">Albuterol (Stock: 40 inhalers)</option>
+                                            <option value="26">Insulin (Stock: 35 vials)</option>
+                                            <option value="27">Vitamin D (Stock: 200 capsules)</option>
+                                            <option value="28">Vitamin B12 (Stock: 150 tablets)</option>
+                                            <option value="29">Calcium Carbonate (Stock: 180 tablets)</option>
+                                            <option value="30">Iron Supplement (Stock: 90 tablets)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Quantity *</label>
+                                        <input type="number" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Enter quantity" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Dispensing Notes</label>
+                                        <textarea rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Any special instructions..."></textarea>
+                                    </div>
+                                    <div class="flex justify-end space-x-4">
+                                        <button type="button" class="btn-secondary bg-gray-200 text-gray-900 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors font-medium">Clear Form</button>
+                                        <button type="submit" class="btn-primary bg-gradient-to-r from-pink-500 to-pink-600 text-white px-4 py-2 rounded-lg hover:from-pink-600 hover:to-pink-700 transition-all font-medium shadow-lg">Dispense Medication</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="lg:col-span-1 space-y-6">
+                            <div class="card bg-white rounded-lg shadow-md p-6">
+                                <h2 class="text-xl font-semibold text-gray-900 mb-6">Inventory Status</h2>
+                                <div class="space-y-3">
+                                    <div class="border border-gray-200 rounded-lg p-3">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h4 class="font-medium text-gray-900">Lisinopril</h4>
+                                                <p class="text-sm text-gray-600">150 tablets</p>
+                                            </div>
+                                            <div class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">In Stock</div>
+                                        </div>
+                                    </div>
+                                    <div class="border border-gray-200 rounded-lg p-3">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h4 class="font-medium text-gray-900">Amoxicillin</h4>
+                                                <p class="text-sm text-gray-600">200 capsules</p>
+                                            </div>
+                                            <div class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">In Stock</div>
+                                        </div>
+                                    </div>
+                                    <div class="border border-gray-200 rounded-lg p-3">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h4 class="font-medium text-gray-900">Metformin</h4>
+                                                <p class="text-sm text-gray-600">75 tablets</p>
+                                            </div>
+                                            <div class="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">Low Stock</div>
+                                        </div>
+                                    </div>
+                                    <div class="border border-gray-200 rounded-lg p-3">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h4 class="font-medium text-gray-900">Atorvastatin</h4>
+                                                <p class="text-sm text-gray-600">120 tablets</p>
+                                            </div>
+                                            <div class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">In Stock</div>
+                                        </div>
+                                    </div>
+                                    <div class="border border-gray-200 rounded-lg p-3">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h4 class="font-medium text-gray-900">Omeprazole</h4>
+                                                <p class="text-sm text-gray-600">30 capsules</p>
+                                            </div>
+                                            <div class="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">Low Stock</div>
+                                        </div>
+                                    </div>
+                                    <div class="border border-gray-200 rounded-lg p-3">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h4 class="font-medium text-gray-900">Paracetamol</h4>
+                                                <p class="text-sm text-gray-600">500 tablets</p>
+                                            </div>
+                                            <div class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">In Stock</div>
+                                        </div>
+                                    </div>
+                                    <div class="border border-gray-200 rounded-lg p-3">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h4 class="font-medium text-gray-900">Ibuprofen</h4>
+                                                <p class="text-sm text-gray-600">180 tablets</p>
+                                            </div>
+                                            <div class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">In Stock</div>
+                                        </div>
+                                    </div>
+                                    <div class="border border-gray-200 rounded-lg p-3">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h4 class="font-medium text-gray-900">Aspirin</h4>
+                                                <p class="text-sm text-gray-600">300 tablets</p>
+                                            </div>
+                                            <div class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">In Stock</div>
+                                        </div>
+                                    </div>
+                                    <div class="border border-gray-200 rounded-lg p-3">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h4 class="font-medium text-gray-900">Ciprofloxacin</h4>
+                                                <p class="text-sm text-gray-600">90 tablets</p>
+                                            </div>
+                                            <div class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">In Stock</div>
+                                        </div>
+                                    </div>
+                                    <div class="border border-gray-200 rounded-lg p-3">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h4 class="font-medium text-gray-900">Azithromycin</h4>
+                                                <p class="text-sm text-gray-600">60 tablets</p>
+                                            </div>
+                                            <div class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">In Stock</div>
+                                        </div>
+                                    </div>
+                                    <div class="border border-gray-200 rounded-lg p-3">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h4 class="font-medium text-gray-900">Doxycycline</h4>
+                                                <p class="text-sm text-gray-600">70 capsules</p>
+                                            </div>
+                                            <div class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">In Stock</div>
+                                        </div>
+                                    </div>
+                                    <div class="border border-gray-200 rounded-lg p-3">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h4 class="font-medium text-gray-900">Prednisone</h4>
+                                                <p class="text-sm text-gray-600">80 tablets</p>
+                                            </div>
+                                            <div class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">In Stock</div>
+                                        </div>
+                                    </div>
+                                    <div class="border border-gray-200 rounded-lg p-3">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h4 class="font-medium text-gray-900">Warfarin</h4>
+                                                <p class="text-sm text-gray-600">25 tablets</p>
+                                            </div>
+                                            <div class="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">Low Stock</div>
+                                        </div>
+                                    </div>
+                                    <div class="border border-gray-200 rounded-lg p-3">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h4 class="font-medium text-gray-900">Furosemide</h4>
+                                                <p class="text-sm text-gray-600">110 tablets</p>
+                                            </div>
+                                            <div class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">In Stock</div>
+                                        </div>
+                                    </div>
+                                    <div class="border border-gray-200 rounded-lg p-3">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h4 class="font-medium text-gray-900">Hydrochlorothiazide</h4>
+                                                <p class="text-sm text-gray-600">95 tablets</p>
+                                            </div>
+                                            <div class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">In Stock</div>
+                                        </div>
+                                    </div>
+                                    <div class="border border-gray-200 rounded-lg p-3">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h4 class="font-medium text-gray-900">Amlodipine</h4>
+                                                <p class="text-sm text-gray-600">140 tablets</p>
+                                            </div>
+                                            <div class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">In Stock</div>
+                                        </div>
+                                    </div>
+                                    <div class="border border-gray-200 rounded-lg p-3">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h4 class="font-medium text-gray-900">Metoprolol</h4>
+                                                <p class="text-sm text-gray-600">85 tablets</p>
+                                            </div>
+                                            <div class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">In Stock</div>
+                                        </div>
+                                    </div>
+                                    <div class="border border-gray-200 rounded-lg p-3">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h4 class="font-medium text-gray-900">Gabapentin</h4>
+                                                <p class="text-sm text-gray-600">70 capsules</p>
+                                            </div>
+                                            <div class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">In Stock</div>
+                                        </div>
+                                    </div>
+                                    <div class="border border-gray-200 rounded-lg p-3">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h4 class="font-medium text-gray-900">Sertraline</h4>
+                                                <p class="text-sm text-gray-600">55 tablets</p>
+                                            </div>
+                                            <div class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">In Stock</div>
+                                        </div>
+                                    </div>
+                                    <div class="border border-gray-200 rounded-lg p-3">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h4 class="font-medium text-gray-900">Albuterol</h4>
+                                                <p class="text-sm text-gray-600">40 inhalers</p>
+                                            </div>
+                                            <div class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">In Stock</div>
+                                        </div>
+                                    </div>
+                                    <div class="border border-gray-200 rounded-lg p-3">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h4 class="font-medium text-gray-900">Insulin</h4>
+                                                <p class="text-sm text-gray-600">35 vials</p>
+                                            </div>
+                                            <div class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">In Stock</div>
+                                        </div>
+                                    </div>
+                                    <div class="border border-gray-200 rounded-lg p-3">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h4 class="font-medium text-gray-900">Vitamin D</h4>
+                                                <p class="text-sm text-gray-600">200 capsules</p>
+                                            </div>
+                                            <div class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">In Stock</div>
+                                        </div>
+                                    </div>
+                                    <div class="border border-gray-200 rounded-lg p-3">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h4 class="font-medium text-gray-900">Vitamin B12</h4>
+                                                <p class="text-sm text-gray-600">150 tablets</p>
+                                            </div>
+                                            <div class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">In Stock</div>
+                                        </div>
+                                    </div>
+                                    <div class="border border-gray-200 rounded-lg p-3">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h4 class="font-medium text-gray-900">Calcium Carbonate</h4>
+                                                <p class="text-sm text-gray-600">180 tablets</p>
+                                            </div>
+                                            <div class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">In Stock</div>
+                                        </div>
+                                    </div>
+                                    <div class="border border-gray-200 rounded-lg p-3">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h4 class="font-medium text-gray-900">Iron Supplement</h4>
+                                                <p class="text-sm text-gray-600">90 tablets</p>
+                                            </div>
+                                            <div class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">In Stock</div>
+                                        </div>
+                                    </div>
+                                    <div class="border border-gray-200 rounded-lg p-3">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h4 class="font-medium text-gray-900">Omega-3</h4>
+                                                <p class="text-sm text-gray-600">120 capsules</p>
+                                            </div>
+                                            <div class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">In Stock</div>
+                                        </div>
+                                    </div>
+                                    <div class="border border-gray-200 rounded-lg p-3">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h4 class="font-medium text-gray-900">Probiotics</h4>
+                                                <p class="text-sm text-gray-600">80 capsules</p>
+                                            </div>
+                                            <div class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">In Stock</div>
+                                        </div>
+                                    </div>
+                                    <div class="border border-gray-200 rounded-lg p-3">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h4 class="font-medium text-gray-900">Antihistamine</h4>
+                                                <p class="text-sm text-gray-600">65 tablets</p>
+                                            </div>
+                                            <div class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">In Stock</div>
+                                        </div>
+                                    </div>
+                                    <div class="border border-gray-200 rounded-lg p-3">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h4 class="font-medium text-gray-900">Cough Syrup</h4>
+                                                <p class="text-sm text-gray-600">45 bottles</p>
+                                            </div>
+                                            <div class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">In Stock</div>
+                                        </div>
+                                    </div>
+                                    <div class="border border-gray-200 rounded-lg p-3">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h4 class="font-medium text-gray-900">Nasal Spray</h4>
+                                                <p class="text-sm text-gray-600">30 bottles</p>
+                                            </div>
+                                            <div class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">In Stock</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Billing View
+        function renderBilling() {
+            return `
+                <div class="max-w-7xl mx-auto space-y-6 fade-in">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">Billing & Payment</h1>
+                        <p class="text-gray-600 mt-2">Process patient bills and manage payments for healthcare services</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div class="lg:col-span-2">
+                            <div class="card bg-white rounded-lg shadow-md p-6">
+                                <h2 class="text-xl font-semibold text-gray-900 mb-6">Process Patient Bill</h2>
+                                <form class="space-y-6">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Patient *</label>
+                                            <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                                <option value="">Select patient</option>
+                                                ${state.bills.map(bill => `
+                                                    <option value="${bill.id}">${bill.patientName} - Balance: ₹${bill.totalAmount}</option>
+                                                `).join('')}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Payment Method *</label>
+                                            <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                                <option value="">Select payment method</option>
+                                                <option value="cash">Cash</option>
+                                                <option value="credit_card">Credit Card</option>
+                                                <option value="insurance">Insurance</option>
+                                                <option value="electronic_transfer">Electronic Transfer</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Billing Items</label>
+                                        <div class="space-y-4">
+                                            <div class="border border-gray-200 rounded-lg p-4">
+                                                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 mb-1">Description *</label>
+                                                        <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Service description" />
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 mb-1">Category *</label>
+                                                        <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                                            <option value="consultation">Consultation</option>
+                                                            <option value="lab">Lab Test</option>
+                                                            <option value="imaging">Imaging</option>
+                                                            <option value="medication">Medication</option>
+                                                        </select>
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 mb-1">Quantity *</label>
+                                                        <input type="number" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="1" />
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 mb-1">Unit Price *</label>
+                                                        <input type="number" min="0" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="0.00" />
+                                                    </div>
+                                                </div>
+                                                <div class="mt-3 flex items-center justify-between">
+                                                    <span class="text-sm text-gray-600">Line Total: ₹0.00</span>
+                                                    <button type="button" class="text-red-600 hover:text-red-700 text-sm">Remove</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button type="button" class="btn-secondary bg-gray-200 text-gray-900 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors text-sm">Add Item</button>
+                                    </div>
+                                    <div class="border-t border-gray-200 pt-4">
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-lg font-semibold text-gray-900">Total Amount:</span>
+                                            <span class="text-2xl font-bold gradient-text">₹0.00</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex justify-end space-x-4">
+                                        <button type="button" class="btn-secondary bg-gray-200 text-gray-900 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors font-medium">Clear Form</button>
+                                        <button type="submit" class="btn-primary bg-gradient-to-r from-purple-500 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all font-medium shadow-lg">Process Payment</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="lg:col-span-1 space-y-6">
+                            <div class="card bg-white rounded-lg shadow-md p-6">
+                                <h2 class="text-xl font-semibold text-gray-900 mb-6">Standard Rates</h2>
+                                <div class="space-y-3">
+                                    <div class="flex items-center justify-between p-3 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg">
+                                        <span class="text-sm font-medium text-gray-900">Consultation</span>
+                                        <span class="text-sm font-semibold text-purple-600">₹150.00</span>
+                                    </div>
+                                    <div class="flex items-center justify-between p-3 bg-gradient-to-r from-teal-50 to-teal-100 rounded-lg">
+                                        <span class="text-sm font-medium text-gray-900">Lab Test</span>
+                                        <span class="text-sm font-semibold text-teal-600">₹75.00</span>
+                                    </div>
+                                    <div class="flex items-center justify-between p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
+                                        <span class="text-sm font-medium text-gray-900">Imaging</span>
+                                        <span class="text-sm font-semibold text-blue-600">₹250.00</span>
+                                    </div>
+                                    <div class="flex items-center justify-between p-3 bg-gradient-to-r from-pink-50 to-pink-100 rounded-lg">
+                                        <span class="text-sm font-medium text-gray-900">Medication</span>
+                                        <span class="text-sm font-semibold text-pink-600">₹25.00</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Discharge View
+        function renderDischarge() {
+            return `
+                <div class="max-w-7xl mx-auto space-y-6 fade-in">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">Patient Discharge</h1>
+                        <p class="text-gray-600 mt-2">Complete patient discharge process and finalize documentation</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div class="lg:col-span-2">
+                            <div class="card bg-white rounded-lg shadow-md p-6">
+                                <h2 class="text-xl font-semibold text-gray-900 mb-6">Discharge Processing</h2>
+                                <form class="space-y-6">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Patient *</label>
+                                            <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                                <option value="">Select patient</option>
+                                                ${state.patients.filter(patient => ['in_treatment', 'in_pharmacy', 'in_billing'].includes(patient.status)).map(patient => `
+                                                    <option value="${patient.id}">${patient.name} - Status: ${patient.status.replace('_', ' ')}</option>
+                                                `).join('')}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Discharge Date *</label>
+                                            <input type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Discharge Type *</label>
+                                        <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                            <option value="routine">Routine</option>
+                                            <option value="transfer">Transfer to another facility</option>
+                                            <option value="against_medical_advice">Against Medical Advice</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Final Diagnosis *</label>
+                                        <textarea rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Enter final diagnosis..."></textarea>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Treatment Summary *</label>
+                                        <textarea rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Summarize the treatment provided..."></textarea>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Discharge Instructions *</label>
+                                        <textarea rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Provide detailed instructions for home care..."></textarea>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Follow-up Appointment</label>
+                                        <input type="datetime-local" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                    </div>
+                                    <div class="flex justify-end space-x-4">
+                                        <button type="button" class="btn-secondary bg-gray-200 text-gray-900 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors font-medium">Clear Form</button>
+                                        <button type="submit" class="btn-primary bg-gradient-to-r from-teal-500 to-teal-600 text-white px-4 py-2 rounded-lg hover:from-teal-600 hover:to-teal-700 transition-all font-medium shadow-lg">Complete Discharge</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="lg:col-span-1 space-y-6">
+                            <div class="card bg-white rounded-lg shadow-md p-6">
+                                <h2 class="text-xl font-semibold text-gray-900 mb-6">Discharge Checklist</h2>
+                                <div class="space-y-3">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-5 h-5 rounded-full border-2 border-green-500 flex items-center justify-center bg-green-500">
+                                            <i data-lucide="CheckCircle" class="h-3 w-3 text-white"></i>
+                                        </div>
+                                        <span class="text-sm text-gray-900">Final physician review completed</span>
+                                    </div>
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-5 h-5 rounded-full border-2 border-green-500 flex items-center justify-center bg-green-500">
+                                            <i data-lucide="CheckCircle" class="h-3 w-3 text-white"></i>
+                                        </div>
+                                        <span class="text-sm text-gray-900">Medication reconciliation done</span>
+                                    </div>
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center">
+                                        </div>
+                                        <span class="text-sm text-gray-600">Discharge instructions provided</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card bg-white rounded-lg shadow-md p-6">
+                                <h2 class="text-xl font-semibold text-gray-900 mb-6">Today's Statistics</h2>
+                                <div class="space-y-4">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm text-gray-600">Pending Discharges</span>
+                                        <span class="text-lg font-semibold text-orange-600">3</span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm text-gray-600">Completed Today</span>
+                                        <span class="text-lg font-semibold text-green-600">5</span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm text-gray-600">Average Length of Stay</span>
+                                        <span class="text-lg font-semibold text-gray-900">4.2 days</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Feedback View
+        function renderFeedback() {
+            return `
+                <div class="max-w-7xl mx-auto space-y-6 fade-in">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">Patient Satisfaction Feedback</h1>
+                        <p class="text-gray-600 mt-2">Collect and manage patient feedback to improve healthcare services</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div class="lg:col-span-2">
+                            <div class="card bg-white rounded-lg shadow-md p-6">
+                                <h2 class="text-xl font-semibold text-gray-900 mb-6">Submit Patient Feedback</h2>
+                                <form class="space-y-6">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Patient *</label>
+                                        <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                            <option value="">Select patient</option>
+                                            ${state.discharges.map(discharge => `
+                                                <option value="${discharge.id}">${discharge.patientName} - Discharged: ${discharge.dischargeDate}</option>
+                                            `).join('')}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Overall Rating *</label>
+                                        <div class="flex items-center space-x-2">
+                                            <button type="button" class="p-1" onclick="setRating(1)">
+                                                    <i data-lucide="Star" class="h-8 w-8 text-yellow-400 fill-current"></i>
+                                                </button>
+                                                <button type="button" class="p-1" onclick="setRating(2)">
+                                                    <i data-lucide="Star" class="h-8 w-8 text-yellow-400 fill-current"></i>
+                                                </button>
+                                                <button type="button" class="p-1" onclick="setRating(3)">
+                                                    <i data-lucide="Star" class="h-8 w-8 text-yellow-400 fill-current"></i>
+                                                </button>
+                                                <button type="button" class="p-1" onclick="setRating(4)">
+                                                    <i data-lucide="Star" class="h-8 w-8 text-yellow-400 fill-current"></i>
+                                                </button>
+                                                <button type="button" class="p-1" onclick="setRating(5)">
+                                                    <i data-lucide="Star" class="h-8 w-8 text-yellow-400 fill-current"></i>
+                                                </button>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Feedback Category *</label>
+                                        <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                            <option value="overall">Overall Experience</option>
+                                            <option value="staff">Staff Performance</option>
+                                            <option value="facility">Facility & Environment</option>
+                                            <option value="treatment">Treatment & Care</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Comments *</label>
+                                        <textarea rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Please share your experience and suggestions..."></textarea>
+                                    </div>
+                                    <div class="space-y-4">
+                                        <div class="flex items-center">
+                                            <input type="checkbox" class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded">
+                                            <label class="ml-2 text-sm text-gray-700">I would recommend this hospital to others</label>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <input type="checkbox" class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded">
+                                            <label class="ml-2 text-sm text-gray-700">Follow-up required for this feedback</label>
+                                        </div>
+                                    </div>
+                                    <div class="flex justify-end space-x-4">
+                                        <button type="button" class="btn-secondary bg-gray-200 text-gray-900 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors font-medium">Clear Form</button>
+                                        <button type="submit" class="btn-primary bg-gradient-to-r from-purple-500 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all font-medium shadow-lg">Submit Feedback</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="lg:col-span-1 space-y-6">
+                            <div class="card bg-white rounded-lg shadow-md p-6">
+                                <h2 class="text-xl font-semibold text-gray-900 mb-6">Recent Feedback</h2>
+                                <div class="space-y-4">
+                                    ${state.feedback.map(feedback => `
+                                        <div class="border border-gray-200 rounded-lg p-4">
+                                            <div class="flex items-start justify-between">
+                                                <div class="flex-1">
+                                                    <h4 class="font-medium text-gray-900">${feedback.patientName}</h4>
+                                                    <div class="flex items-center mt-1">
+                                                        <i data-lucide="Star" class="h-4 w-4 text-yellow-400 fill-current"></i>
+                                                        <i data-lucide="Star" class="h-4 w-4 text-yellow-400 fill-current"></i>
+                                                        <i data-lucide="Star" class="h-4 w-4 text-yellow-400 fill-current"></i>
+                                                        <i data-lucide="Star" class="h-4 w-4 text-yellow-400 fill-current"></i>
+                                                        <i data-lucide="Star" class="h-4 w-4 text-gray-300"></i>
+                                                    </div>
+                                                    <p class="text-sm text-gray-600 mt-2 line-clamp-2">${feedback.comments}</p>
+                                                    <div class="mt-2 flex items-center justify-between">
+                                                        <span class="text-xs text-gray-500">${feedback.date}</span>
+                                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${feedback.rating >= 4 ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
+                                                            Recommended
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                            <div class="card bg-white rounded-lg shadow-md p-6">
+                                <h2 class="text-xl font-semibold text-gray-900 mb-6">Satisfaction Metrics</h2>
+                                <div class="space-y-4">
+                                    <div>
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span class="text-sm text-gray-600">Overall Satisfaction</span>
+                                            <span class="text-sm font-semibold gradient-text">4.2/5.0</span>
+                                        </div>
+                                        <div class="w-full bg-gray-200 rounded-full h-2">
+                                            <div class="bg-gradient-to-r from-purple-500 to-purple-600 h-2 rounded-full" style="width: 84%"></div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span class="text-sm text-gray-600">Staff Performance</span>
+                                            <span class="text-sm font-semibold gradient-text">4.5/5.0</span>
+                                        </div>
+                                        <div class="w-full bg-gray-200 rounded-full h-2">
+                                            <div class="bg-gradient-to-r from-teal-500 to-teal-600 h-2 rounded-full" style="width: 90%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Appointment Booking View
+        function renderAppointmentBooking() {
+            return `
+                <div class="max-w-7xl mx-auto space-y-6 fade-in">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">Pune Hospital Appointment Booking</h1>
+                        <p class="text-gray-600 mt-2">Book appointments with top doctors in Pune's best hospitals</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div class="lg:col-span-2">
+                            <div class="card bg-white rounded-lg shadow-md p-6">
+                                <h2 class="text-xl font-semibold text-gray-900 mb-6">Book Appointment</h2>
+                                <form onsubmit="bookAppointment(event)" class="space-y-6">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Select Hospital *</label>
+                                            <select id="hospitalSelect" onchange="updateDoctors()" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                                <option value="">Choose a hospital</option>
+                                                <option value="1">Sahyadri Hospital - Karve Road, Pune (4.7 stars)</option>
+                                                <option value="2">Ruby Hall Clinic - Sassoon Road, Pune (4.6 stars)</option>
+                                                <option value="3">Jehangir Hospital - Bund Garden Road, Pune (4.5 stars)</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Select Doctor *</label>
+                                            <select id="doctorSelect" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                                <option value="">First select a hospital</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Patient Name *</label>
+                                            <input type="text" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Enter patient name" />
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number *</label>
+                                            <input type="tel" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Enter phone number" />
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Appointment Date *</label>
+                                            <input type="date" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Preferred Time *</label>
+                                            <select required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                                <option value="">Select time</option>
+                                                <option value="09:00">09:00 AM</option>
+                                                <option value="10:00">10:00 AM</option>
+                                                <option value="11:00">11:00 AM</option>
+                                                <option value="14:00">02:00 PM</option>
+                                                <option value="15:00">03:00 PM</option>
+                                                <option value="16:00">04:00 PM</option>
+                                                <option value="17:00">05:00 PM</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Reason for Visit *</label>
+                                        <textarea rows="4" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Describe your symptoms or reason for consultation..."></textarea>
+                                    </div>
+                                    <div class="flex justify-end space-x-4">
+                                        <button type="button" onclick="clearAppointmentForm()" class="btn-secondary bg-gray-200 text-gray-900 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors font-medium">Clear Form</button>
+                                        <button type="submit" class="btn-primary bg-gradient-to-r from-purple-500 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all font-medium shadow-lg">Book Appointment</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="lg:col-span-1 space-y-6">
+                            <div class="card bg-white rounded-lg shadow-md p-6">
+                                <h2 class="text-xl font-semibold text-gray-900 mb-6">Top Hospitals in Pune</h2>
+                                <div class="space-y-4">
+                                    ${state.hospitals.map(hospital => `
+                                        <div class="border border-gray-200 rounded-lg p-4 hover:border-purple-300 transition-colors cursor-pointer" onclick="selectHospital('${hospital.id}')">
+                                            <div class="flex items-center justify-between">
+                                                <div>
+                                                    <h4 class="font-medium text-gray-900">${hospital.name}</h4>
+                                                    <p class="text-sm text-gray-600 mt-1">${hospital.location}</p>
+                                                    <div class="flex items-center mt-2">
+                                                        <i data-lucide="Star" class="h-4 w-4 text-yellow-400 fill-current"></i>
+                                                        <span class="text-sm text-gray-600 ml-1">${hospital.rating} stars</span>
+                                                        <span class="text-sm text-gray-500 ml-2">• ${hospital.specialty}</span>
+                                                    </div>
+                                                </div>
+                                                <i data-lucide="ChevronRight" class="h-5 w-5 text-gray-400"></i>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Helper Functions
+        function renderStatCard(title, value, change, icon, colorType) {
+            const colors = {
+                blue: 'bg-gradient-to-br from-blue-400 to-blue-600',
+                purple: 'bg-gradient-to-br from-purple-400 to-purple-600',
+                teal: 'bg-gradient-to-br from-teal-400 to-teal-600',
+                pink: 'bg-gradient-to-br from-pink-400 to-pink-600'
+            };
+            return `
+                <div class="card bg-white rounded-lg shadow-md p-6 card-hover" style="animation-delay: Math.random() * 0.2 + 's'">
+                    <div class="flex items-center">
+                        <div class="${colors[colorType]} p-3 rounded-lg animate-pulse">
+                            <i data-lucide="${icon}" class="h-6 w-6 text-white"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">${title}</p>
+                            <p class="text-2xl font-bold text-gray-900 counter-animate">${value}</p>
+                            <p class="text-sm text-secondary-600">${change} from yesterday</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getCurrentPageName() {
+            const pages = {
+                'dashboard': 'Dashboard',
+                'registration': 'Patient Registration',
+                'consultation': 'Consultation',
+                'diagnosis': 'Diagnosis',
+                'treatment': 'Treatment Decision',
+                'pharmacy': 'Pharmacy',
+                'billing': 'Billing',
+                'discharge': 'Discharge',
+                'appointments': 'Appointment Booking',
+                'feedback': 'Feedback'
+            };
+            return pages[state.currentView] || 'Dashboard';
+        }
+
+        // Navigation
+        function navigateTo(view) {
+            state.currentView = view;
+            renderApp();
+        }
+
+        // Form Handlers
+        function handlePatientRegistration(event) {
+            event.preventDefault();
+            alert('Patient registration completed successfully!');
+            // In a real app, this would save the data to a database
+        }
+
+        // Appointment Booking Functions
+        function updateDoctors() {
+            const hospitalSelect = document.getElementById('hospitalSelect');
+            const doctorSelect = document.getElementById('doctorSelect');
+            const selectedHospitalId = hospitalSelect.value;
+            
+            // Clear current doctor options
+            doctorSelect.innerHTML = '<option value="">Select a doctor</option>';
+            
+            if (selectedHospitalId) {
+                // Find the selected hospital
+                const hospital = state.hospitals.find(h => h.id === selectedHospitalId);
+                if (hospital && hospital.doctors) {
+                    // Add doctor options for the selected hospital
+                    hospital.doctors.forEach(doctor => {
+                        const option = document.createElement('option');
+                        option.value = doctor.id;
+                        option.textContent = `${doctor.name} - ${doctor.specialty} (${doctor.rating} stars)`;
+                        doctorSelect.appendChild(option);
+                    });
+                }
+            }
+        }
+
+        function selectHospital(hospitalId) {
+            const hospitalSelect = document.getElementById('hospitalSelect');
+            hospitalSelect.value = hospitalId;
+            updateDoctors(); // Update doctors when hospital is selected
+        }
+
+        function bookAppointment(event) {
+            event.preventDefault();
+            const form = event.target;
+            
+            // Get form values
+            const hospitalId = form.querySelector('#hospitalSelect').value;
+            const doctorId = form.querySelector('#doctorSelect').value;
+            const patientName = form.querySelector('input[placeholder="Enter patient name"]').value;
+            const phoneNumber = form.querySelector('input[placeholder="Enter phone number"]').value;
+            const appointmentDate = form.querySelector('input[type="date"]').value;
+            const preferredTime = form.querySelector('select:not(#hospitalSelect):not(#doctorSelect)').value;
+            const reason = form.querySelector('textarea').value;
+            
+            // Find hospital and doctor details
+            const hospital = state.hospitals.find(h => h.id === hospitalId);
+            const doctor = hospital ? hospital.doctors.find(d => d.id === doctorId) : null;
+            
+            // Create appointment object
+            const appointment = {
+                id: Date.now().toString(),
+                patientName: patientName,
+                phoneNumber: phoneNumber,
+                hospital: hospital ? hospital.name : 'Unknown',
+                doctor: doctor ? doctor.name : 'Unknown',
+                date: appointmentDate,
+                time: preferredTime,
+                reason: reason,
+                status: 'confirmed',
+                createdAt: new Date().toISOString()
+            };
+            
+            // Add to state
+            state.appointments.push(appointment);
+            
+            // Show success message
+            alert(`Appointment booked successfully!\n\nPatient: ${patientName}\nHospital: ${hospital ? hospital.name : 'Unknown'}\nDoctor: ${doctor ? doctor.name : 'Unknown'}\nDate: ${appointmentDate}\nTime: ${preferredTime}`);
+            
+            // Clear form
+            form.reset();
+            
+            // Re-render to update recent appointments
+            renderApp();
+        }
+
+        function clearAppointmentForm() {
+            const form = document.querySelector('form[onsubmit="bookAppointment(event)"]');
+            if (form) {
+                form.reset();
+                // Reset doctor select to default
+                const doctorSelect = document.getElementById('doctorSelect');
+                if (doctorSelect) {
+                    doctorSelect.innerHTML = '<option value="">First select a hospital</option>';
+                }
+            }
+        }
+
+        function clearRegistrationForm() {
+            event.target.form.reset();
+        }
+
+        // Test Report View Function
+        function viewTestReport(patientName, testType, testDate, status) {
+            // Create detailed test report based on test type
+            const testReports = {
+                'Complete Blood Count': {
+                    normalRanges: {
+                        'WBC': '4.5-11.0 x 10^9/L',
+                        'RBC': '4.5-5.5 x 10^12/L',
+                        'Hemoglobin': '13.5-17.5 g/dL',
+                        'Hematocrit': '41-50%',
+                        'Platelets': '150-450 x 10^9/L'
+                    },
+                    results: {
+                        'WBC': '7.2 x 10^9/L',
+                        'RBC': '4.8 x 10^12/L',
+                        'Hemoglobin': '14.5 g/dL',
+                        'Hematocrit': '43%',
+                        'Platelets': '280 x 10^9/L'
+                    }
+                },
+                'Chest X-Ray': {
+                    findings: 'Clear lung fields, no acute cardiopulmonary abnormality detected',
+                    impression: 'Normal chest X-ray examination',
+                    recommendations: 'No immediate follow-up required'
+                },
+                'CT Scan': {
+                    findings: 'No evidence of acute intracranial hemorrhage or mass effect',
+                    impression: 'Normal CT scan of head',
+                    recommendations: 'Follow-up with neurologist if symptoms persist'
+                },
+                'MRI': {
+                    findings: 'Mild degenerative changes in lumbar spine',
+                    impression: 'Early stage lumbar spondylosis',
+                    recommendations: 'Physical therapy and pain management'
+                },
+                'Comprehensive Metabolic Panel': {
+                    normalRanges: {
+                        'Glucose': '70-100 mg/dL',
+                        'BUN': '7-20 mg/dL',
+                        'Creatinine': '0.6-1.3 mg/dL',
+                        'Sodium': '135-145 mEq/L',
+                        'Potassium': '3.5-5.0 mEq/L'
+                    },
+                    results: {
+                        'Glucose': '85 mg/dL',
+                        'BUN': '15 mg/dL',
+                        'Creatinine': '0.9 mg/dL',
+                        'Sodium': '140 mEq/L',
+                        'Potassium': '4.2 mEq/L'
+                    }
+                },
+                'Ultrasound': {
+                    findings: 'Gallbladder appears normal, no stones detected',
+                    impression: 'Normal abdominal ultrasound',
+                    recommendations: 'Continue routine health monitoring'
+                },
+                'Lipid Panel': {
+                    normalRanges: {
+                        'Total Cholesterol': '<200 mg/dL',
+                        'LDL': '<100 mg/dL',
+                        'HDL': '>40 mg/dL',
+                        'Triglycerides': '<150 mg/dL'
+                    },
+                    results: {
+                        'Total Cholesterol': '185 mg/dL',
+                        'LDL': '110 mg/dL',
+                        'HDL': '45 mg/dL',
+                        'Triglycerides': '120 mg/dL'
+                    }
+                },
+                'Echocardiogram': {
+                    findings: 'Normal left ventricular size and function',
+                    impression: 'Normal echocardiographic examination',
+                    recommendations: 'Continue current cardiac care plan'
+                }
+            };
+
+            const report = testReports[testType] || { findings: 'Test details not available' };
+            
+            // Create modal HTML
+            const modalHtml = `
+                <div id="testReportModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+                        <div class="p-6">
+                            <div class="flex items-center justify-between mb-6">
+                                <div>
+                                    <h2 class="text-2xl font-bold text-gray-900">Test Report</h2>
+                                    <p class="text-gray-600 mt-1">${testType} - ${testDate}</p>
+                                </div>
+                                <button onclick="closeTestReport()" class="text-gray-400 hover:text-gray-600">
+                                    <i data-lucide="X" class="h-6 w-6"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                                <div class="lg:col-span-2">
+                                    <div class="bg-purple-50 rounded-lg p-4">
+                                        <h3 class="text-lg font-semibold text-purple-900 mb-3">Patient Information</h3>
+                                        <div class="space-y-2">
+                                            <div class="flex justify-between">
+                                                <span class="text-gray-600">Patient Name:</span>
+                                                <span class="font-medium">${patientName}</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="text-gray-600">Test Date:</span>
+                                                <span class="font-medium">${testDate}</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="text-gray-600">Status:</span>
+                                                <span class="px-2 py-1 rounded-full text-xs font-medium ${
+                                                    status === 'completed' 
+                                                        ? 'bg-green-100 text-green-800' 
+                                                        : 'bg-yellow-100 text-yellow-800'
+                                                }">${status === 'completed' ? 'Completed' : 'In Progress'}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="lg:col-span-1">
+                                    <div class="bg-blue-50 rounded-lg p-4">
+                                        <h3 class="text-lg font-semibold text-blue-900 mb-3">Test Details</h3>
+                                        <div class="space-y-2">
+                                            <div class="flex justify-between">
+                                                <span class="text-gray-600">Test Type:</span>
+                                                <span class="font-medium">${testType}</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="text-gray-600">Lab:</span>
+                                                <span class="font-medium">Central Diagnostic Lab</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="text-gray-600">Technician:</span>
+                                                <span class="font-medium">Dr. Sarah Johnson</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-6">
+                                <div class="bg-green-50 rounded-lg p-4">
+                                    <h3 class="text-lg font-semibold text-green-900 mb-4">Test Results</h3>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div class="flex justify-between items-center p-3 bg-white rounded">
+                                            <span class="text-gray-700">WBC:</span>
+                                            <div class="text-right">
+                                                <span class="font-bold text-green-600">7.2 x 10^9/L</span>
+                                                <span class="text-xs text-gray-500 block">Normal: 4.5-11.0 x 10^9/L</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex justify-between items-center p-3 bg-white rounded">
+                                            <span class="text-gray-700">RBC:</span>
+                                            <div class="text-right">
+                                                <span class="font-bold text-green-600">4.8 x 10^12/L</span>
+                                                <span class="text-xs text-gray-500 block">Normal: 4.5-5.5 x 10^12/L</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex justify-between items-center p-3 bg-white rounded">
+                                            <span class="text-gray-700">Hemoglobin:</span>
+                                            <div class="text-right">
+                                                <span class="font-bold text-green-600">14.5 g/dL</span>
+                                                <span class="text-xs text-gray-500 block">Normal: 13.5-17.5 g/dL</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex justify-between items-center p-3 bg-white rounded">
+                                            <span class="text-gray-700">Hematocrit:</span>
+                                            <div class="text-right">
+                                                <span class="font-bold text-green-600">43%</span>
+                                                <span class="text-xs text-gray-500 block">Normal: 41-50%</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex justify-between items-center p-3 bg-white rounded">
+                                            <span class="text-gray-700">Platelets:</span>
+                                            <div class="text-right">
+                                                <span class="font-bold text-green-600">280 x 10^9/L</span>
+                                                <span class="text-xs text-gray-500 block">Normal: 150-450 x 10^9/L</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex justify-end space-x-4 pt-4 border-t">
+                                <button onclick="printTestReport()" class="px-4 py-2 bg-gray-200 text-gray-900 rounded-lg hover:bg-gray-300 transition-colors">
+                                    <i data-lucide="Printer" class="h-4 w-4 inline mr-2"></i>
+                                    Print Report
+                                </button>
+                                <button onclick="downloadTestReport()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                                    <i data-lucide="Download" class="h-4 w-4 inline mr-2"></i>
+                                    Download PDF
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Add modal to page
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // Re-initialize Lucide icons for modal
+            setTimeout(() => {
+                lucide.createIcons();
+            }, 100);
+        }
+
+        function closeTestReport() {
+            const modal = document.getElementById('testReportModal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        function printTestReport() {
+            window.print();
+        }
+
+        function downloadTestReport() {
+            // Get current modal data
+            const modal = document.getElementById('testReportModal');
+            if (!modal) return;
+            
+            // Extract data from modal
+            const titleText = modal.querySelector('h2').textContent;
+            const parts = titleText.split(' - ');
+            const testType = parts[0];
+            const testDate = parts[1];
+            
+            // Extract patient name from the modal
+            const patientNameElement = modal.querySelector('.font-medium');
+            const patientName = patientNameElement ? patientNameElement.textContent : 'Unknown';
+            
+            // Create PDF content
+            let doc;
+            
+            // Try to use jsPDF library
+            try {
+                const { jsPDF } = window.jspdf || window.jsPDF;
+                
+                if (jsPDF) {
+                    // Initialize PDF
+                    doc = new jsPDF({
+                        orientation: 'portrait',
+                        unit: 'mm',
+                        format: 'a4'
+                    });
+                } else {
+                    throw new Error('jsPDF library not loaded');
+                }
+            } catch (error) {
+                // Fallback: Create text content for download
+                downloadTestReportAsText(modal, patientName, testType, testDate);
+                return;
+            }
+            
+            // Set fonts
+            doc.setFont('helvetica', 'normal');
+            
+            // Add header
+            doc.setFontSize(20);
+            doc.setTextColor(102, 51, 153);
+            doc.text('Test Report', 105, 20, { align: 'center' });
+            
+            doc.setFontSize(12);
+            doc.setTextColor(100, 100, 100);
+            doc.text(`${testType} - ${testDate}`, 105, 30, { align: 'center' });
+            
+            // Add patient information
+            doc.setFontSize(14);
+            doc.setTextColor(0, 0, 0);
+            doc.text('Patient Information', 20, 50);
+            
+            doc.setFontSize(11);
+            doc.setTextColor(60, 60, 60);
+            const patientInfo = modal.querySelectorAll('.bg-purple-50 .space-y-2 .flex');
+            patientInfo.forEach((info, index) => {
+                const label = info.querySelector('span:first-child').textContent;
+                const value = info.querySelector('span:last-child').textContent;
+                doc.text(`${label}: ${value}`, 20, 60 + (index * 8));
+            });
+            
+            // Add test details
+            doc.setFontSize(14);
+            doc.text('Test Details', 20, 110);
+            
+            doc.setFontSize(11);
+            const testDetails = modal.querySelectorAll('.bg-blue-50 .space-y-2 .flex');
+            testDetails.forEach((detail, index) => {
+                const label = detail.querySelector('span:first-child').textContent;
+                const value = detail.querySelector('span:last-child').textContent;
+                doc.text(`${label}: ${value}`, 20, 120 + (index * 8));
+            });
+            
+            // Add results/findings
+            const resultsSection = modal.querySelector('.bg-green-50, .bg-blue-50');
+            if (resultsSection) {
+                doc.setFontSize(14);
+                doc.text(resultsSection.querySelector('h3').textContent, 20, 160);
+                
+                doc.setFontSize(11);
+                if (resultsSection.classList.contains('bg-green-50')) {
+                    // Lab test results
+                    const resultItems = resultsSection.querySelectorAll('.grid > div');
+                    let yPos = 170;
+                    resultItems.forEach((item, index) => {
+                        if (index > 0 && index % 2 === 0) yPos += 30;
+                        const param = item.querySelector('.text-gray-700').textContent;
+                        const value = item.querySelector('.font-bold').textContent;
+                        const normal = item.querySelector('.text-gray-500').textContent;
+                        
+                        doc.text(`${param}: ${value}`, 20, yPos);
+                        doc.setFontSize(9);
+                        doc.setTextColor(100, 100, 100);
+                        doc.text(normal, 20, yPos + 5);
+                        doc.setFontSize(11);
+                        doc.setTextColor(60, 60, 60);
+                        yPos += 8;
+                    });
+                } else {
+                    // Imaging findings
+                    const findings = resultsSection.querySelectorAll('.space-y-3 > div');
+                    let yPos = 170;
+                    findings.forEach((finding, index) => {
+                        const label = finding.querySelector('h4').textContent;
+                        const content = finding.querySelector('p').textContent;
+                        doc.text(`${label}:`, 20, yPos);
+                        doc.setFontSize(10);
+                        const lines = doc.splitTextToSize(content, 170);
+                        lines.forEach((line, lineIndex) => {
+                            doc.text(line, 25, yPos + 5 + (lineIndex * 4));
+                        });
+                        doc.setFontSize(11);
+                        yPos += 15 + (lines.length * 4);
+                    });
+                }
+            }
+            
+            // Add footer
+            doc.setFontSize(10);
+            doc.setTextColor(100, 100, 100);
+            doc.text('Generated by Healthcare Management System', 105, 280, { align: 'center' });
+            doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 105, 285, { align: 'center' });
+            
+            // Save PDF
+            const fileName = `Test_Report_${patientName.replace(' ', '_')}_${testDate}.pdf`;
+            doc.save(fileName);
+            
+            // Show success message
+            alert(`PDF downloaded successfully!\nFile name: ${fileName}`);
+        }
+
+        function downloadTestReportAsText(modal, patientName, testType, testDate) {
+            // Create text content as fallback
+            let textContent = `TEST REPORT\n`;
+            textContent += `==================\n\n`;
+            textContent += `Test Type: ${testType}\n`;
+            textContent += `Test Date: ${testDate}\n`;
+            textContent += `Patient Name: ${patientName}\n\n`;
+            
+            // Add patient information
+            textContent += `PATIENT INFORMATION\n`;
+            textContent += `------------------\n`;
+            const patientInfo = modal.querySelectorAll('.bg-purple-50 .space-y-2 .flex');
+            patientInfo.forEach((info) => {
+                const label = info.querySelector('span:first-child').textContent;
+                const value = info.querySelector('span:last-child').textContent;
+                textContent += `${label}: ${value}\n`;
+            });
+            
+            textContent += `\nTEST DETAILS\n`;
+            textContent += `-------------\n`;
+            const testDetails = modal.querySelectorAll('.bg-blue-50 .space-y-2 .flex');
+            testDetails.forEach((detail) => {
+                const label = detail.querySelector('span:first-child').textContent;
+                const value = detail.querySelector('span:last-child').textContent;
+                textContent += `${label}: ${value}\n`;
+            });
+            
+            // Add results/findings
+            const resultsSection = modal.querySelector('.bg-green-50, .bg-blue-50');
+            if (resultsSection) {
+                textContent += `\n${resultsSection.querySelector('h3').textContent.toUpperCase()}\n`;
+                textContent += `${'='.repeat(resultsSection.querySelector('h3').textContent.length + 5)}\n`;
+                
+                if (resultsSection.classList.contains('bg-green-50')) {
+                    // Lab test results
+                    const resultItems = resultsSection.querySelectorAll('.grid > div');
+                    resultItems.forEach((item) => {
+                        const param = item.querySelector('.text-gray-700').textContent;
+                        const value = item.querySelector('.font-bold').textContent;
+                        const normal = item.querySelector('.text-gray-500').textContent;
+                        textContent += `${param}: ${value}\n`;
+                        textContent += `  Normal: ${normal}\n`;
+                    });
+                } else {
+                    // Imaging findings
+                    const findings = resultsSection.querySelectorAll('.space-y-3 > div');
+                    findings.forEach((finding) => {
+                        const label = finding.querySelector('h4').textContent;
+                        const content = finding.querySelector('p').textContent;
+                        textContent += `${label}:\n`;
+                        textContent += `  ${content}\n`;
+                    });
+                }
+            }
+            
+            textContent += `\nGenerated by Healthcare Management System\n`;
+            textContent += `Generated on: ${new Date().toLocaleDateString()}\n`;
+            
+            // Create and download text file
+            const blob = new Blob([textContent], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Test_Report_${patientName.replace(' ', '_')}_${testDate}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            alert('Test report downloaded as text file (PDF library not available)');
+        }
+
+        function setRating(rating) {
+            // Update rating display
+            const stars = event.target.closest('form').querySelectorAll('[data-lucide="Star"]');
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.add('text-yellow-400', 'fill-current');
+                    star.classList.remove('text-gray-300');
+                } else {
+                    star.classList.remove('text-yellow-400', 'fill-current');
+                    star.classList.add('text-gray-300');
+                }
+            });
+        }
+
+        // Event Listeners
+        function attachEventListeners() {
+            // Initialize Lucide icons
+            lucide.createIcons();
+            
+            // Add form submit listeners
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const formType = getCurrentPageName().toLowerCase();
+                    showNotification(`${formType} completed successfully!`, 'success');
+                });
+            });
+
+            // Add smooth scroll behavior
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = anchor.getAttribute('href').substring(1);
+                    const targetElement = document.getElementById(targetId);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                });
+            });
+
+            // Add intersection observer for animations
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate-slide-up');
+                    }
+                });
+            }, observerOptions);
+
+            // Observe all cards
+            document.querySelectorAll('.card').forEach(card => {
+                observer.observe(card);
+            });
+        }
+
+        // Enhanced notification function
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification-enter fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
+                type === 'success' ? 'bg-green-500 text-white' : 
+                type === 'error' ? 'bg-red-500 text-white' : 
+                'bg-blue-500 text-white'
+            }`;
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <i data-lucide="${
+                        type === 'success' ? 'CheckCircle' : 
+                        type === 'error' ? 'XCircle' : 'Info'
+                    }" class="h-5 w-5 mr-2"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Auto remove after 3 seconds
+            setTimeout(() => {
+                notification.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        // Enhanced navigation with smooth transitions
+        function navigateTo(view) {
+            const currentView = state.currentView;
+            state.currentView = view;
+            
+            // Add page transition effect
+            const mainContent = document.querySelector('main');
+            if (mainContent) {
+                mainContent.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+                
+                setTimeout(() => {
+                    renderApp();
+                    // Re-initialize animations for new content
+                    setTimeout(() => {
+                        document.querySelectorAll('.card').forEach((card, index) => {
+                            setTimeout(() => {
+                                card.classList.add('animate-slide-up');
+                            }, index * 100);
+                        });
+                    }, 100);
+                }, 300);
+            }
+        }
+
+        // Add loading animation for async operations
+        function showLoading(element) {
+            element.classList.add('animate-shimmer');
+        }
+
+        function hideLoading(element) {
+            element.classList.remove('animate-shimmer');
+        }
+
+        // Add hover sound effect (optional)
+        function playHoverSound() {
+            // Create a simple hover sound using Web Audio API
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 800;
+            oscillator.type = 'sine';
+            gainNode.gain.value = 0.1;
+            
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.05);
+        }
+
+        // Initialize animations on load
+        function initializeAnimations() {
+            // Animate elements on page load
+            document.addEventListener('DOMContentLoaded', () => {
+                const elements = document.querySelectorAll('.animate-on-load');
+                elements.forEach((el, index) => {
+                    setTimeout(() => {
+                        el.classList.add('animate-slide-up');
+                    }, index * 200);
+                });
+            });
+        }
+
+        // Initialize the app when DOM is ready
+        document.addEventListener('DOMContentLoaded', initApp);
+
+        // Production optimizations
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch(registrationError => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+
+        // Error handling for production
+        window.addEventListener('error', (e) => {
+            console.error('Application error:', e.error);
+            // In production, you might want to send this to an error tracking service
+        });
+
+        // Performance monitoring
+        if ('performance' in window) {
+            window.addEventListener('load', () => {
+                const perfData = performance.getEntriesByType('navigation')[0];
+                console.log('Page load time:', perfData.loadEventEnd - perfData.loadEventStart);
+            });
+        }
+
+        // PWA manifest
+        const manifest = {
+            "name": "Healthcare SCM",
+            "short_name": "Healthcare",
+            "description": "Healthcare Supply Chain Management System",
+            "start_url": "/",
+            "display": "standalone",
+            "background_color": "#ffffff",
+            "theme_color": "#8b5cf6",
+            "icons": [
+                {
+                    "src": "/icon-192.png",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "/icon-512.png",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        };
+
+        // Create manifest link if not exists
+        if (!document.querySelector('link[rel="manifest"]')) {
+            const manifestLink = document.createElement('link');
+            manifestLink.rel = 'manifest';
+            manifestLink.href = '/manifest.json';
+            document.head.appendChild(manifestLink);
+        }
+    </script>
+</body>
+</html>

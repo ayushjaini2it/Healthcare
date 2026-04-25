@@ -1,0 +1,45 @@
+{
+  "name": "healthcare-supply-chain",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "start": "npm install --no-audit --no-fund && npm run dev",
+    "auto-start": "npm cache clean --force && npm install --no-audit --no-fund && npm run dev",
+    "setup": "npm install --no-audit --no-fund && echo Setup complete! Run 'npm run dev' to start the server.",
+    "fix": "npm audit fix --force --no-audit --no-fund && npm run dev",
+    "clean": "npm cache clean --force && rmdir /s /q node_modules && npm install --no-audit --no-fund",
+    "safe-start": "npm install --legacy-peer-deps --no-audit --no-fund && npm run dev"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^3.0.1",
+    "@supabase/supabase-js": "^2.104.1",
+    "clsx": "^1.2.1",
+    "date-fns": "^2.29.3",
+    "lucide-react": "^0.263.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-hook-form": "^7.43.5",
+    "react-router-dom": "^6.8.1",
+    "tailwindcss": "^3.3.0",
+    "zod": "^3.20.6"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.28",
+    "@types/react-dom": "^18.0.11",
+    "@typescript-eslint/eslint-plugin": "^5.54.0",
+    "@typescript-eslint/parser": "^5.54.0",
+    "@vitejs/plugin-react": "^3.1.0",
+    "autoprefixer": "^10.4.27",
+    "eslint": "^8.35.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.3.4",
+    "postcss": "^8.4.21",
+    "typescript": "^4.9.3",
+    "vite": "^4.1.0"
+  }
+}

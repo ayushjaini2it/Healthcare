@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://yourdomain.com/sitemap.xml
+
+# Block common non-content paths
+Disallow: /admin/
+Disallow: /api/
+Disallow: /temp/
+Disallow: /*.json$
+Disallow: /*.js$
