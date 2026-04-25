@@ -57,7 +57,7 @@ const Consultation: React.FC = () => {
       const { data: doctorsData } = await supabase
         .from('users')
         .select('*')
-        .eq('role', 'doctor')
+        .eq('Role', 'doctor')
 
       // Map to expected User structure
       setDoctors(
