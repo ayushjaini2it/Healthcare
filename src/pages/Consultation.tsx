@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { supabase } from '../lib/supabase' 
 import { supabaseServices } from '../services/supabaseServices'
+import { useAuth } from '../context/AuthContext'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -8,7 +8,6 @@ import { Stethoscope, Heart, Thermometer, Scale, Activity, Clock, User, AlertCir
 
 const consultationSchema = z.object({
   patientId: z.string().min(1, 'Please select a patient'),
-  doctorId: z.string().min(1, 'Please select a doctor'),
   symptoms: z.string().min(10, 'Please describe symptoms in detail'),
   bloodPressure: z.string().min(5, 'Please enter blood pressure'),
   heartRate: z.coerce.number().min(40).max(200, 'Heart rate must be between 40-200'),
@@ -22,10 +21,10 @@ const consultationSchema = z.object({
 type ConsultationFormData = z.infer<typeof consultationSchema>
 
 const Consultation: React.FC = () => {
+  const { currentUser } = useAuth()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [consultationSuccess, setConsultationSuccess] = useState(false)
   const [patients, setPatients] = useState<any[]>([])
-  const [doctors, setDoctors] = useState<any[]>([])
   const [errorMessage, setErrorMessage] = useState('')
   const [isLoading, setIsLoading] = useState(true)
 
@@ -47,18 +46,11 @@ const Consultation: React.FC = () => {
   const loadPatientsAndDoctors = async () => {
     try {
       setIsLoading(true)
-      
-      // Fetch all patients from Supabase
       const patientsData = await supabaseServices.patientServices.getAllPatients()
       setPatients(patientsData || [])
-      
-      
-      // Fetch all doctors from Supabase
-      const doctorsData = await supabaseServices.authServices.getAllDoctors()
-      setDoctors(doctorsData || [])
     } catch (error) {
       console.error('Error loading data:', error)
-      setErrorMessage('Failed to load patient and doctor data')
+      setErrorMessage('Failed to load patient data')
     } finally {
       setIsLoading(false)
     }
@@ -69,14 +61,19 @@ const Consultation: React.FC = () => {
   const onSubmit = async (data: ConsultationFormData) => {
     setIsSubmitting(true)
     setErrorMessage('')
-    
+
+    if (!currentUser?.id) {
+      setErrorMessage('Could not identify logged-in doctor. Please re-login.')
+      setIsSubmitting(false)
+      return
+    }
+
     try {
-      // Step 1: Create consultation record
       const consultationData = {
         patientId: data.patientId,
-        doctorId: data.doctorId,
+        doctorId: currentUser.id,
         date: new Date(),
-        symptoms: data.symptoms.split(',').map(s => s.trim()),
+        symptoms: data.symptoms.split(',').map((s: string) => s.trim()),
         diagnosis: data.preliminaryDiagnosis,
         notes: data.notes,
         vitalSigns: {
@@ -208,22 +205,26 @@ const Consultation: React.FC = () => {
 
           <div className="card">
             <h2 className="text-xl font-semibold text-gray-900 mb-6">Doctor Information</h2>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Select Doctor *
-              </label>
-              <select {...register('doctorId')} className="input-field">
-                <option value="">Choose a doctor</option>
-                {doctors.map(doctor => (
-                  <option key={doctor.id} value={doctor.id}>
-                    {doctor.full_name} - {doctor.specialization}
-                  </option>
-                ))}
-              </select>
-              {errors.doctorId && (
-                <p className="text-red-500 text-sm mt-1">{errors.doctorId.message}</p>
-              )}
+            <div className="bg-indigo-50 p-4 rounded-lg border border-indigo-100">
+              <div className="flex items-center gap-3">
+                <div className="h-12 w-12 bg-indigo-600 rounded-full flex items-center justify-center shadow">
+                  <span className="text-white text-lg font-bold">
+                    {currentUser?.profile?.full_name?.[0] || 'D'}
+                  </span>
+                </div>
+                <div>
+                  <p className="font-bold text-indigo-900 text-base">
+                    {currentUser?.profile?.full_name || 'Doctor'}
+                  </p>
+                  <p className="text-sm text-indigo-600 font-medium">
+                    {currentUser?.profile?.specialization || 'Specialist'}
+                  </p>
+                  <p className="text-xs text-indigo-400 mt-0.5">
+                    {currentUser?.email}
+                  </p>
+                </div>
+              </div>
+              <p className="text-xs text-indigo-400 mt-3 font-medium">✓ Logged in as this doctor — assigned automatically</p>
             </div>
           </div>
         </div>

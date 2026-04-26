@@ -12,6 +12,7 @@ import Discharge from './pages/Discharge'
 import Feedback from './pages/Feedback'
 import Auth from './pages/Auth'
 import { supabase } from './lib/supabase'
+import { AuthProvider } from './context/AuthContext'
 
 function App() {
   const [session, setSession] = useState<any>(null)
@@ -51,20 +52,22 @@ function App() {
   }
 
   return (
-    <Layout>
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/registration" element={<PatientRegistration />} />
-        <Route path="/consultation" element={<Consultation />} />
-        <Route path="/diagnosis" element={<Diagnosis />} />
-        <Route path="/treatment" element={<TreatmentDecision />} />
-        <Route path="/pharmacy" element={<Pharmacy />} />
-        <Route path="/billing" element={<Billing />} />
-        <Route path="/discharge" element={<Discharge />} />
-        <Route path="/feedback" element={<Feedback />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Layout>
+    <AuthProvider>
+      <Layout>
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/registration" element={<PatientRegistration />} />
+          <Route path="/consultation" element={<Consultation />} />
+          <Route path="/diagnosis" element={<Diagnosis />} />
+          <Route path="/treatment" element={<TreatmentDecision />} />
+          <Route path="/pharmacy" element={<Pharmacy />} />
+          <Route path="/billing" element={<Billing />} />
+          <Route path="/discharge" element={<Discharge />} />
+          <Route path="/feedback" element={<Feedback />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Layout>
+    </AuthProvider>
   )
 }
 

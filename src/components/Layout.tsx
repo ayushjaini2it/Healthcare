@@ -15,32 +15,35 @@ import {
   User as UserIcon
 } from 'lucide-react'
 import { supabaseServices } from '../services/supabaseServices'
+import { useAuth } from '../context/AuthContext'
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation()
-  const [user, setUser] = React.useState<any>(null)
-
-  React.useEffect(() => {
-    supabaseServices.authServices.getCurrentUser().then(setUser)
-  }, [])
+  const { currentUser: user } = useAuth()
 
   const handleLogout = async () => {
     await supabaseServices.authServices.signOut()
     window.location.reload()
   }
 
-  const navigation = [
+  const doctorNav = [
     { name: 'Dashboard', href: '/', icon: Home },
-    { name: 'Patient Entry', href: '/registration', icon: UserCheck },
-    { name: 'Registration', href: '/registration', icon: Users },
     { name: 'Consultation', href: '/consultation', icon: Stethoscope },
     { name: 'Diagnosis', href: '/diagnosis', icon: Microscope },
     { name: 'Treatment', href: '/treatment', icon: Activity },
+    { name: 'Discharge', href: '/discharge', icon: FileText },
+  ]
+
+  const patientNav = [
+    { name: 'Dashboard', href: '/', icon: Home },
+    { name: 'Patient Entry', href: '/registration', icon: UserCheck },
+    { name: 'Registration', href: '/registration', icon: Users },
     { name: 'Pharmacy', href: '/pharmacy', icon: Pill },
     { name: 'Billing', href: '/billing', icon: CreditCard },
-    { name: 'Discharge', href: '/discharge', icon: FileText },
     { name: 'Feedback', href: '/feedback', icon: MessageSquare },
   ]
+
+  const navigation = user?.role === 'doctor' ? doctorNav : patientNav
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -54,6 +57,15 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <p className="text-sm text-gray-600 mt-1">
               Supply Chain Management
             </p>
+            {user?.role && (
+              <span className={`inline-flex items-center mt-3 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
+                user.role === 'doctor' 
+                  ? 'bg-indigo-100 text-indigo-700' 
+                  : 'bg-emerald-100 text-emerald-700'
+              }`}>
+                {user.role === 'doctor' ? '🩺 Doctor' : '🏥 Patient'}
+              </span>
+            )}
           </div>
           
           <nav className="mt-6">

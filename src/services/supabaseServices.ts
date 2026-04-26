@@ -150,27 +150,32 @@ export const consultationServices = {
    * Create a new consultation
    */
   async createConsultation(consultationData: Omit<Consultation, 'id' | 'status'>) {
+    const insertPayload = {
+      patient_id: consultationData.patientId,
+      doctor_id: consultationData.doctorId,
+      consultation_date: consultationData.date,
+      symptoms: Array.isArray(consultationData.symptoms)
+        ? consultationData.symptoms.join(', ')
+        : consultationData.symptoms,
+      diagnosis: consultationData.diagnosis || null,
+      notes: consultationData.notes || null,
+      blood_pressure: consultationData.vitalSigns?.bloodPressure || null,
+      heart_rate: consultationData.vitalSigns?.heartRate || null,
+      temperature: consultationData.vitalSigns?.temperature || null,
+      weight: consultationData.vitalSigns?.weight || null,
+      height: consultationData.vitalSigns?.height || null,
+      status: 'completed'
+    }
+
     const { data, error } = await supabase
       .from('consultations')
-      .insert([
-        {
-          patient_id: consultationData.patientId,
-          doctor_id: consultationData.doctorId,
-          consultation_date: consultationData.date,
-          symptoms: consultationData.symptoms.join(','),
-          diagnosis: consultationData.diagnosis,
-          notes: consultationData.notes,
-          blood_pressure: consultationData.vitalSigns.bloodPressure,
-          heart_rate: consultationData.vitalSigns.heartRate,
-          temperature: consultationData.vitalSigns.temperature,
-          weight: consultationData.vitalSigns.weight,
-          height: consultationData.vitalSigns.height,
-          status: 'scheduled'
-        }
-      ])
+      .insert([insertPayload])
       .select()
 
-    if (error) throw error
+    if (error) {
+      console.error('Supabase createConsultation error:', JSON.stringify(error, null, 2))
+      throw new Error(error.message || 'Failed to create consultation')
+    }
     return data?.[0]
   },
 
