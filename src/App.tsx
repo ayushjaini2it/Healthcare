@@ -11,6 +11,8 @@ import Billing from './pages/Billing'
 import Discharge from './pages/Discharge'
 import Feedback from './pages/Feedback'
 import Auth from './pages/Auth'
+import AppointmentBooking from './pages/AppointmentBooking'
+import DoctorAppointments from './pages/DoctorAppointments'
 import { supabase } from './lib/supabase'
 import { AuthProvider } from './context/AuthContext'
 
@@ -57,6 +59,8 @@ function App() {
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/registration" element={<PatientRegistration />} />
+          <Route path="/appointments" element={<AppointmentBooking />} />
+          <Route path="/doctor-appointments" element={<DoctorAppointments />} />
           <Route path="/consultation" element={<Consultation />} />
           <Route path="/diagnosis" element={<Diagnosis />} />
           <Route path="/treatment" element={<TreatmentDecision />} />

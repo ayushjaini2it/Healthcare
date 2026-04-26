@@ -11,6 +11,7 @@ import {
   Activity,
   UserCheck,
   LogOut,
+  Calendar,
 } from 'lucide-react'
 import { supabaseServices } from '../services/supabaseServices'
 import { useAuth } from '../context/AuthContext'
@@ -26,6 +27,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   const doctorNav = [
     { name: 'Dashboard', href: '/', icon: Home },
+    { name: 'Appointments', href: '/doctor-appointments', icon: Calendar },
     { name: 'Consultation', href: '/consultation', icon: Stethoscope },
     { name: 'Diagnosis', href: '/diagnosis', icon: Microscope },
     { name: 'Treatment', href: '/treatment', icon: Activity },
@@ -35,6 +37,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const patientNav = [
     { name: 'Dashboard', href: '/', icon: Home },
     { name: 'Patient Entry', href: '/registration', icon: UserCheck },
+    { name: 'Appointments', href: '/appointments', icon: Calendar },
     { name: 'Pharmacy', href: '/pharmacy', icon: Pill },
     { name: 'Billing', href: '/billing', icon: CreditCard },
     { name: 'Feedback', href: '/feedback', icon: MessageSquare },
