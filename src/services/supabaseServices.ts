@@ -526,7 +526,15 @@ export const authServices = {
   /**
    * Signup a new doctor
    */
-  async signupDoctor(email: string, password: string, fullName: string, specialization: string) {
+  async signupDoctor(
+    email: string,
+    password: string,
+    fullName: string,
+    specialization: string,
+    phone: string,
+    hospitalName: string,
+    hospitalAddress: string
+  ) {
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
@@ -543,6 +551,9 @@ export const authServices = {
           full_name: fullName,
           email: email,
           specialization: specialization,
+          phone: phone,
+          hospital_name: hospitalName,
+          hospital_address: hospitalAddress,
         }
       ])
       .select()

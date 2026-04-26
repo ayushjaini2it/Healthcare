@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabaseServices } from '../services/supabaseServices'
-import { Stethoscope, User, Mail, Lock, UserPlus, LogIn, Loader2 } from 'lucide-react'
+import { Stethoscope, User, Mail, Lock, UserPlus, LogIn, Loader2, Phone, Building2, MapPin } from 'lucide-react'
 
 const Auth: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true)
@@ -10,6 +10,9 @@ const Auth: React.FC = () => {
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
   const [specialization, setSpecialization] = useState('')
+  const [phone, setPhone] = useState('')
+  const [hospitalName, setHospitalName] = useState('')
+  const [hospitalAddress, setHospitalAddress] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const navigate = useNavigate()
@@ -24,7 +27,7 @@ const Auth: React.FC = () => {
         await supabaseServices.authServices.signIn(email, password)
       } else {
         if (role === 'doctor') {
-          await supabaseServices.authServices.signupDoctor(email, password, fullName, specialization)
+          await supabaseServices.authServices.signupDoctor(email, password, fullName, specialization, phone, hospitalName, hospitalAddress)
         } else {
           await supabaseServices.authServices.signupPatient(email, password, fullName)
         }
@@ -135,22 +138,85 @@ const Auth: React.FC = () => {
                   </div>
 
                   {role === 'doctor' && (
-                    <div className="animate-slideDown">
-                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 ml-1">
-                        Specialization
-                      </label>
-                      <div className="relative group">
-                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-indigo-500 transition-colors">
-                          <Stethoscope className="h-5 w-5" />
+                    <div className="space-y-4 animate-slideDown">
+                      {/* Specialization */}
+                      <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 ml-1">
+                          Specialization
+                        </label>
+                        <div className="relative group">
+                          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-indigo-500 transition-colors">
+                            <Stethoscope className="h-5 w-5" />
+                          </div>
+                          <input
+                            type="text"
+                            required={role === 'doctor'}
+                            value={specialization}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSpecialization(e.target.value)}
+                            className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+                            placeholder="e.g. Cardiologist"
+                          />
                         </div>
-                        <input
-                          type="text"
-                          required={role === 'doctor'}
-                          value={specialization}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSpecialization(e.target.value)}
-                          className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
-                          placeholder="e.g. Cardiologist"
-                        />
+                      </div>
+
+                      {/* Phone */}
+                      <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 ml-1">
+                          Contact Number
+                        </label>
+                        <div className="relative group">
+                          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-indigo-500 transition-colors">
+                            <Phone className="h-5 w-5" />
+                          </div>
+                          <input
+                            type="tel"
+                            required={role === 'doctor'}
+                            value={phone}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPhone(e.target.value)}
+                            className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+                            placeholder="+91 98765 43210"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Hospital Name */}
+                      <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 ml-1">
+                          Hospital / Clinic Name
+                        </label>
+                        <div className="relative group">
+                          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-indigo-500 transition-colors">
+                            <Building2 className="h-5 w-5" />
+                          </div>
+                          <input
+                            type="text"
+                            required={role === 'doctor'}
+                            value={hospitalName}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setHospitalName(e.target.value)}
+                            className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+                            placeholder="e.g. City General Hospital"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Hospital Address */}
+                      <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 ml-1">
+                          Hospital Address
+                        </label>
+                        <div className="relative group">
+                          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-indigo-500 transition-colors">
+                            <MapPin className="h-5 w-5" />
+                          </div>
+                          <input
+                            type="text"
+                            required={role === 'doctor'}
+                            value={hospitalAddress}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setHospitalAddress(e.target.value)}
+                            className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+                            placeholder="123 Medical Lane, City, State"
+                          />
+                        </div>
                       </div>
                     </div>
                   )}

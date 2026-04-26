@@ -145,6 +145,13 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           <main className="p-8">
             {children}
           </main>
+
+          {/* Copyright Footer */}
+          <footer className="border-t border-gray-100 bg-white px-8 py-4">
+            <p className="text-center text-xs text-gray-400 font-medium">
+              All rights are reserved since 2026 &copy; Lokesh and Ayush
+            </p>
+          </footer>
         </div>
       </div>
     </div>
