@@ -8,7 +8,6 @@ import { Microscope, TestTube, Image, FileText, CheckCircle, Clock, AlertCircle 
 
 const diagnosisSchema = z.object({
   patientId: z.string().min(1, 'Please select a patient'),
-  consultationId: z.string().min(1, 'Please select a consultation'),
   testType: z.enum(['lab', 'imaging']),
   testName: z.string().min(3, 'Test name is required'),
   priority: z.enum(['routine', 'urgent', 'stat']),
@@ -25,7 +24,6 @@ const Diagnosis: React.FC = () => {
   const [diagnosisSuccess, setDiagnosisSuccess] = useState(false)
   const [activeTab, setActiveTab] = useState<'lab' | 'imaging'>('lab')
   const [patients, setPatients] = useState<any[]>([])
-  const [consultations, setConsultations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
 
@@ -87,10 +85,13 @@ const Diagnosis: React.FC = () => {
     handleSubmit,
     formState: { errors },
     reset,
-    watch,
     setValue
   } = useForm<DiagnosisFormData>({
-    resolver: zodResolver(diagnosisSchema)
+    resolver: zodResolver(diagnosisSchema),
+    defaultValues: {
+      testType: 'lab',
+      priority: 'routine'
+    }
   })
 
   // Load patients and consultations when component mounts
@@ -101,41 +102,35 @@ const Diagnosis: React.FC = () => {
   const loadPatientsAndConsultations = async () => {
     try {
       setIsLoading(true)
-
-      // Fetch patients with status 'in_consultation'
       const patientsData = await supabaseServices.patientServices.getAllPatients()
-      const inConsultationPatients = patientsData?.filter(p => p.status === 'in_consultation') || []
-      setPatients(inConsultationPatients)
-
-      // Fetch recent consultations
-      if (inConsultationPatients.length > 0) {
-        const { data: consultationsData } = await supabase
-          .from('consultations')
-          .select('*')
-          .in('patient_id', inConsultationPatients.map(p => p.id))
-          .order('consultation_date', { ascending: false })
-
-        setConsultations(consultationsData || [])
-      }
+      setPatients(patientsData || [])
     } catch (error) {
       console.error('Error loading data:', error)
-      setErrorMessage('Failed to load patient and consultation data')
+      setErrorMessage('Failed to load patient data')
     } finally {
       setIsLoading(false)
     }
   }
-
-  const selectedPatient = patients.find(p => p.id === watch('patientId'))
 
   const onSubmit = async (data: DiagnosisFormData) => {
     setIsSubmitting(true)
     setErrorMessage('')
     
     try {
+      // Auto-fetch latest consultation for this patient
+      const { data: consultationsData } = await supabase
+        .from('consultations')
+        .select('id')
+        .eq('patient_id', data.patientId)
+        .order('consultation_date', { ascending: false })
+        .limit(1)
+
+      const consultationId = consultationsData?.[0]?.id || null
+
       // Create diagnosis record
       await supabaseServices.diagnosisServices.createDiagnosis({
         patientId: data.patientId,
-        consultationId: data.consultationId,
+        consultationId: consultationId,
         type: data.testType,
         testName: data.testName,
         results: data.results,
@@ -156,12 +151,16 @@ const Diagnosis: React.FC = () => {
       reset()
 
       setTimeout(() => setDiagnosisSuccess(false), 5000)
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating diagnosis:', error)
-      const errorMsg = error instanceof Error
-        ? error.message
-        : 'Failed to create diagnosis. Please try again.'
-      setErrorMessage(errorMsg)
+      const msg = error?.message || ''
+      if (msg.includes('row-level security') || msg.includes('42501')) {
+        setErrorMessage('Database permission error: RLS policy is blocking this action. Please ask your admin to run the fix_rls_policies.sql in Supabase.')
+      } else if (msg.includes('null') || msg.includes('violates not-null')) {
+        setErrorMessage('This patient has no consultation on record. Please complete a consultation first.')
+      } else {
+        setErrorMessage(msg || 'Failed to create diagnosis. Please try again.')
+      }
     } finally {
       setIsSubmitting(false)
     }
@@ -232,43 +231,22 @@ const Diagnosis: React.FC = () => {
             </h2>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              {/* Patient Selection */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Select Patient *
-                  </label>
-                  <select {...register('patientId')} className="input-field">
-                    <option value="">Choose a patient</option>
-                    {patients.map(patient => (
-                      <option key={patient.id} value={patient.id}>
-                        {patient.name} - {patient.status}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.patientId && (
-                    <p className="text-red-500 text-sm mt-1">{errors.patientId.message}</p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Consultation *
-                  </label>
-                  <select {...register('consultationId')} className="input-field">
-                    <option value="">Select consultation</option>
-                    {consultations
-                      .filter(c => !selectedPatient || c.patientId === selectedPatient.id)
-                      .map(consultation => (
-                        <option key={consultation.id} value={consultation.id}>
-                          {consultation.date} - {consultation.doctor}
-                        </option>
-                      ))}
-                  </select>
-                  {errors.consultationId && (
-                    <p className="text-red-500 text-sm mt-1">{errors.consultationId.message}</p>
-                  )}
-                </div>
+              {/* Patient Selection only */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Select Patient *
+                </label>
+                <select {...register('patientId')} className="input-field">
+                  <option value="">Choose a patient</option>
+                  {patients.map(patient => (
+                    <option key={patient.id} value={patient.id}>
+                      {patient.name} - {patient.status}
+                    </option>
+                  ))}
+                </select>
+                {errors.patientId && (
+                  <p className="text-red-500 text-sm mt-1">{errors.patientId.message}</p>
+                )}
               </div>
 
               {/* Test Type Selection */}

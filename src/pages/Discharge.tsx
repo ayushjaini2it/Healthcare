@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { FileText, CheckCircle, Clock, AlertTriangle, Calendar, User, Home, AlertCircle } from 'lucide-react'
-import { supabase } from '../lib/supabase'
+import { FileText, CheckCircle, Clock, AlertTriangle, Calendar, AlertCircle } from 'lucide-react'
 import { supabaseServices } from '../services/supabaseServices'
 
 const dischargeSchema = z.object({
@@ -47,9 +46,9 @@ const Discharge: React.FC = () => {
       // Map to UI expectations
       setPatients(readyForDischarge.map(p => ({
         id: p.id,
-        name: `${p.first_name} ${p.last_name}`,
+        name: p.name,
         age: p.age,
-        admissionDate: new Date(p.created_at).toLocaleDateString(),
+        admissionDate: p.registrationDate ? new Date(p.registrationDate).toLocaleDateString() : 'N/A',
         diagnosis: 'Check medical records',
         status: p.status,
         room: 'General Ward'
@@ -59,9 +58,9 @@ const Discharge: React.FC = () => {
       const dischargedList = patientsData?.filter(p => p.status === 'discharged') || []
       setRecentDischarges(dischargedList.map(p => ({
         id: p.id,
-        patientName: `${p.first_name} ${p.last_name}`,
-        dischargeDate: new Date(p.updated_at).toLocaleDateString(),
-        lengthOfStay: Math.max(1, Math.floor((new Date(p.updated_at).getTime() - new Date(p.created_at).getTime()) / (1000 * 3600 * 24))),
+        patientName: p.name,
+        dischargeDate: p.registrationDate ? new Date(p.registrationDate).toLocaleDateString() : 'N/A',
+        lengthOfStay: 1,
         dischargeType: 'routine',
         finalDiagnosis: 'Treatment Complete',
       })))

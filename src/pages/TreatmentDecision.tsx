@@ -8,8 +8,6 @@ import { Activity, Pill, Calendar, FileText, Clock, CheckCircle, AlertTriangle, 
 
 const treatmentSchema = z.object({
   patientId: z.string().min(1, 'Please select a patient'),
-  consultationId: z.string().min(1, 'Please select a consultation'),
-  diagnosisId: z.string().min(1, 'Please select a diagnosis'),
   treatmentPlan: z.string().min(20, 'Treatment plan must be at least 20 characters'),
   medicationName: z.string().min(3, 'Medication name is required'),
   dosage: z.string().min(2, 'Dosage is required'),
@@ -27,8 +25,6 @@ const TreatmentDecision: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [treatmentSuccess, setTreatmentSuccess] = useState(false)
   const [patients, setPatients] = useState<any[]>([])
-  const [consultations, setConsultations] = useState<any[]>([])
-  const [diagnoses, setDiagnoses] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
   const existingTreatments = [
@@ -41,8 +37,7 @@ const TreatmentDecision: React.FC = () => {
     register,
     handleSubmit,
     formState: { errors },
-    reset,
-    watch
+    reset
   } = useForm<TreatmentFormData>({
     resolver: zodResolver(treatmentSchema)
   })
@@ -55,62 +50,60 @@ const TreatmentDecision: React.FC = () => {
   const loadData = async () => {
     try {
       setIsLoading(true)
-
-      // Fetch patients with status 'diagnosed'
       const patientsData = await supabaseServices.patientServices.getAllPatients()
-      const diagnosedPatients = patientsData?.filter(p => p.status === 'diagnosed') || []
-      setPatients(diagnosedPatients)
-
-      // Fetch consultations for diagnosed patients
-      if (diagnosedPatients.length > 0) {
-        const { data: consultationsData } = await supabase
-          .from('consultations')
-          .select('*')
-          .in('patient_id', diagnosedPatients.map(p => p.id))
-
-        setConsultations(consultationsData || [])
-      }
-
-      // Fetch diagnoses for diagnosed patients
-      if (diagnosedPatients.length > 0) {
-        const { data: diagnosesData } = await supabase
-          .from('diagnoses')
-          .select('*')
-          .in('patient_id', diagnosedPatients.map(p => p.id))
-
-        setDiagnoses(diagnosesData || [])
-      }
+      setPatients(patientsData || [])
     } catch (error) {
       console.error('Error loading data:', error)
-      setErrorMessage('Failed to load patient, consultation, and diagnosis data')
+      setErrorMessage('Failed to load patient data')
     } finally {
       setIsLoading(false)
     }
   }
-
-  const selectedPatient = patients.find(p => p.id === watch('patientId'))
 
   const onSubmit = async (data: TreatmentFormData) => {
     setIsSubmitting(true)
     setErrorMessage('')
 
     try {
+      // Auto-fetch latest consultation and diagnosis for this patient
+      const { data: consultationsData } = await supabase
+        .from('consultations')
+        .select('id')
+        .eq('patient_id', data.patientId)
+        .order('consultation_date', { ascending: false })
+        .limit(1)
+      const consultationId = consultationsData?.[0]?.id || null
+
+      const { data: diagnosesData } = await supabase
+        .from('diagnoses')
+        .select('id')
+        .eq('patient_id', data.patientId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+      const diagnosisId = diagnosesData?.[0]?.id || null
+
       // Create treatment plan
       const treatment = await supabaseServices.treatmentServices.createTreatment({
         patientId: data.patientId,
-        consultationId: data.consultationId,
-        diagnosisId: data.diagnosisId,
+        consultationId: consultationId,
+        diagnosisId: diagnosisId,
         plan: data.treatmentPlan,
-        procedures: data.procedures?.split(',').map(p => p.trim()),
+        procedures: data.procedures?.split(',').map((p: string) => p.trim()),
         followUpDate: new Date(data.followUpDate),
         status: 'planned'
       })
 
-      // Add medications to treatment
-      for (const medication of data.medications) {
+      // Add the single medication from the form
+      if (treatment?.id) {
         await supabaseServices.treatmentServices.addMedication(
           treatment.id,
-          medication
+          {
+            name: data.medicationName,
+            dosage: data.dosage,
+            frequency: data.frequency,
+            duration: data.duration,
+            instructions: data.medicationInstructions,
+          }
         )
       }
 
@@ -201,62 +194,22 @@ const TreatmentDecision: React.FC = () => {
             </h2>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              {/* Patient and Diagnosis Selection */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Patient *
-                  </label>
-                  <select {...register('patientId')} className="input-field">
-                    <option value="">Select patient</option>
-                    {patients.map(patient => (
-                      <option key={patient.id} value={patient.id}>
-                        {patient.name}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.patientId && (
-                    <p className="text-red-500 text-sm mt-1">{errors.patientId.message}</p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Consultation *
-                  </label>
-                  <select {...register('consultationId')} className="input-field">
-                    <option value="">Select consultation</option>
-                    {consultations
-                      .filter(c => !selectedPatient || c.patientId === selectedPatient.id)
-                      .map(consultation => (
-                        <option key={consultation.id} value={consultation.id}>
-                          {consultation.date instanceof Date ? consultation.date.toLocaleDateString() : consultation.date}
-                        </option>
-                      ))}
-                  </select>
-                  {errors.consultationId && (
-                    <p className="text-red-500 text-sm mt-1">{errors.consultationId.message}</p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Diagnosis *
-                  </label>
-                  <select {...register('diagnosisId')} className="input-field">
-                    <option value="">Select diagnosis</option>
-                    {diagnoses
-                      .filter(d => !selectedPatient || d.patientId === selectedPatient.id)
-                      .map(diagnosis => (
-                        <option key={diagnosis.id} value={diagnosis.id}>
-                          {diagnosis.results ? diagnosis.results.substring(0, 30) : 'No results'}...
-                        </option>
-                      ))}
-                  </select>
-                  {errors.diagnosisId && (
-                    <p className="text-red-500 text-sm mt-1">{errors.diagnosisId.message}</p>
-                  )}
-                </div>
+              {/* Patient Selection only */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Patient *
+                </label>
+                <select {...register('patientId')} className="input-field">
+                  <option value="">Select patient</option>
+                  {patients.map(patient => (
+                    <option key={patient.id} value={patient.id}>
+                      {patient.name}
+                    </option>
+                  ))}
+                </select>
+                {errors.patientId && (
+                  <p className="text-red-500 text-sm mt-1">{errors.patientId.message}</p>
+                )}
               </div>
 
               {/* Treatment Plan */}
