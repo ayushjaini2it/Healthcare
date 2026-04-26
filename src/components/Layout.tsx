@@ -10,11 +10,24 @@ import {
   Home, 
   MessageSquare,
   Activity,
-  UserCheck
+  UserCheck,
+  LogOut,
+  User as UserIcon
 } from 'lucide-react'
+import { supabaseServices } from '../services/supabaseServices'
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation()
+  const [user, setUser] = React.useState<any>(null)
+
+  React.useEffect(() => {
+    supabaseServices.authServices.getCurrentUser().then(setUser)
+  }, [])
+
+  const handleLogout = async () => {
+    await supabaseServices.authServices.signOut()
+    window.location.reload()
+  }
 
   const navigation = [
     { name: 'Dashboard', href: '/', icon: Home },
@@ -78,8 +91,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                     Healthcare Service Supply Chain Management
                   </p>
                 </div>
-                <div className="flex items-center space-x-4">
-                  <span className="text-sm text-gray-600">
+                <div className="flex items-center space-x-6">
+                  <span className="text-sm text-gray-500 hidden md:inline-block font-medium">
                     {new Date().toLocaleDateString('en-US', { 
                       weekday: 'long', 
                       year: 'numeric', 
@@ -87,9 +100,30 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                       day: 'numeric' 
                     })}
                   </span>
-                  <div className="h-8 w-8 bg-primary-600 rounded-full flex items-center justify-center">
-                    <span className="text-white text-sm font-medium">A</span>
+                  
+                  <div className="flex items-center gap-4 bg-gray-50 p-1.5 pr-4 rounded-full border border-gray-100">
+                    <div className="h-9 w-9 bg-indigo-600 rounded-full flex items-center justify-center shadow-md shadow-indigo-100">
+                      <span className="text-white text-sm font-bold">
+                        {user?.profile?.full_name?.[0] || user?.profile?.first_name?.[0] || 'U'}
+                      </span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-bold text-gray-900 leading-none">
+                        {user?.profile?.full_name || `${user?.profile?.first_name} ${user?.profile?.last_name}` || 'User'}
+                      </span>
+                      <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-wider mt-0.5">
+                        {user?.role || 'Member'}
+                      </span>
+                    </div>
                   </div>
+
+                  <button 
+                    onClick={handleLogout}
+                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200 group"
+                    title="Logout"
+                  >
+                    <LogOut className="h-5 w-5 group-hover:translate-x-0.5 transition-transform" />
+                  </button>
                 </div>
               </div>
             </div>

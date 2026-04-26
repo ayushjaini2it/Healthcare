@@ -1,5 +1,15 @@
+export interface Doctor {
+  id: string
+  fullName: string
+  email: string
+  specialization: string
+  createdAt?: Date
+  updatedAt?: Date
+}
+
 export interface Patient {
   id: string
+  authUserId?: string // Optional link to Supabase Auth
   name: string
   age: number
   gender: 'male' | 'female' | 'other'
@@ -20,7 +30,7 @@ export interface Patient {
 export interface Consultation {
   id: string
   patientId: string
-  doctorId: string
+  doctorId: string // References Doctor.id
   date: Date
   symptoms: string[]
   diagnosis: string
@@ -97,10 +107,3 @@ export interface Feedback {
   status: 'submitted' | 'reviewed'
 }
 
-export interface User {
-  id: string
-  name: string
-  email: string
-  role: 'admin' | 'doctor' | 'nurse' | 'lab_tech' | 'pharmacist' | 'billing'
-  department: string
-}

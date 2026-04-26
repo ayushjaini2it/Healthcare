@@ -4,14 +4,14 @@
 import { supabase } from '../lib/supabase'
 import type {
   Patient,
+  Doctor,
   Consultation,
   Diagnosis,
   Treatment,
   Medication,
   Bill,
   BillingItem,
-  Feedback,
-  User
+  Feedback
 } from '../types/index'
 
 // ============= PATIENT SERVICES =============
@@ -59,6 +59,7 @@ export const patientServices = {
     if (error) throw error
     return data?.map((p: any) => ({
       id: p.id,
+      authUserId: p.auth_user_id,
       name: `${p.first_name} ${p.last_name}`,
       age: p.age,
       gender: p.gender,
@@ -91,6 +92,7 @@ export const patientServices = {
     if (!data) return null;
     return {
       id: data.id,
+      authUserId: data.auth_user_id,
       name: `${data.first_name} ${data.last_name}`,
       age: data.age,
       gender: data.gender,
@@ -514,48 +516,125 @@ export const feedbackServices = {
   }
 }
 
-// ============= USER SERVICES =============
-
-export const userServices = {
+// ============= AUTH & USER SERVICES =============
+export const authServices = {
   /**
-   * Get current user from Supabase Auth
+   * Signup a new doctor
    */
-  async getCurrentUser() {
-    const { data, error } = await supabase.auth.getUser()
-    if (error) throw error
-    return data?.user
-  },
+  async signupDoctor(email: string, password: string, fullName: string, specialization: string) {
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+    })
 
-  /**
-   * Create a user profile
-   */
-  async createUserProfile(userId: string, userData: Omit<User, 'id'>) {
+    if (authError) throw authError
+    if (!authData.user) throw new Error('Signup failed')
+
     const { data, error } = await supabase
-      .from('users')
+      .from('doctors')
       .insert([
         {
-          id: userId,
-          email: userData.email,
-          full_name: userData.name,
-          role: userData.role || 'user',
-          specialization: userData.specialization
+          id: authData.user.id,
+          full_name: fullName,
+          email: email,
+          specialization: specialization,
         }
       ])
       .select()
 
     if (error) throw error
-    return data?.[0]
+    return { user: authData.user, profile: data?.[0] }
   },
 
   /**
-   * Get user profile
+   * Signup a new patient
    */
-  async getUserProfile(userId: string) {
+  async signupPatient(email: string, password: string, fullName: string) {
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+    })
+
+    if (authError) throw authError
+    if (!authData.user) throw new Error('Signup failed')
+
     const { data, error } = await supabase
-      .from('users')
+      .from('patients')
+      .insert([
+        {
+          auth_user_id: authData.user.id,
+          first_name: fullName.split(' ')[0],
+          last_name: fullName.split(' ').slice(1).join(' '),
+          email: email,
+          age: 0, // Default values
+          gender: 'other',
+          phone: '',
+          address: '',
+          status: 'registered'
+        }
+      ])
+      .select()
+
+    if (error) throw error
+    return { user: authData.user, profile: data?.[0] }
+  },
+
+  /**
+   * Sign in
+   */
+  async signIn(email: string, password: string) {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
+    if (error) throw error
+    return data
+  },
+
+  /**
+   * Sign out
+   */
+  async signOut() {
+    const { error } = await supabase.auth.signOut()
+    if (error) throw error
+  },
+
+  /**
+   * Get current user and their profile (doctor or patient)
+   */
+  async getCurrentUser() {
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) return null
+
+    // Check if doctor
+    const { data: doctor } = await supabase
+      .from('doctors')
       .select('*')
-      .eq('id', userId)
+      .eq('id', user.id)
       .single()
+
+    if (doctor) return { ...user, profile: doctor, role: 'doctor' }
+
+    // Check if patient
+    const { data: patient } = await supabase
+      .from('patients')
+      .select('*')
+      .eq('auth_user_id', user.id)
+      .single()
+
+    if (patient) return { ...user, profile: patient, role: 'patient' }
+
+    return { ...user, role: 'unknown' }
+  },
+
+  /**
+   * Get all doctors
+   */
+  async getAllDoctors() {
+    const { data, error } = await supabase
+      .from('doctors')
+      .select('*')
+      .order('full_name')
 
     if (error) throw error
     return data
@@ -615,6 +694,6 @@ export const supabaseServices = {
   treatmentServices,
   billingServices,
   feedbackServices,
-  userServices,
+  authServices,
   subscriptionServices
 }
