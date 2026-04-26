@@ -61,7 +61,7 @@ const AppointmentBooking: React.FC = () => {
 
   useEffect(() => {
     loadData()
-  }, [])
+  }, [currentUser?.id])
 
   const loadData = async () => {
     setIsLoading(true)
@@ -87,6 +87,22 @@ const AppointmentBooking: React.FC = () => {
             .order('appointment_date', { ascending: false })
             .limit(5)
           setMyAppointments(appts || [])
+
+          // Real-time subscription so patient sees accept/reject instantly
+          const channel = supabase
+            .channel('patient-appt-status')
+            .on(
+              'postgres_changes',
+              { event: 'UPDATE', schema: 'public', table: 'appointments', filter: `patient_id=eq.${patientRecord.id}` },
+              (payload) => {
+                setMyAppointments(prev =>
+                  prev.map(a => a.id === (payload.new as any).id ? { ...a, ...(payload.new as any) } : a)
+                )
+              }
+            )
+            .subscribe()
+
+          return () => { supabase.removeChannel(channel) }
         }
       }
     } catch {
@@ -114,7 +130,7 @@ const AppointmentBooking: React.FC = () => {
         appointment_type: data.appointmentType,
         reason: data.reason,
         notes: data.notes || '',
-        status: 'scheduled',
+        status: 'pending',
       }]).select().single()
 
       if (error) throw error
@@ -136,11 +152,12 @@ const AppointmentBooking: React.FC = () => {
     }
   }
 
-  const statusColor = (status: string) => {
-    if (status === 'scheduled') return 'bg-blue-100 text-blue-700'
-    if (status === 'completed') return 'bg-green-100 text-green-700'
-    if (status === 'cancelled') return 'bg-red-100 text-red-700'
-    return 'bg-gray-100 text-gray-600'
+  const statusLabel = (status: string) => {
+    if (status === 'pending')   return { text: '⏳ Awaiting Confirmation', cls: 'bg-amber-100 text-amber-700' }
+    if (status === 'accepted')  return { text: '✅ Confirmed',             cls: 'bg-green-100 text-green-700' }
+    if (status === 'rejected')  return { text: '❌ Declined',              cls: 'bg-red-100 text-red-700' }
+    if (status === 'completed') return { text: '✔ Completed',              cls: 'bg-blue-100 text-blue-700' }
+    return { text: status, cls: 'bg-gray-100 text-gray-600' }
   }
 
   if (success && bookedAppointment) {
@@ -425,22 +442,26 @@ const AppointmentBooking: React.FC = () => {
               </div>
             ) : (
               <div className="space-y-3">
-                {myAppointments.map((appt: any) => (
-                  <div key={appt.id} className="border border-gray-200 rounded-lg p-3">
-                    <p className="font-medium text-gray-900 text-sm">
-                      Dr. {appt.doctors?.full_name || 'Unknown'}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-0.5">{appt.doctors?.specialization}</p>
-                    <div className="flex items-center justify-between mt-2">
-                      <p className="text-xs text-gray-600">
-                        {new Date(appt.appointment_date).toLocaleDateString()} · {appt.time_slot}
-                      </p>
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusColor(appt.status)}`}>
-                        {appt.status}
-                      </span>
-                    </div>
-                  </div>
-                ))}
+                {myAppointments.map((appt: any) => {
+                    const sl = statusLabel(appt.status)
+                    return (
+                      <div key={appt.id} className={`border rounded-lg p-3 ${appt.status === 'rejected' ? 'border-red-200 bg-red-50/30' : appt.status === 'accepted' ? 'border-green-200 bg-green-50/30' : 'border-gray-200'}`}>
+                        <p className="font-medium text-gray-900 text-sm">
+                          Dr. {appt.doctors?.full_name || 'Unknown'}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-0.5">{appt.doctors?.specialization}</p>
+                        <p className="text-xs text-gray-600 mt-1">
+                          {new Date(appt.appointment_date).toLocaleDateString()} · {appt.time_slot}
+                        </p>
+                        <span className={`inline-block mt-2 text-xs px-2 py-0.5 rounded-full font-medium ${sl.cls}`}>
+                          {sl.text}
+                        </span>
+                        {appt.rejection_reason && (
+                          <p className="text-xs text-red-500 mt-1">Reason: {appt.rejection_reason}</p>
+                        )}
+                      </div>
+                    )
+                  })}
               </div>
             )}
           </div>

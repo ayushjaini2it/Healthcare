@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { 
   Stethoscope, 
@@ -12,35 +12,66 @@ import {
   UserCheck,
   LogOut,
   Calendar,
+  Bell,
 } from 'lucide-react'
 import { supabaseServices } from '../services/supabaseServices'
+import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation()
   const { currentUser: user } = useAuth()
+  const [pendingCount, setPendingCount] = useState(0)
 
   const handleLogout = async () => {
     await supabaseServices.authServices.signOut()
     window.location.reload()
   }
 
+  // Real-time pending appointment count for doctors
+  useEffect(() => {
+    if (user?.role !== 'doctor' || !user?.id) return
+
+    const fetchPending = async () => {
+      const { count } = await supabase
+        .from('appointments')
+        .select('*', { count: 'exact', head: true })
+        .eq('doctor_id', user.id)
+        .eq('status', 'pending')
+      setPendingCount(count || 0)
+    }
+
+    fetchPending()
+
+    // Subscribe to real-time inserts/updates on appointments
+    const channel = supabase
+      .channel('doctor-appointment-notifications')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'appointments', filter: `doctor_id=eq.${user.id}` },
+        () => fetchPending()
+      )
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
+  }, [user?.id, user?.role])
+
   const doctorNav = [
-    { name: 'Dashboard', href: '/', icon: Home },
-    { name: 'Appointments', href: '/doctor-appointments', icon: Calendar },
-    { name: 'Consultation', href: '/consultation', icon: Stethoscope },
-    { name: 'Diagnosis', href: '/diagnosis', icon: Microscope },
-    { name: 'Treatment', href: '/treatment', icon: Activity },
-    { name: 'Discharge', href: '/discharge', icon: FileText },
+    { name: 'Dashboard', href: '/', icon: Home, badge: 0 },
+    { name: 'Appointments', href: '/doctor-appointments', icon: Calendar, badge: pendingCount },
+    { name: 'Consultation', href: '/consultation', icon: Stethoscope, badge: 0 },
+    { name: 'Diagnosis', href: '/diagnosis', icon: Microscope, badge: 0 },
+    { name: 'Treatment', href: '/treatment', icon: Activity, badge: 0 },
+    { name: 'Discharge', href: '/discharge', icon: FileText, badge: 0 },
   ]
 
   const patientNav = [
-    { name: 'Dashboard', href: '/', icon: Home },
-    { name: 'My Profile', href: '/registration', icon: UserCheck },
-    { name: 'Appointments', href: '/appointments', icon: Calendar },
-    { name: 'Pharmacy', href: '/pharmacy', icon: Pill },
-    { name: 'Billing', href: '/billing', icon: CreditCard },
-    { name: 'Feedback', href: '/feedback', icon: MessageSquare },
+    { name: 'Dashboard', href: '/', icon: Home, badge: 0 },
+    { name: 'My Profile', href: '/registration', icon: UserCheck, badge: 0 },
+    { name: 'Appointments', href: '/appointments', icon: Calendar, badge: 0 },
+    { name: 'Pharmacy', href: '/pharmacy', icon: Pill, badge: 0 },
+    { name: 'Billing', href: '/billing', icon: CreditCard, badge: 0 },
+    { name: 'Feedback', href: '/feedback', icon: MessageSquare, badge: 0 },
   ]
 
   const navigation = user?.role === 'doctor' ? doctorNav : patientNav
@@ -81,8 +112,13 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                       : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                   }`}
                 >
-                  <item.icon className="mr-3 h-5 w-5" />
-                  {item.name}
+                  <item.icon className="mr-3 h-5 w-5 shrink-0" />
+                  <span className="flex-1">{item.name}</span>
+                  {item.badge > 0 && (
+                    <span className="ml-2 inline-flex items-center justify-center w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-bold animate-pulse">
+                      {item.badge > 9 ? '9+' : item.badge}
+                    </span>
+                  )}
                 </Link>
               )
             })}
@@ -112,6 +148,20 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                       day: 'numeric' 
                     })}
                   </span>
+
+                  {/* Notification bell for doctors */}
+                  {user?.role === 'doctor' && pendingCount > 0 && (
+                    <Link
+                      to="/doctor-appointments"
+                      className="relative p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
+                      title={`${pendingCount} pending appointment${pendingCount > 1 ? 's' : ''}`}
+                    >
+                      <Bell className="h-5 w-5" />
+                      <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center animate-bounce">
+                        {pendingCount > 9 ? '9+' : pendingCount}
+                      </span>
+                    </Link>
+                  )}
                   
                   <div className="flex items-center gap-4 bg-gray-50 p-1.5 pr-4 rounded-full border border-gray-100">
                     <div className="h-9 w-9 bg-indigo-600 rounded-full flex items-center justify-center shadow-md shadow-indigo-100">
