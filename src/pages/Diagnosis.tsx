@@ -133,10 +133,9 @@ const Diagnosis: React.FC = () => {
         consultationId: consultationId,
         type: data.testType,
         testName: data.testName,
-        results: data.results,
-        interpretation: data.interpretation,
+        results: data.results || '',
+        interpretation: data.interpretation || '',
         date: new Date(),
-        status: 'completed'
       })
 
       // Update patient status

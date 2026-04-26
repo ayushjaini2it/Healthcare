@@ -4,7 +4,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Pill, Package, Clock, CheckCircle, AlertTriangle, Search, AlertCircle } from 'lucide-react'
 import { supabase } from '../lib/supabase'
-import { supabaseServices } from '../services/supabaseServices'
 
 const pharmacySchema = z.object({
   patientId: z.string().min(1, 'Please select a patient'),
@@ -57,25 +56,37 @@ const Pharmacy: React.FC = () => {
     }
   }
 
-  // We map the database records into arrays to show in the UI
-  // Note: For a fully functioning frontend without mock data, we could just rely entirely on DB relationships.
-  // For simplicity to keep the component's existing structure functioning:
-  const patients = treatments.map(t => ({ id: t.patients.id, name: `${t.patients.first_name} ${t.patients.last_name}`, prescription: t.treatment_plan }))
-  const prescriptions = treatments.map(t => ({
-    id: t.id,
-    patientId: t.patients.id,
-    patientName: `${t.patients.first_name} ${t.patients.last_name}`,
-    medications: medicationsList.filter(m => m.treatment_id === t.id).map(m => ({
-      id: m.id, name: m.medication_name, dosage: m.dosage, frequency: m.frequency, duration: m.duration
-    })),
-    prescribedDate: new Date(t.created_at).toLocaleDateString(),
-    doctor: 'Assigned Doctor', // In a full implementation, you'd fetch doctor info too
-    status: t.status
-  }))
+  // Safe mapping — guard against null patients (RLS join may return null)
+  const patients = treatments
+    .filter(t => t.patients)
+    .map(t => ({
+      id: t.patients?.id,
+      name: t.patients?.name || `${t.patients?.first_name || ''} ${t.patients?.last_name || ''}`.trim() || 'Unknown Patient',
+      prescription: t.plan || t.treatment_plan || 'See prescription'
+    }))
+
+  const prescriptions = treatments
+    .filter(t => t.patients)
+    .map(t => ({
+      id: t.id,
+      patientId: t.patients?.id,
+      patientName: t.patients?.name || `${t.patients?.first_name || ''} ${t.patients?.last_name || ''}`.trim() || 'Unknown',
+      medications: medicationsList.filter(m => m.treatment_id === t.id).map(m => ({
+        id: m.id, name: m.medication_name || m.name || 'Unknown', dosage: m.dosage, frequency: m.frequency, duration: m.duration
+      })),
+      prescribedDate: t.created_at ? new Date(t.created_at).toLocaleDateString() : 'N/A',
+      doctor: 'Assigned Doctor',
+      status: t.status
+    }))
+
   const medications = medicationsList.map(m => ({
-    id: m.id, name: m.medication_name, stock: 100, unit: 'units', lowStockThreshold: 20 // Mock inventory values
+    id: m.id,
+    name: m.medication_name || m.name || 'Unknown',
+    stock: 100,
+    unit: 'units',
+    lowStockThreshold: 20
   }))
-  const recentDispensing: any[] = [] // In full implementation, fetch dispensed medications
+  const recentDispensing: any[] = []
 
   const {
     register,
@@ -213,7 +224,7 @@ const Pharmacy: React.FC = () => {
                       .filter(p => !selectedPatient || p.patientId === selectedPatient.id)
                       .map(prescription => (
                         <option key={prescription.id} value={prescription.id}>
-                          {prescription.patientName} - {prescription.medications[0].name}
+                          {prescription.patientName}{prescription.medications.length > 0 ? ` - ${prescription.medications[0].name}` : ''}
                         </option>
                       ))}
                   </select>

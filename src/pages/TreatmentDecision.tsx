@@ -28,9 +28,9 @@ const TreatmentDecision: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
   const existingTreatments = [
-    { id: '1', patientId: '1', consultationId: '1', result: 'Elevated blood pressure, risk factors present' },
-    { id: '2', patientId: '2', consultationId: '2', result: 'Bacterial infection in lungs' },
-    { id: '3', patientId: '3', consultationId: '3', result: 'High blood glucose levels' },
+    { id: '1', patientName: 'John Doe', diagnosis: 'Hypertension', plan: 'Lifestyle changes + Lisinopril 10mg', startDate: '2024-01-10', followUpDate: '2024-02-10', status: 'in_progress' },
+    { id: '2', patientName: 'Jane Smith', diagnosis: 'Pneumonia', plan: 'Antibiotics + Rest', startDate: '2024-01-14', followUpDate: '2024-01-28', status: 'completed' },
+    { id: '3', patientName: 'Robert Johnson', diagnosis: 'Type 2 Diabetes', plan: 'Metformin 500mg + Diet control', startDate: '2024-01-15', followUpDate: '2024-02-15', status: 'in_progress' },
   ]
 
   const {
@@ -88,9 +88,9 @@ const TreatmentDecision: React.FC = () => {
         consultationId: consultationId,
         diagnosisId: diagnosisId,
         plan: data.treatmentPlan,
-        procedures: data.procedures?.split(',').map((p: string) => p.trim()),
+        medications: [],
+        procedures: data.procedures?.split(',').map((p: string) => p.trim()) || [],
         followUpDate: new Date(data.followUpDate),
-        status: 'planned'
       })
 
       // Add the single medication from the form

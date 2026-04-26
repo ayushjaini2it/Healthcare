@@ -1,7 +1,6 @@
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { 
-  Users, 
   Stethoscope, 
   Microscope, 
   Pill, 
@@ -12,7 +11,6 @@ import {
   Activity,
   UserCheck,
   LogOut,
-  User as UserIcon
 } from 'lucide-react'
 import { supabaseServices } from '../services/supabaseServices'
 import { useAuth } from '../context/AuthContext'
@@ -37,7 +35,6 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const patientNav = [
     { name: 'Dashboard', href: '/', icon: Home },
     { name: 'Patient Entry', href: '/registration', icon: UserCheck },
-    { name: 'Registration', href: '/registration', icon: Users },
     { name: 'Pharmacy', href: '/pharmacy', icon: Pill },
     { name: 'Billing', href: '/billing', icon: CreditCard },
     { name: 'Feedback', href: '/feedback', icon: MessageSquare },
