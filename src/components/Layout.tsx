@@ -36,7 +36,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   const patientNav = [
     { name: 'Dashboard', href: '/', icon: Home },
-    { name: 'Patient Entry', href: '/registration', icon: UserCheck },
+    { name: 'My Profile', href: '/registration', icon: UserCheck },
     { name: 'Appointments', href: '/appointments', icon: Calendar },
     { name: 'Pharmacy', href: '/pharmacy', icon: Pill },
     { name: 'Billing', href: '/billing', icon: CreditCard },
