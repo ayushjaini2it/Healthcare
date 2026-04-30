@@ -1,9 +1,9 @@
 @echo off
-title Healthcare App Auto-Start
+title Health-Connect Auto-Start
 color 0A
 
 echo ========================================
-echo    Healthcare App Auto-Start Script
+echo    Health-Connect Auto-Start Script
 echo ========================================
 echo.
 
@@ -77,7 +77,7 @@ if %errorlevel% neq 0 (
 REM Start the development server
 echo.
 echo ========================================
-echo    Starting Healthcare App Server
+echo    Starting Health-Connect Server
 echo ========================================
 echo.
 echo Server will be available at: http://localhost:5173

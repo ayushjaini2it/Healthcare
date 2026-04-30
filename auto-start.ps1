@@ -1,11 +1,11 @@
-# Healthcare App Auto-Start PowerShell Script
+# Health-Connect Auto-Start PowerShell Script
 # Set execution policy for this script
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
 
 # Color settings
-$Host.UI.RawUI.WindowTitle = "Healthcare App Auto-Start"
+$Host.UI.RawUI.WindowTitle = "Health-Connect Auto-Start"
 Write-Host "========================================" -ForegroundColor Green
-Write-Host "   Healthcare App Auto-Start Script" -ForegroundColor Green
+Write-Host "   Health-Connect Auto-Start Script" -ForegroundColor Green
 Write-Host "========================================" -ForegroundColor Green
 Write-Host ""
 
@@ -88,7 +88,7 @@ if ($LASTEXITCODE -ne 0) {
 # Start development server
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Green
-Write-Host "   Starting Healthcare App Server" -ForegroundColor Green
+Write-Host "   Starting Health-Connect Server" -ForegroundColor Green
 Write-Host "========================================" -ForegroundColor Green
 Write-Host ""
 Write-Host "Server will be available at: http://localhost:5173" -ForegroundColor Cyan

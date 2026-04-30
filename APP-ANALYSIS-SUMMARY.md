@@ -1,8 +1,8 @@
-# Healthcare App - Complete Analysis & Supabase Setup Summary
+# Health-Connect - Complete Analysis & Supabase Setup Summary
 
 ## 📱 App Overview
 
-Your **Healthcare Supply Chain Management System** is a comprehensive healthcare application built with:
+Your **Health-Connect** is a comprehensive healthcare application built with:
 - **Frontend**: React 18 + TypeScript + Vite
 - **Styling**: Tailwind CSS
 - **State Management**: React Hook Form + Zod validation

@@ -1,4 +1,4 @@
-# Healthcare Supply Chain Management System
+# Health-Connect
 
 ## 🏥 Complete Healthcare Application
 

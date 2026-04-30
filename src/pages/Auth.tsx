@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabaseServices } from '../services/supabaseServices'
-import { Stethoscope, User, Mail, Lock, UserPlus, LogIn, Loader2, Phone, Building2, MapPin } from 'lucide-react'
+import { User, Mail, Lock, UserPlus, LogIn, Loader2, Phone, Building2, MapPin } from 'lucide-react'
 
 const Auth: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true)
@@ -45,10 +45,10 @@ const Auth: React.FC = () => {
       <div className="max-w-md w-full">
         {/* Logo & Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center p-3 bg-indigo-600 rounded-2xl shadow-lg shadow-indigo-200 mb-4 transform hover:scale-110 transition-transform duration-300">
-            <Stethoscope className="h-8 w-8 text-white" />
+          <div className="inline-flex items-center justify-center p-3 rounded-2xl shadow-lg shadow-indigo-200 mb-4 transform hover:scale-110 transition-transform duration-300">
+            <img src="/logo.png" alt="Health-Connect Logo" className="h-12 w-12" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Healthcare Connect</h1>
+          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Health-Connect</h1>
           <p className="text-gray-500 mt-2 font-medium">Your health, our priority</p>
         </div>
 
