@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabaseServices } from '../services/supabaseServices'
-import { User, Mail, Lock, UserPlus, LogIn, Loader2, Phone, Building2, MapPin } from 'lucide-react'
+import { supabase } from '../lib/supabase'
+import { User, Mail, Lock, UserPlus, LogIn, Loader2, Phone, Building2, MapPin, Stethoscope } from 'lucide-react'
 
 const Auth: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true)
@@ -25,14 +26,23 @@ const Auth: React.FC = () => {
     try {
       if (isLogin) {
         await supabaseServices.authServices.signIn(email, password)
+        navigate('/')
       } else {
-        if (role === 'doctor') {
-          await supabaseServices.authServices.signupDoctor(email, password, fullName, specialization, phone, hospitalName, hospitalAddress)
+        const result = await (role === 'doctor'
+          ? supabaseServices.authServices.signupDoctor(email, password, fullName, specialization, phone, hospitalName, hospitalAddress)
+          : supabaseServices.authServices.signupPatient(email, password, fullName)
+        )
+        
+        // Check if user is signed in after signup
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session) {
+          // Wait a bit for the session to propagate
+          setTimeout(() => navigate('/'), 100)
         } else {
-          await supabaseServices.authServices.signupPatient(email, password, fullName)
+          // If not signed in, show a message
+          setError('Account created successfully! Please check your email to confirm your account before signing in.')
         }
       }
-      navigate('/')
     } catch (err: any) {
       setError(err.message || 'An error occurred')
     } finally {

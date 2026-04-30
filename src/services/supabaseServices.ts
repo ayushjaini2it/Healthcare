@@ -559,6 +559,16 @@ export const authServices = {
       .select()
 
     if (error) throw error
+
+    // If user is confirmed, sign them in automatically
+    if (authData.user && authData.user.email_confirmed_at) {
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+      if (signInError) throw signInError
+    }
+
     return { user: authData.user, profile: data?.[0] }
   },
 
@@ -592,6 +602,16 @@ export const authServices = {
       .select()
 
     if (error) throw error
+
+    // If user is confirmed, sign them in automatically
+    if (authData.user && authData.user.email_confirmed_at) {
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+      if (signInError) throw signInError
+    }
+
     return { user: authData.user, profile: data?.[0] }
   },
 
