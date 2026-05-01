@@ -151,14 +151,12 @@ const Diagnosis: React.FC = () => {
 
       setTimeout(() => setDiagnosisSuccess(false), 5000)
     } catch (error: any) {
-      console.error('Error creating diagnosis:', error)
-      const msg = error?.message || ''
-      if (msg.includes('row-level security') || msg.includes('42501')) {
-        setErrorMessage('Database permission error: RLS policy is blocking this action. Please ask your admin to run the fix_rls_policies.sql in Supabase.')
-      } else if (msg.includes('null') || msg.includes('violates not-null')) {
+      console.error('Diagnosis error:', error)
+      const msg: string = error?.message || ''
+      if (msg.includes('null') || msg.includes('violates not-null')) {
         setErrorMessage('This patient has no consultation on record. Please complete a consultation first.')
       } else {
-        setErrorMessage(msg || 'Failed to create diagnosis. Please try again.')
+        setErrorMessage('Failed to create diagnosis. Please try again or contact support.')
       }
     } finally {
       setIsSubmitting(false)

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Layout from './components/Layout'
+import { RoleProtectedRoute } from './components/RoleProtectedRoute'
 import Dashboard from './pages/Dashboard'
 import PatientRegistration from './pages/PatientRegistration'
 import Consultation from './pages/Consultation'
@@ -14,26 +15,12 @@ import Auth from './pages/Auth'
 import AppointmentBooking from './pages/AppointmentBooking'
 import DoctorAppointments from './pages/DoctorAppointments'
 import { supabase } from './lib/supabase'
-import { AuthProvider } from './context/AuthContext'
+import { useAuth } from './context/AuthContext'
 
 function App() {
-  const [session, setSession] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
+  const { currentUser, isInitialLoading } = useAuth()
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      setLoading(false)
-    })
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
-    })
-
-    return () => subscription.unsubscribe()
-  }, [])
-
-  if (loading) {
+  if (isInitialLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
@@ -41,29 +28,55 @@ function App() {
     )
   }
 
-  if (!session) {
+  // Keep showing Auth until we have a definitively valid currentUser
+  if (!currentUser) {
     return <Auth />
   }
 
   return (
-    <AuthProvider>
       <Layout>
         <Routes>
+          {/* Shared routes — accessible by any authenticated user */}
           <Route path="/" element={<Dashboard />} />
-          <Route path="/registration" element={<PatientRegistration />} />
-          <Route path="/appointments" element={<AppointmentBooking />} />
-          <Route path="/doctor-appointments" element={<DoctorAppointments />} />
-          <Route path="/consultation" element={<Consultation />} />
-          <Route path="/diagnosis" element={<Diagnosis />} />
-          <Route path="/treatment" element={<TreatmentDecision />} />
-          <Route path="/pharmacy" element={<Pharmacy />} />
-          <Route path="/billing" element={<Billing />} />
-          <Route path="/discharge" element={<Discharge />} />
-          <Route path="/feedback" element={<Feedback />} />
+
+          {/* Doctor-only routes */}
+          <Route path="/doctor-appointments" element={
+            <RoleProtectedRoute allowedRole="doctor"><DoctorAppointments /></RoleProtectedRoute>
+          } />
+          <Route path="/consultation" element={
+            <RoleProtectedRoute allowedRole="doctor"><Consultation /></RoleProtectedRoute>
+          } />
+          <Route path="/diagnosis" element={
+            <RoleProtectedRoute allowedRole="doctor"><Diagnosis /></RoleProtectedRoute>
+          } />
+          <Route path="/treatment" element={
+            <RoleProtectedRoute allowedRole="doctor"><TreatmentDecision /></RoleProtectedRoute>
+          } />
+          <Route path="/discharge" element={
+            <RoleProtectedRoute allowedRole="doctor"><Discharge /></RoleProtectedRoute>
+          } />
+
+          {/* Patient-only routes */}
+          <Route path="/registration" element={
+            <RoleProtectedRoute allowedRole="patient"><PatientRegistration /></RoleProtectedRoute>
+          } />
+          <Route path="/appointments" element={
+            <RoleProtectedRoute allowedRole="patient"><AppointmentBooking /></RoleProtectedRoute>
+          } />
+          <Route path="/pharmacy" element={
+            <RoleProtectedRoute allowedRole="patient"><Pharmacy /></RoleProtectedRoute>
+          } />
+          <Route path="/billing" element={
+            <RoleProtectedRoute allowedRole="patient"><Billing /></RoleProtectedRoute>
+          } />
+          <Route path="/feedback" element={
+            <RoleProtectedRoute allowedRole="patient"><Feedback /></RoleProtectedRoute>
+          } />
+
+          {/* Catch-all */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Layout>
-    </AuthProvider>
   )
 }
 

@@ -624,6 +624,20 @@ export const authServices = {
       password,
     })
     if (error) throw error
+
+    // Check if the user exists in our app tables
+    if (data.user) {
+      const { data: doctor } = await supabase.from('doctors').select('id').eq('id', data.user.id).single()
+      const { data: patient } = await supabase.from('patients').select('auth_user_id').eq('auth_user_id', data.user.id).single()
+
+      if (!doctor && !patient) {
+        const errorMsg = 'Account data missing. Your database record was likely cleared during testing. Please sign up again.'
+        sessionStorage.setItem('auth_error', errorMsg)
+        await supabase.auth.signOut()
+        throw new Error(errorMsg)
+      }
+    }
+
     return data
   },
 
@@ -660,7 +674,12 @@ export const authServices = {
 
     if (patient) return { ...user, profile: patient, role: 'patient' }
 
-    return { ...user, role: 'unknown' }
+    // User exists in Auth but not in our tables (e.g. database cleared)
+    // Sign them out automatically to prevent undefined state
+    const errorMsg = 'Account data missing. Your database record was likely cleared during testing. Please sign up again.'
+    sessionStorage.setItem('auth_error', errorMsg)
+    await supabase.auth.signOut()
+    return null
   },
 
   /**

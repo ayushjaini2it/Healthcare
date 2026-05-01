@@ -107,11 +107,8 @@ const Consultation: React.FC = () => {
       // Hide success message after 5 seconds
       setTimeout(() => setConsultationSuccess(false), 5000)
     } catch (error) {
-      console.error('Error creating consultation:', error)
-      const errorMsg = error instanceof Error 
-        ? error.message 
-        : 'Failed to create consultation. Please try again.'
-      setErrorMessage(errorMsg)
+      console.error('Consultation error:', error)
+      setErrorMessage('Failed to save consultation. Please try again or contact support.')
     } finally {
       setIsSubmitting(false)
     }

@@ -113,8 +113,8 @@ const Discharge: React.FC = () => {
       
       setTimeout(() => setDischargeSuccess(false), 5000)
     } catch (err: any) {
-      console.error('Error discharging patient:', err)
-      setErrorMessage(err.message || 'Failed to discharge patient')
+      console.error('Discharge error:', err)
+      setErrorMessage('Failed to discharge patient. Please try again or contact support.')
       setIsSubmitting(false)
     }
   }
