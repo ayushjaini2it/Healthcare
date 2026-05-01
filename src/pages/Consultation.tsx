@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Stethoscope, Heart, Thermometer, Scale, Activity, Clock, User, AlertCircle } from 'lucide-react'
+import { Stethoscope, Heart, Thermometer, Scale, Activity, Clock, User } from 'lucide-react'
 
 const consultationSchema = z.object({
   patientId: z.string().min(1, 'Please select a patient'),
@@ -87,7 +87,7 @@ const Consultation: React.FC = () => {
       }
 
       // Step 2: Save consultation to Supabase
-      const result = await supabaseServices.consultationServices.createConsultation(
+      await supabaseServices.consultationServices.createConsultation(
         consultationData
       )
 

@@ -2,18 +2,15 @@ import React, { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { MessageSquare, Star, ThumbsUp, TrendingUp, Users, Calendar, AlertCircle } from 'lucide-react'
+import { MessageSquare, Star, ThumbsUp, Users, AlertCircle, Stethoscope } from 'lucide-react'
 import { supabase } from '../lib/supabase'
-import { supabaseServices } from '../services/supabaseServices'
+
 
 const feedbackSchema = z.object({
-  patientId: z.string().min(1, 'Please select a patient'),
+  doctorId: z.string().min(1, 'Please select a doctor'),
   rating: z.number().min(1).max(5, 'Rating must be between 1-5'),
-  category: z.enum(['overall', 'staff', 'facility', 'treatment']),
   comments: z.string().min(10, 'Comments must be at least 10 characters'),
   wouldRecommend: z.boolean(),
-  followUpRequired: z.boolean(),
-  followUpNotes: z.string().optional(),
 })
 
 type FeedbackFormData = z.infer<typeof feedbackSchema>
@@ -23,8 +20,13 @@ const Feedback: React.FC = () => {
   const [feedbackSuccess, setFeedbackSuccess] = useState(false)
   const [selectedRating, setSelectedRating] = useState(0)
 
-  const [patients, setPatients] = useState<any[]>([])
+  const [doctors, setDoctors] = useState<any[]>([])
   const [recentFeedback, setRecentFeedback] = useState<any[]>([])
+  const [monthlyStats, setMonthlyStats] = useState({
+    totalResponses: 0,
+    recommendationRate: 0,
+    averageRating: 0
+  })
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
 
@@ -36,34 +38,91 @@ const Feedback: React.FC = () => {
     try {
       setIsLoading(true)
       
-      const patientsData = await supabaseServices.patientServices.getAllPatients()
-      // We can collect feedback for patients that are discharged or currently in a treatment phase
-      const eligiblePatients = patientsData?.filter(p => 
-        p.status === 'discharged' || p.status === 'discharge' || p.status === 'treatment'
-      ) || []
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        setErrorMessage('User not authenticated')
+        setIsLoading(false)
+        return
+      }
+
+      // Fetch appointments for the current user
+      const { data: appointmentsData } = await supabase
+        .from('appointments')
+        .select('*, doctors(*)')
+        .eq('patient_id', user.id)
+        .eq('status', 'completed')
       
-      setPatients(eligiblePatients.map(p => ({
-        id: p.id,
-        name: `${p.first_name} ${p.last_name}`,
-        age: p.age,
-        dischargeDate: p.updated_at ? new Date(p.updated_at).toLocaleDateString() : 'N/A'
+      // Extract unique doctors from appointments
+      const uniqueDoctors = appointmentsData?.reduce((acc: any[], apt) => {
+        if (apt.doctors && !acc.some(d => d.id === apt.doctors.id)) {
+          acc.push(apt.doctors)
+        }
+        return acc
+      }, []) || []
+
+      setDoctors(uniqueDoctors.map(d => ({
+        id: d.id,
+        name: d.full_name,
+        specialization: d.specialization,
+        hospital: d.hospital_name,
+        rating: 0 // Will be calculated from feedback
       })))
 
-      // Fetch feedback
+      // Fetch all feedback
       const { data: feedbackData } = await supabase
         .from('feedback')
-        .select('*, patients(first_name, last_name)')
+        .select('*, doctors(full_name, specialization)')
         .order('created_at', { ascending: false })
       
-      setRecentFeedback(feedbackData?.map(f => ({
+      const feedback = feedbackData?.map(f => ({
         id: f.id,
-        patientName: f.patients ? `${f.patients.first_name} ${f.patients.last_name}` : 'Unknown',
+        doctorName: f.doctors ? f.doctors.full_name : 'Unknown',
         rating: f.rating,
-        category: f.category,
         comments: f.comments,
         date: new Date(f.created_at).toLocaleDateString(),
         wouldRecommend: f.rating >= 4,
-      })) || [])
+      })) || []
+
+      setRecentFeedback(feedback)
+
+      // Calculate monthly stats
+      const now = new Date()
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+      
+      const monthlyFeedback = feedbackData?.filter(f => 
+        new Date(f.created_at) >= monthStart
+      ) || []
+
+      const totalResponses = monthlyFeedback.length
+      const recommendationCount = monthlyFeedback.filter(f => f.rating >= 4).length
+      const avgRating = totalResponses > 0 
+        ? (monthlyFeedback.reduce((sum: number, f: any) => sum + f.rating, 0) / totalResponses).toFixed(1)
+        : 0
+
+      setMonthlyStats({
+        totalResponses,
+        recommendationRate: totalResponses > 0 ? Math.round((recommendationCount / totalResponses) * 100) : 0,
+        averageRating: parseFloat(avgRating as string)
+      })
+
+      // Calculate doctor ratings from all feedback
+      const updatedDoctors = uniqueDoctors.map(d => {
+        const doctorFeedback = feedbackData?.filter(f => f.doctor_id === d.id) || []
+        const avgDocRating = doctorFeedback.length > 0
+          ? (doctorFeedback.reduce((sum: number, f: any) => sum + f.rating, 0) / doctorFeedback.length).toFixed(1)
+          : 0
+        return {
+          ...d,
+          id: d.id,
+          name: d.full_name,
+          specialization: d.specialization,
+          hospital: d.hospital_name,
+          rating: parseFloat(avgDocRating as string)
+        }
+      })
+
+      setDoctors(updatedDoctors)
       
     } catch (error) {
       console.error('Error loading feedback data:', error)
@@ -84,21 +143,26 @@ const Feedback: React.FC = () => {
     resolver: zodResolver(feedbackSchema)
   })
 
-  const selectedPatient = patients.find(p => p.id === watch('patientId'))
-  const wouldRecommend = watch('wouldRecommend')
-  const followUpRequired = watch('followUpRequired')
+  const selectedDoctor = doctors.find(d => d.id === watch('doctorId'))
+
 
   const onSubmit = async (data: FeedbackFormData) => {
     setIsSubmitting(true)
     setErrorMessage('')
     
     try {
-      await supabaseServices.feedbackServices.submitFeedback({
-        patientId: data.patientId,
-        rating: data.rating,
-        comments: data.comments,
-        category: data.category
-      })
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('User not authenticated')
+
+      await supabase
+        .from('feedback')
+        .insert([{
+          doctor_id: data.doctorId,
+          patient_id: user.id,
+          rating: data.rating,
+          comments: data.comments,
+          created_at: new Date().toISOString()
+        }])
       
       console.log('Feedback submitted:', data)
       await loadFeedbackData()
@@ -131,7 +195,7 @@ const Feedback: React.FC = () => {
             <div className="ml-4">
               <h3 className="text-lg font-semibold text-green-900">Feedback Submitted!</h3>
               <p className="text-green-700 mt-1">
-                Thank you for your feedback. Your input helps us improve our services.
+                Thank you for your feedback. Your input helps doctors improve their services.
               </p>
               <button
                 onClick={() => setFeedbackSuccess(false)}
@@ -145,7 +209,6 @@ const Feedback: React.FC = () => {
       </div>
     )
   }
-
 
   if (isLoading) {
     return (
@@ -167,9 +230,9 @@ const Feedback: React.FC = () => {
         </div>
       )}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Patient Satisfaction Feedback</h1>
+        <h1 className="text-3xl font-bold text-gray-900">Doctor Feedback</h1>
         <p className="text-gray-600 mt-2">
-          Collect and manage patient feedback to improve healthcare services.
+          Share your feedback about doctors you've had appointments with.
         </p>
       </div>
 
@@ -179,44 +242,65 @@ const Feedback: React.FC = () => {
           <div className="card">
             <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
               <MessageSquare className="h-5 w-5 mr-2" />
-              Submit Patient Feedback
+              Submit Doctor Feedback
             </h2>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              {/* Patient Selection */}
+              {/* Doctor Selection */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Patient *
+                  Select Doctor *
                 </label>
-                <select {...register('patientId')} className="input-field">
-                  <option value="">Select patient</option>
-                  {patients.map(patient => (
-                    <option key={patient.id} value={patient.id}>
-                      {patient.name} - Discharged: {patient.dischargeDate}
+                <select {...register('doctorId')} className="input-field">
+                  <option value="">Choose a doctor</option>
+                  {doctors.map(doctor => (
+                    <option key={doctor.id} value={doctor.id}>
+                      {doctor.name} - {doctor.specialization} ({doctor.hospital})
                     </option>
                   ))}
                 </select>
-                {errors.patientId && (
-                  <p className="text-red-500 text-sm mt-1">{errors.patientId.message}</p>
+                {errors.doctorId && (
+                  <p className="text-red-500 text-sm mt-1">{errors.doctorId.message}</p>
                 )}
               </div>
 
-              {/* Patient Info */}
-              {selectedPatient && (
+              {/* Doctor Info */}
+              {selectedDoctor && (
                 <div className="bg-blue-50 p-4 rounded-lg">
-                  <h4 className="font-medium text-blue-900">Patient Information</h4>
-                  <div className="mt-2 grid grid-cols-3 gap-4 text-sm">
+                  <h4 className="font-medium text-blue-900 flex items-center">
+                    <Stethoscope className="h-4 w-4 mr-2" />
+                    Doctor Information
+                  </h4>
+                  <div className="mt-2 grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <span className="text-blue-700">Name:</span>
-                      <span className="text-blue-900 ml-2">{selectedPatient.name}</span>
+                      <span className="text-blue-900 ml-2">{selectedDoctor.name}</span>
                     </div>
                     <div>
-                      <span className="text-blue-700">Age:</span>
-                      <span className="text-blue-900 ml-2">{selectedPatient.age}</span>
+                      <span className="text-blue-700">Specialization:</span>
+                      <span className="text-blue-900 ml-2">{selectedDoctor.specialization}</span>
                     </div>
-                    <div>
-                      <span className="text-blue-700">Discharge:</span>
-                      <span className="text-blue-900 ml-2">{selectedPatient.dischargeDate}</span>
+                    <div className="col-span-2">
+                      <span className="text-blue-700">Current Rating:</span>
+                      <span className="text-blue-900 ml-2 font-semibold flex items-center">
+                        {selectedDoctor.rating > 0 ? (
+                          <>
+                            {selectedDoctor.rating} / 5.0
+                            {[...Array(5)].map((_, i) => (
+                              <Star
+                                key={i}
+                                className={`h-4 w-4 ml-1 ${
+                                  i < Math.round(selectedDoctor.rating)
+                                    ? 'text-yellow-400 fill-current'
+                                    : 'text-gray-300'
+                                }`}
+                              />
+                            ))}
+                          </>
+                        ) : (
+                          'No ratings yet'
+                        )}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -254,22 +338,6 @@ const Feedback: React.FC = () => {
                 )}
               </div>
 
-              {/* Category */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Feedback Category *
-                </label>
-                <select {...register('category')} className="input-field">
-                  <option value="overall">Overall Experience</option>
-                  <option value="staff">Staff Performance</option>
-                  <option value="facility">Facility & Environment</option>
-                  <option value="treatment">Treatment & Care</option>
-                </select>
-                {errors.category && (
-                  <p className="text-red-500 text-sm mt-1">{errors.category.message}</p>
-                )}
-              </div>
-
               {/* Comments */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -279,15 +347,15 @@ const Feedback: React.FC = () => {
                   {...register('comments')}
                   rows={4}
                   className="input-field"
-                  placeholder="Please share your experience and suggestions..."
+                  placeholder="Please share your experience with this doctor..."
                 />
                 {errors.comments && (
                   <p className="text-red-500 text-sm mt-1">{errors.comments.message}</p>
                 )}
               </div>
 
-              {/* Recommendations */}
-              <div className="space-y-4">
+              {/* Recommendation */}
+              <div>
                 <div className="flex items-center">
                   <input
                     {...register('wouldRecommend')}
@@ -295,36 +363,10 @@ const Feedback: React.FC = () => {
                     className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                   />
                   <label className="ml-2 text-sm text-gray-700">
-                    I would recommend this hospital to others
-                  </label>
-                </div>
-
-                <div className="flex items-center">
-                  <input
-                    {...register('followUpRequired')}
-                    type="checkbox"
-                    className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-                  />
-                  <label className="ml-2 text-sm text-gray-700">
-                    Follow-up required for this feedback
+                    I would recommend this doctor to others
                   </label>
                 </div>
               </div>
-
-              {/* Follow-up Notes */}
-              {followUpRequired && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Follow-up Notes
-                  </label>
-                  <textarea
-                    {...register('followUpNotes')}
-                    rows={3}
-                    className="input-field"
-                    placeholder="Describe the follow-up actions needed..."
-                  />
-                </div>
-              )}
 
               {/* Submit Button */}
               <div className="flex justify-end space-x-4">
@@ -360,90 +402,44 @@ const Feedback: React.FC = () => {
             </h2>
 
             <div className="space-y-4">
-              {recentFeedback.map(feedback => (
-                <div key={feedback.id} className="border border-gray-200 rounded-lg p-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h4 className="font-medium text-gray-900">{feedback.patientName}</h4>
-                      <div className="flex items-center mt-1">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`h-4 w-4 ${
-                              i < feedback.rating
-                                ? 'text-yellow-400 fill-current'
-                                : 'text-gray-300'
-                            }`}
-                          />
-                        ))}
-                      </div>
-                      <p className="text-sm text-gray-600 mt-2 line-clamp-2">
-                        {feedback.comments}
-                      </p>
-                      <div className="mt-2 flex items-center justify-between">
-                        <span className="text-xs text-gray-500">{feedback.date}</span>
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                          feedback.wouldRecommend 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-red-100 text-red-800'
-                        }`}>
-                          {feedback.wouldRecommend ? 'Recommended' : 'Not Recommended'}
-                        </span>
+              {recentFeedback.length > 0 ? (
+                recentFeedback.slice(0, 5).map(feedback => (
+                  <div key={feedback.id} className="border border-gray-200 rounded-lg p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h4 className="font-medium text-gray-900">{feedback.doctorName}</h4>
+                        <div className="flex items-center mt-1">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`h-4 w-4 ${
+                                i < feedback.rating
+                                  ? 'text-yellow-400 fill-current'
+                                  : 'text-gray-300'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        <p className="text-sm text-gray-600 mt-2 line-clamp-2">
+                          {feedback.comments}
+                        </p>
+                        <div className="mt-2 flex items-center justify-between">
+                          <span className="text-xs text-gray-500">{feedback.date}</span>
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                            feedback.wouldRecommend 
+                              ? 'bg-green-100 text-green-800' 
+                              : 'bg-orange-100 text-orange-800'
+                          }`}>
+                            {feedback.wouldRecommend ? 'Recommended' : 'Neutral'}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Satisfaction Metrics */}
-          <div className="card">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
-              <TrendingUp className="h-5 w-5 mr-2" />
-              Satisfaction Metrics
-            </h2>
-
-            <div className="space-y-4">
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-gray-600">Overall Satisfaction</span>
-                  <span className="text-sm font-semibold text-gray-900">4.2/5.0</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className="bg-green-500 h-2 rounded-full" style={{ width: '84%' }}></div>
-                </div>
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-gray-600">Staff Performance</span>
-                  <span className="text-sm font-semibold text-gray-900">4.5/5.0</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className="bg-blue-500 h-2 rounded-full" style={{ width: '90%' }}></div>
-                </div>
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-gray-600">Facility Quality</span>
-                  <span className="text-sm font-semibold text-gray-900">4.0/5.0</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className="bg-purple-500 h-2 rounded-full" style={{ width: '80%' }}></div>
-                </div>
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-gray-600">Treatment Effectiveness</span>
-                  <span className="text-sm font-semibold text-gray-900">4.3/5.0</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className="bg-orange-500 h-2 rounded-full" style={{ width: '86%' }}></div>
-                </div>
-              </div>
+                ))
+              ) : (
+                <p className="text-gray-500 text-sm">No feedback submitted yet.</p>
+              )}
             </div>
           </div>
 
@@ -457,28 +453,21 @@ const Feedback: React.FC = () => {
                   <Users className="h-4 w-4 text-gray-400 mr-2" />
                   <span className="text-sm text-gray-600">Total Responses</span>
                 </div>
-                <span className="text-lg font-semibold text-gray-900">47</span>
+                <span className="text-lg font-semibold text-gray-900">{monthlyStats.totalResponses}</span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <ThumbsUp className="h-4 w-4 text-gray-400 mr-2" />
                   <span className="text-sm text-gray-600">Recommendation Rate</span>
                 </div>
-                <span className="text-lg font-semibold text-green-600">89%</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <Calendar className="h-4 w-4 text-gray-400 mr-2" />
-                  <span className="text-sm text-gray-600">Response Rate</span>
-                </div>
-                <span className="text-lg font-semibold text-blue-600">72%</span>
+                <span className="text-lg font-semibold text-green-600">{monthlyStats.recommendationRate}%</span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <Star className="h-4 w-4 text-gray-400 mr-2" />
                   <span className="text-sm text-gray-600">Average Rating</span>
                 </div>
-                <span className="text-lg font-semibold text-yellow-600">4.2</span>
+                <span className="text-lg font-semibold text-yellow-600">{monthlyStats.averageRating.toFixed(1)}</span>
               </div>
             </div>
           </div>

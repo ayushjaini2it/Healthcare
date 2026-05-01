@@ -28,7 +28,7 @@ const Auth: React.FC = () => {
         await supabaseServices.authServices.signIn(email, password)
         navigate('/')
       } else {
-        const result = await (role === 'doctor'
+        await (role === 'doctor'
           ? supabaseServices.authServices.signupDoctor(email, password, fullName, specialization, phone, hospitalName, hospitalAddress)
           : supabaseServices.authServices.signupPatient(email, password, fullName)
         )
