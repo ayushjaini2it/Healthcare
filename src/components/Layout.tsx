@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { 
   Stethoscope, 
   Microscope, 
@@ -20,12 +20,14 @@ import { useAuth } from '../context/AuthContext'
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation()
+  const navigate = useNavigate()
   const { currentUser: user } = useAuth()
   const [pendingCount, setPendingCount] = useState(0)
 
   const handleLogout = async () => {
+    // Navigate strictly to the base path, dropping any ?login=true search params instantly
+    navigate('/', { replace: true })
     await supabaseServices.authServices.signOut()
-    window.location.reload()
   }
 
   // Real-time pending appointment count for doctors
@@ -83,25 +85,11 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         <div className="w-64 bg-white border-r border-slate-200 min-h-screen flex flex-col">
           <div className="p-6">
             <div className="flex items-center gap-2 mb-1">
-              <div className="w-8 h-8 rounded-lg bg-teal-600 flex items-center justify-center text-white font-bold shadow-sm">
-                HC
-              </div>
+              <img src="/logo.png" alt="Health Connect Logo" className="h-8 w-auto" />
               <h1 className="text-xl font-bold text-slate-900 tracking-tight">
                 Health-Connect
               </h1>
             </div>
-            <p className="text-xs text-slate-500 font-medium ml-10">
-              Provider Portal
-            </p>
-            {user?.role && (
-              <span className={`inline-flex items-center mt-3 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
-                user.role === 'doctor' 
-                  ? 'bg-teal-100 text-teal-700' 
-                  : 'bg-emerald-100 text-emerald-700'
-              }`}>
-                {user.role === 'doctor' ? '🩺 Doctor' : '🏥 Patient'}
-              </span>
-            )}
           </div>
           
           <nav className="mt-6">
@@ -174,12 +162,9 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                         {user?.profile?.full_name?.[0] || user?.profile?.first_name?.[0] || 'U'}
                       </span>
                     </div>
-                    <div className="flex flex-col">
+                    <div className="flex flex-col justify-center">
                       <span className="text-sm font-bold text-slate-900 leading-none">
                         {user?.profile?.full_name || `${user?.profile?.first_name} ${user?.profile?.last_name}` || 'User'}
-                      </span>
-                      <span className="text-[10px] font-bold text-teal-600 uppercase tracking-wider mt-0.5">
-                        {user?.role || 'Member'}
                       </span>
                     </div>
                   </div>
