@@ -7,11 +7,11 @@ const Pharmacy: React.FC = () => {
         <div className="inline-flex items-center justify-center mx-auto mb-6 h-16 w-16 rounded-full bg-emerald-100 text-emerald-700">
           <span className="text-2xl font-bold">??</span>
         </div>
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">Pharmacy Page</h1>
-        <p className="text-lg text-gray-600 leading-8">
+        <h1 className="text-4xl font-bold text-slate-900 mb-4">Pharmacy Page</h1>
+        <p className="text-lg text-slate-600 leading-8">
           This section is currently under progress and will be available in the next update.
         </p>
-        <p className="text-sm text-gray-400 mt-4">
+        <p className="text-sm text-slate-400 mt-4">
           We are working on medication dispensing and pharmacy features now.
         </p>
       </div>

@@ -131,8 +131,8 @@ const PatientDetails: React.FC = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-10 w-10 animate-spin text-indigo-600" />
-        <span className="ml-3 text-gray-500 text-lg">Loading your profile...</span>
+        <Loader2 className="h-10 w-10 animate-spin text-teal-600" />
+        <span className="ml-3 text-slate-500 text-lg">Loading your profile...</span>
       </div>
     )
   }
@@ -142,8 +142,8 @@ const PatientDetails: React.FC = () => {
       {/* Header */}
       <div className="mb-8 flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">My Patient Profile</h1>
-          <p className="text-gray-600 mt-2">
+          <h1 className="text-3xl font-bold text-slate-900">My Patient Profile</h1>
+          <p className="text-slate-600 mt-2">
             Keep your details up to date — doctors can view this information during your consultation.
           </p>
         </div>
@@ -173,26 +173,26 @@ const PatientDetails: React.FC = () => {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
         {/* Personal Information */}
         <div className="card">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
-            <UserCheck className="h-5 w-5 text-indigo-500" />
+          <h2 className="text-xl font-semibold text-slate-900 mb-6 flex items-center gap-2">
+            <UserCheck className="h-5 w-5 text-teal-500" />
             Personal Information
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">First Name *</label>
               <input {...register('firstName')} className="input-field" placeholder="Enter first name" />
               {errors.firstName && <p className="text-red-500 text-sm mt-1">{errors.firstName.message}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Last Name *</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Last Name *</label>
               <input {...register('lastName')} className="input-field" placeholder="Enter last name" />
               {errors.lastName && <p className="text-red-500 text-sm mt-1">{errors.lastName.message}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Age *</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Age *</label>
               <input
                 {...register('age', { valueAsNumber: true })}
                 type="number"
@@ -203,7 +203,7 @@ const PatientDetails: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Gender *</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Gender *</label>
               <select {...register('gender')} className="input-field">
                 <option value="">Select gender</option>
                 <option value="male">Male</option>
@@ -214,9 +214,9 @@ const PatientDetails: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Email *</label>
               <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Mail className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
                 <input
                   {...register('email')}
                   type="email"
@@ -228,9 +228,9 @@ const PatientDetails: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Phone *</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Phone *</label>
               <div className="relative">
-                <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Phone className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
                 <input
                   {...register('phone')}
                   className="input-field pl-10"
@@ -241,9 +241,9 @@ const PatientDetails: React.FC = () => {
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Address *</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Address *</label>
               <div className="relative">
-                <MapPin className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <MapPin className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
                 <input
                   {...register('address')}
                   className="input-field pl-10"
@@ -257,10 +257,10 @@ const PatientDetails: React.FC = () => {
 
         {/* Emergency Contact */}
         <div className="card">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">Emergency Contact</h2>
+          <h2 className="text-xl font-semibold text-slate-900 mb-6">Emergency Contact</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Contact Name *</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Contact Name *</label>
               <input
                 {...register('emergencyContactName')}
                 className="input-field"
@@ -272,7 +272,7 @@ const PatientDetails: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Contact Phone *</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Contact Phone *</label>
               <input
                 {...register('emergencyContactPhone')}
                 className="input-field"
@@ -284,7 +284,7 @@ const PatientDetails: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Relationship *</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Relationship *</label>
               <input
                 {...register('emergencyContactRelationship')}
                 className="input-field"
@@ -299,15 +299,15 @@ const PatientDetails: React.FC = () => {
 
         {/* Medical Information */}
         <div className="card">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
-            <AlertCircle className="h-5 w-5 text-indigo-500" />
+          <h2 className="text-xl font-semibold text-slate-900 mb-6 flex items-center gap-2">
+            <AlertCircle className="h-5 w-5 text-teal-500" />
             Medical Information
-            <span className="ml-2 text-xs font-normal text-gray-400 bg-gray-100 px-2 py-1 rounded-full">Visible to your doctor</span>
+            <span className="ml-2 text-xs font-normal text-slate-400 bg-slate-100 px-2 py-1 rounded-full">Visible to your doctor</span>
           </h2>
 
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Medical History</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Medical History</label>
               <textarea
                 {...register('medicalHistory')}
                 rows={4}
@@ -317,7 +317,7 @@ const PatientDetails: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Allergies</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Allergies</label>
               <textarea
                 {...register('allergies')}
                 rows={3}

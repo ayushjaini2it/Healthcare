@@ -230,8 +230,8 @@ const Feedback: React.FC = () => {
         </div>
       )}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Doctor Feedback</h1>
-        <p className="text-gray-600 mt-2">
+        <h1 className="text-3xl font-bold text-slate-900">Doctor Feedback</h1>
+        <p className="text-slate-600 mt-2">
           Share your feedback about doctors you've had appointments with.
         </p>
       </div>
@@ -240,7 +240,7 @@ const Feedback: React.FC = () => {
         {/* Feedback Form */}
         <div className="lg:col-span-2">
           <div className="card">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+            <h2 className="text-xl font-semibold text-slate-900 mb-6 flex items-center">
               <MessageSquare className="h-5 w-5 mr-2" />
               Submit Doctor Feedback
             </h2>
@@ -248,7 +248,7 @@ const Feedback: React.FC = () => {
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               {/* Doctor Selection */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
                   Select Doctor *
                 </label>
                 <select {...register('doctorId')} className="input-field">
@@ -266,23 +266,23 @@ const Feedback: React.FC = () => {
 
               {/* Doctor Info */}
               {selectedDoctor && (
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <h4 className="font-medium text-blue-900 flex items-center">
+                <div className="bg-teal-50 p-4 rounded-lg">
+                  <h4 className="font-medium text-teal-900 flex items-center">
                     <Stethoscope className="h-4 w-4 mr-2" />
                     Doctor Information
                   </h4>
                   <div className="mt-2 grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <span className="text-blue-700">Name:</span>
-                      <span className="text-blue-900 ml-2">{selectedDoctor.name}</span>
+                      <span className="text-teal-700">Name:</span>
+                      <span className="text-teal-900 ml-2">{selectedDoctor.name}</span>
                     </div>
                     <div>
-                      <span className="text-blue-700">Specialization:</span>
-                      <span className="text-blue-900 ml-2">{selectedDoctor.specialization}</span>
+                      <span className="text-teal-700">Specialization:</span>
+                      <span className="text-teal-900 ml-2">{selectedDoctor.specialization}</span>
                     </div>
                     <div className="col-span-2">
-                      <span className="text-blue-700">Current Rating:</span>
-                      <span className="text-blue-900 ml-2 font-semibold flex items-center">
+                      <span className="text-teal-700">Current Rating:</span>
+                      <span className="text-teal-900 ml-2 font-semibold flex items-center">
                         {selectedDoctor.rating > 0 ? (
                           <>
                             {selectedDoctor.rating} / 5.0
@@ -292,7 +292,7 @@ const Feedback: React.FC = () => {
                                 className={`h-4 w-4 ml-1 ${
                                   i < Math.round(selectedDoctor.rating)
                                     ? 'text-yellow-400 fill-current'
-                                    : 'text-gray-300'
+                                    : 'text-slate-300'
                                 }`}
                               />
                             ))}
@@ -308,7 +308,7 @@ const Feedback: React.FC = () => {
 
               {/* Rating */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
                   Overall Rating *
                 </label>
                 <div className="flex items-center space-x-2">
@@ -323,12 +323,12 @@ const Feedback: React.FC = () => {
                         className={`h-8 w-8 ${
                           star <= selectedRating
                             ? 'text-yellow-400 fill-current'
-                            : 'text-gray-300'
+                            : 'text-slate-300'
                         }`}
                       />
                     </button>
                   ))}
-                  <span className="ml-2 text-sm text-gray-600">
+                  <span className="ml-2 text-sm text-slate-600">
                     {selectedRating > 0 ? `${selectedRating} out of 5` : 'Please select a rating'}
                   </span>
                 </div>
@@ -340,7 +340,7 @@ const Feedback: React.FC = () => {
 
               {/* Comments */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
                   Comments *
                 </label>
                 <textarea
@@ -360,9 +360,9 @@ const Feedback: React.FC = () => {
                   <input
                     {...register('wouldRecommend')}
                     type="checkbox"
-                    className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-slate-300 rounded"
                   />
-                  <label className="ml-2 text-sm text-gray-700">
+                  <label className="ml-2 text-sm text-slate-700">
                     I would recommend this doctor to others
                   </label>
                 </div>
@@ -396,7 +396,7 @@ const Feedback: React.FC = () => {
         <div className="lg:col-span-1 space-y-6">
           {/* Recent Feedback */}
           <div className="card">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+            <h2 className="text-xl font-semibold text-slate-900 mb-6 flex items-center">
               <MessageSquare className="h-5 w-5 mr-2" />
               Recent Feedback
             </h2>
@@ -404,10 +404,10 @@ const Feedback: React.FC = () => {
             <div className="space-y-4">
               {recentFeedback.length > 0 ? (
                 recentFeedback.slice(0, 5).map(feedback => (
-                  <div key={feedback.id} className="border border-gray-200 rounded-lg p-4">
+                  <div key={feedback.id} className="border border-slate-200 rounded-lg p-4">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <h4 className="font-medium text-gray-900">{feedback.doctorName}</h4>
+                        <h4 className="font-medium text-slate-900">{feedback.doctorName}</h4>
                         <div className="flex items-center mt-1">
                           {[...Array(5)].map((_, i) => (
                             <Star
@@ -415,16 +415,16 @@ const Feedback: React.FC = () => {
                               className={`h-4 w-4 ${
                                 i < feedback.rating
                                   ? 'text-yellow-400 fill-current'
-                                  : 'text-gray-300'
+                                  : 'text-slate-300'
                               }`}
                             />
                           ))}
                         </div>
-                        <p className="text-sm text-gray-600 mt-2 line-clamp-2">
+                        <p className="text-sm text-slate-600 mt-2 line-clamp-2">
                           {feedback.comments}
                         </p>
                         <div className="mt-2 flex items-center justify-between">
-                          <span className="text-xs text-gray-500">{feedback.date}</span>
+                          <span className="text-xs text-slate-500">{feedback.date}</span>
                           <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                             feedback.wouldRecommend 
                               ? 'bg-green-100 text-green-800' 
@@ -438,34 +438,34 @@ const Feedback: React.FC = () => {
                   </div>
                 ))
               ) : (
-                <p className="text-gray-500 text-sm">No feedback submitted yet.</p>
+                <p className="text-slate-500 text-sm">No feedback submitted yet.</p>
               )}
             </div>
           </div>
 
           {/* Statistics */}
           <div className="card">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">This Month</h2>
+            <h2 className="text-xl font-semibold text-slate-900 mb-6">This Month</h2>
             
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
-                  <Users className="h-4 w-4 text-gray-400 mr-2" />
-                  <span className="text-sm text-gray-600">Total Responses</span>
+                  <Users className="h-4 w-4 text-slate-400 mr-2" />
+                  <span className="text-sm text-slate-600">Total Responses</span>
                 </div>
-                <span className="text-lg font-semibold text-gray-900">{monthlyStats.totalResponses}</span>
+                <span className="text-lg font-semibold text-slate-900">{monthlyStats.totalResponses}</span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
-                  <ThumbsUp className="h-4 w-4 text-gray-400 mr-2" />
-                  <span className="text-sm text-gray-600">Recommendation Rate</span>
+                  <ThumbsUp className="h-4 w-4 text-slate-400 mr-2" />
+                  <span className="text-sm text-slate-600">Recommendation Rate</span>
                 </div>
                 <span className="text-lg font-semibold text-green-600">{monthlyStats.recommendationRate}%</span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
-                  <Star className="h-4 w-4 text-gray-400 mr-2" />
-                  <span className="text-sm text-gray-600">Average Rating</span>
+                  <Star className="h-4 w-4 text-slate-400 mr-2" />
+                  <span className="text-sm text-slate-600">Average Rating</span>
                 </div>
                 <span className="text-lg font-semibold text-yellow-600">{monthlyStats.averageRating.toFixed(1)}</span>
               </div>

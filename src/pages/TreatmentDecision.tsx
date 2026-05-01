@@ -162,7 +162,7 @@ const TreatmentDecision: React.FC = () => {
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center justify-center p-8">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
-          <span className="ml-3 text-lg text-gray-700">Loading treatment data...</span>
+          <span className="ml-3 text-lg text-slate-700">Loading treatment data...</span>
         </div>
       </div>
     )
@@ -171,8 +171,8 @@ const TreatmentDecision: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Treatment Decision</h1>
-        <p className="text-gray-600 mt-2">
+        <h1 className="text-3xl font-bold text-slate-900">Treatment Decision</h1>
+        <p className="text-slate-600 mt-2">
           Plan treatment and prescribe medications for diagnosed patients.
         </p>
       </div>
@@ -188,7 +188,7 @@ const TreatmentDecision: React.FC = () => {
         {/* Treatment Plan Form */}
         <div className="lg:col-span-2">
           <div className="card">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+            <h2 className="text-xl font-semibold text-slate-900 mb-6 flex items-center">
               <Activity className="h-5 w-5 mr-2" />
               Create Treatment Plan
             </h2>
@@ -196,7 +196,7 @@ const TreatmentDecision: React.FC = () => {
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               {/* Patient Selection only */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
                   Patient *
                 </label>
                 <select {...register('patientId')} className="input-field">
@@ -214,7 +214,7 @@ const TreatmentDecision: React.FC = () => {
 
               {/* Treatment Plan */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
                   Treatment Plan *
                 </label>
                 <textarea
@@ -229,15 +229,15 @@ const TreatmentDecision: React.FC = () => {
               </div>
 
               {/* Medication Details */}
-              <div className="border border-gray-200 rounded-lg p-4">
-                <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+              <div className="border border-slate-200 rounded-lg p-4">
+                <h3 className="text-lg font-medium text-slate-900 mb-4 flex items-center">
                   <Pill className="h-5 w-5 mr-2" />
                   Medication Prescription
                 </h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
                       Medication Name *
                     </label>
                     <input
@@ -251,7 +251,7 @@ const TreatmentDecision: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
                       Dosage *
                     </label>
                     <input
@@ -265,7 +265,7 @@ const TreatmentDecision: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
                       Frequency *
                     </label>
                     <input
@@ -279,7 +279,7 @@ const TreatmentDecision: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
                       Duration *
                     </label>
                     <input
@@ -294,7 +294,7 @@ const TreatmentDecision: React.FC = () => {
                 </div>
 
                 <div className="mt-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
                     Medication Instructions *
                   </label>
                   <textarea
@@ -311,7 +311,7 @@ const TreatmentDecision: React.FC = () => {
 
               {/* Procedures */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
                   Procedures (if any)
                 </label>
                 <textarea
@@ -325,11 +325,11 @@ const TreatmentDecision: React.FC = () => {
               {/* Follow-up */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
                     Follow-up Date *
                   </label>
                   <div className="relative">
-                    <Calendar className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Calendar className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
                     <input
                       {...register('followUpDate')}
                       type="date"
@@ -342,7 +342,7 @@ const TreatmentDecision: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
                     Additional Notes
                   </label>
                   <textarea
@@ -378,30 +378,30 @@ const TreatmentDecision: React.FC = () => {
         {/* Existing Treatments */}
         <div className="lg:col-span-1">
           <div className="card">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+            <h2 className="text-xl font-semibold text-slate-900 mb-6 flex items-center">
               <FileText className="h-5 w-5 mr-2" />
               Active Treatments
             </h2>
 
             <div className="space-y-4">
               {existingTreatments.map(treatment => (
-                <div key={treatment.id} className="border border-gray-200 rounded-lg p-4">
+                <div key={treatment.id} className="border border-slate-200 rounded-lg p-4">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <h4 className="font-medium text-gray-900">{treatment.patientName}</h4>
-                      <p className="text-sm text-gray-600 mt-1">{treatment.diagnosis}</p>
-                      <p className="text-sm text-gray-500 mt-2">{treatment.plan}</p>
+                      <h4 className="font-medium text-slate-900">{treatment.patientName}</h4>
+                      <p className="text-sm text-slate-600 mt-1">{treatment.diagnosis}</p>
+                      <p className="text-sm text-slate-500 mt-2">{treatment.plan}</p>
                     </div>
                   </div>
                   
                   <div className="mt-3 space-y-2">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-500">Start Date:</span>
-                      <span className="text-gray-900">{treatment.startDate}</span>
+                      <span className="text-slate-500">Start Date:</span>
+                      <span className="text-slate-900">{treatment.startDate}</span>
                     </div>
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-500">Follow-up:</span>
-                      <span className="text-gray-900">{treatment.followUpDate}</span>
+                      <span className="text-slate-500">Follow-up:</span>
+                      <span className="text-slate-900">{treatment.followUpDate}</span>
                     </div>
                   </div>
 
@@ -410,8 +410,8 @@ const TreatmentDecision: React.FC = () => {
                       treatment.status === 'completed' 
                         ? 'text-green-600'
                         : treatment.status === 'in_progress'
-                        ? 'text-blue-600'
-                        : 'text-gray-600'
+                        ? 'text-teal-600'
+                        : 'text-slate-600'
                     }`}>
                       {treatment.status === 'completed' && <CheckCircle className="h-3 w-3 mr-1" />}
                       {treatment.status === 'in_progress' && <Clock className="h-3 w-3 mr-1" />}
@@ -425,7 +425,7 @@ const TreatmentDecision: React.FC = () => {
 
           {/* Treatment Guidelines */}
           <div className="card mt-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center">
               <AlertTriangle className="h-5 w-5 mr-2 text-yellow-600" />
               Treatment Guidelines
             </h3>
@@ -436,9 +436,9 @@ const TreatmentDecision: React.FC = () => {
                   Always check for drug interactions and patient allergies before prescribing.
                 </p>
               </div>
-              <div className="p-3 bg-blue-50 rounded-lg">
-                <h4 className="font-medium text-blue-900">Follow-up Care</h4>
-                <p className="text-blue-700 text-sm mt-1">
+              <div className="p-3 bg-teal-50 rounded-lg">
+                <h4 className="font-medium text-teal-900">Follow-up Care</h4>
+                <p className="text-teal-700 text-sm mt-1">
                   Schedule regular follow-ups to monitor treatment effectiveness.
                 </p>
               </div>

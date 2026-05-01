@@ -195,7 +195,7 @@ const Diagnosis: React.FC = () => {
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center justify-center p-8">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
-          <span className="ml-3 text-lg text-gray-700">Loading patients and tests...</span>
+          <span className="ml-3 text-lg text-slate-700">Loading patients and tests...</span>
         </div>
       </div>
     )
@@ -204,8 +204,8 @@ const Diagnosis: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Diagnosis & Testing</h1>
-        <p className="text-gray-600 mt-2">
+        <h1 className="text-3xl font-bold text-slate-900">Diagnosis & Testing</h1>
+        <p className="text-slate-600 mt-2">
           Order laboratory tests and imaging studies for patient diagnosis.
         </p>
       </div>
@@ -222,7 +222,7 @@ const Diagnosis: React.FC = () => {
         {/* Test Order Form */}
         <div className="lg:col-span-2">
           <div className="card">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+            <h2 className="text-xl font-semibold text-slate-900 mb-6 flex items-center">
               <Microscope className="h-5 w-5 mr-2" />
               Order Diagnostic Test
             </h2>
@@ -230,7 +230,7 @@ const Diagnosis: React.FC = () => {
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               {/* Patient Selection only */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
                   Select Patient *
                 </label>
                 <select {...register('patientId')} className="input-field">
@@ -248,7 +248,7 @@ const Diagnosis: React.FC = () => {
 
               {/* Test Type Selection */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
                   Test Type *
                 </label>
                 <div className="flex space-x-4">
@@ -260,8 +260,8 @@ const Diagnosis: React.FC = () => {
                     }}
                     className={`flex items-center px-4 py-2 rounded-lg transition-colors ${
                       activeTab === 'lab'
-                        ? 'bg-blue-100 text-blue-700 border-blue-300'
-                        : 'bg-gray-100 text-gray-700 border-gray-300'
+                        ? 'bg-teal-100 text-teal-700 border-teal-300'
+                        : 'bg-slate-100 text-slate-700 border-slate-300'
                     } border`}
                   >
                     <TestTube className="h-4 w-4 mr-2" />
@@ -275,8 +275,8 @@ const Diagnosis: React.FC = () => {
                     }}
                     className={`flex items-center px-4 py-2 rounded-lg transition-colors ${
                       activeTab === 'imaging'
-                        ? 'bg-blue-100 text-blue-700 border-blue-300'
-                        : 'bg-gray-100 text-gray-700 border-gray-300'
+                        ? 'bg-teal-100 text-teal-700 border-teal-300'
+                        : 'bg-slate-100 text-slate-700 border-slate-300'
                     } border`}
                   >
                     <Image className="h-4 w-4 mr-2" />
@@ -291,7 +291,7 @@ const Diagnosis: React.FC = () => {
 
               {/* Test Selection */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
                   Test Name *
                 </label>
                 <select {...register('testName')} className="input-field">
@@ -309,7 +309,7 @@ const Diagnosis: React.FC = () => {
 
               {/* Priority */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
                   Priority *
                 </label>
                 <select {...register('priority')} className="input-field">
@@ -324,7 +324,7 @@ const Diagnosis: React.FC = () => {
 
               {/* Instructions */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
                   Test Instructions *
                 </label>
                 <textarea
@@ -340,7 +340,7 @@ const Diagnosis: React.FC = () => {
 
               {/* Additional Notes */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
                   Additional Notes
                 </label>
                 <textarea
@@ -375,23 +375,23 @@ const Diagnosis: React.FC = () => {
         {/* Existing Tests */}
         <div className="lg:col-span-1">
           <div className="card">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+            <h2 className="text-xl font-semibold text-slate-900 mb-6 flex items-center">
               <FileText className="h-5 w-5 mr-2" />
               Recent Tests
             </h2>
 
             <div className="space-y-4">
               {existingTests.map(test => (
-                <div key={test.id} className="border border-gray-200 rounded-lg p-4">
+                <div key={test.id} className="border border-slate-200 rounded-lg p-4">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <h4 className="font-medium text-gray-900">{test.testName}</h4>
-                      <p className="text-sm text-gray-600 mt-1">{test.patientName}</p>
+                      <h4 className="font-medium text-slate-900">{test.testName}</h4>
+                      <p className="text-sm text-slate-600 mt-1">{test.patientName}</p>
                       <div className="flex items-center mt-2 space-x-4">
                         <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                           test.type === 'lab' 
-                            ? 'bg-blue-100 text-blue-800' 
-                            : 'bg-purple-100 text-purple-800'
+                            ? 'bg-teal-100 text-teal-800' 
+                            : 'bg-teal-100/50 text-purple-800'
                         }`}>
                           {test.type === 'lab' ? (
                             <TestTube className="h-3 w-3 mr-1" />
@@ -405,7 +405,7 @@ const Diagnosis: React.FC = () => {
                             ? 'bg-red-100 text-red-800'
                             : test.priority === 'urgent'
                             ? 'bg-orange-100 text-orange-800'
-                            : 'bg-gray-100 text-gray-800'
+                            : 'bg-slate-100 text-slate-800'
                         }`}>
                           {test.priority}
                         </span>
@@ -414,7 +414,7 @@ const Diagnosis: React.FC = () => {
                   </div>
                   
                   <div className="mt-3 flex items-center justify-between">
-                    <div className="flex items-center text-sm text-gray-500">
+                    <div className="flex items-center text-sm text-slate-500">
                       <Clock className="h-3 w-3 mr-1" />
                       {test.orderedDate}
                     </div>
@@ -423,7 +423,7 @@ const Diagnosis: React.FC = () => {
                         ? 'text-green-600'
                         : test.status === 'in_progress'
                         ? 'text-yellow-600'
-                        : 'text-gray-600'
+                        : 'text-slate-600'
                     }`}>
                       {test.status === 'completed' && <CheckCircle className="h-3 w-3 mr-1" />}
                       {test.status === 'in_progress' && <Clock className="h-3 w-3 mr-1" />}
@@ -433,9 +433,9 @@ const Diagnosis: React.FC = () => {
                   </div>
 
                   {test.results && (
-                    <div className="mt-3 p-3 bg-gray-50 rounded text-sm">
-                      <p className="font-medium text-gray-700 mb-1">Results:</p>
-                      <p className="text-gray-600">{test.results}</p>
+                    <div className="mt-3 p-3 bg-slate-50 rounded text-sm">
+                      <p className="font-medium text-slate-700 mb-1">Results:</p>
+                      <p className="text-slate-600">{test.results}</p>
                     </div>
                   )}
                 </div>

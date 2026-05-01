@@ -165,14 +165,14 @@ const Consultation: React.FC = () => {
         {/* Patient and Doctor Selection */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="card">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+            <h2 className="text-xl font-semibold text-slate-900 mb-6 flex items-center">
               <User className="h-5 w-5 mr-2" />
               Patient Information
             </h2>
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
                   Select Patient *
                 </label>
                 <select {...register('patientId')} className="input-field">
@@ -189,10 +189,10 @@ const Consultation: React.FC = () => {
               </div>
 
               {selectedPatient && (
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <h4 className="font-medium text-blue-900">Selected Patient</h4>
-                  <p className="text-blue-700 mt-1">{selectedPatient.name}</p>
-                  <p className="text-blue-600 text-sm">
+                <div className="bg-teal-50 p-4 rounded-lg">
+                  <h4 className="font-medium text-teal-900">Selected Patient</h4>
+                  <p className="text-teal-700 mt-1">{selectedPatient.name}</p>
+                  <p className="text-teal-600 text-sm">
                     {selectedPatient.age} years, {selectedPatient.gender}
                   </p>
                 </div>
@@ -201,41 +201,41 @@ const Consultation: React.FC = () => {
           </div>
 
           <div className="card">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Doctor Information</h2>
-            <div className="bg-indigo-50 p-4 rounded-lg border border-indigo-100">
+            <h2 className="text-xl font-semibold text-slate-900 mb-6">Doctor Information</h2>
+            <div className="bg-teal-50 p-4 rounded-lg border border-teal-100">
               <div className="flex items-center gap-3">
-                <div className="h-12 w-12 bg-indigo-600 rounded-full flex items-center justify-center shadow">
+                <div className="h-12 w-12 bg-teal-600 rounded-full flex items-center justify-center shadow">
                   <span className="text-white text-lg font-bold">
                     {currentUser?.profile?.full_name?.[0] || 'D'}
                   </span>
                 </div>
                 <div>
-                  <p className="font-bold text-indigo-900 text-base">
+                  <p className="font-bold text-teal-900 text-base">
                     {currentUser?.profile?.full_name || 'Doctor'}
                   </p>
-                  <p className="text-sm text-indigo-600 font-medium">
+                  <p className="text-sm text-teal-600 font-medium">
                     {currentUser?.profile?.specialization || 'Specialist'}
                   </p>
-                  <p className="text-xs text-indigo-400 mt-0.5">
+                  <p className="text-xs text-teal-400 mt-0.5">
                     {currentUser?.email}
                   </p>
                 </div>
               </div>
-              <p className="text-xs text-indigo-400 mt-3 font-medium">✓ Logged in as this doctor — assigned automatically</p>
+              <p className="text-xs text-teal-400 mt-3 font-medium">✓ Logged in as this doctor — assigned automatically</p>
             </div>
           </div>
         </div>
 
         {/* Vital Signs */}
         <div className="card">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+          <h2 className="text-xl font-semibold text-slate-900 mb-6 flex items-center">
             <Heart className="h-5 w-5 mr-2" />
             Vital Signs
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-700 mb-2">
                 Blood Pressure *
               </label>
               <input
@@ -249,11 +249,11 @@ const Consultation: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-700 mb-2">
                 Heart Rate (bpm) *
               </label>
               <div className="relative">
-                <Heart className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Heart className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
                 <input
                   {...register('heartRate')}
                   type="number"
@@ -267,11 +267,11 @@ const Consultation: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-700 mb-2">
                 Temperature (°C) *
               </label>
               <div className="relative">
-                <Thermometer className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Thermometer className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
                 <input
                   {...register('temperature')}
                   type="number"
@@ -286,11 +286,11 @@ const Consultation: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-700 mb-2">
                 Weight (kg) *
               </label>
               <div className="relative">
-                <Scale className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Scale className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
                 <input
                   {...register('weight')}
                   type="number"
@@ -305,11 +305,11 @@ const Consultation: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-700 mb-2">
                 Height (cm) *
               </label>
               <div className="relative">
-                <Activity className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Activity className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
                 <input
                   {...register('height')}
                   type="number"
@@ -327,10 +327,10 @@ const Consultation: React.FC = () => {
         {/* Symptoms and Diagnosis */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="card">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Symptoms</h2>
+            <h2 className="text-xl font-semibold text-slate-900 mb-6">Symptoms</h2>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-700 mb-2">
                 Patient Symptoms *
               </label>
               <textarea
@@ -346,11 +346,11 @@ const Consultation: React.FC = () => {
           </div>
 
           <div className="card">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Diagnosis</h2>
+            <h2 className="text-xl font-semibold text-slate-900 mb-6">Diagnosis</h2>
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
                   Preliminary Diagnosis *
                 </label>
                 <textarea
@@ -365,7 +365,7 @@ const Consultation: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
                   Consultation Notes *
                 </label>
                 <textarea
@@ -384,7 +384,7 @@ const Consultation: React.FC = () => {
 
         {/* Action Buttons */}
         <div className="flex justify-between items-center">
-          <div className="flex items-center text-gray-600">
+          <div className="flex items-center text-slate-600">
             <Clock className="h-4 w-4 mr-2" />
             <span className="text-sm">Consultation time: ~15 minutes</span>
           </div>

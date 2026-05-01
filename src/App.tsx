@@ -11,9 +11,10 @@ import Pharmacy from './pages/Pharmacy'
 import Billing from './pages/Billing'
 import Discharge from './pages/Discharge'
 import Feedback from './pages/Feedback'
-import Auth from './pages/Auth'
+
 import AppointmentBooking from './pages/AppointmentBooking'
 import DoctorAppointments from './pages/DoctorAppointments'
+import LandingPage from './pages/LandingPage'
 import { supabase } from './lib/supabase'
 import { useAuth } from './context/AuthContext'
 
@@ -22,15 +23,20 @@ function App() {
 
   if (isInitialLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
       </div>
     )
   }
 
-  // Keep showing Auth until we have a definitively valid currentUser
+  // Keep showing unauthenticated routes until we have a definitively valid currentUser
   if (!currentUser) {
-    return <Auth />
+    return (
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    )
   }
 
   return (

@@ -77,21 +77,26 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navigation = user?.role === 'doctor' ? doctorNav : patientNav
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-50">
       <div className="flex">
         {/* Sidebar */}
-        <div className="w-64 bg-white shadow-lg min-h-screen">
+        <div className="w-64 bg-white border-r border-slate-200 min-h-screen flex flex-col">
           <div className="p-6">
-            <h1 className="text-2xl font-bold text-primary-600">
-              Healthcare SCM
-            </h1>
-            <p className="text-sm text-gray-600 mt-1">
-              Supply Chain Management
+            <div className="flex items-center gap-2 mb-1">
+              <div className="w-8 h-8 rounded-lg bg-teal-600 flex items-center justify-center text-white font-bold shadow-sm">
+                HC
+              </div>
+              <h1 className="text-xl font-bold text-slate-900 tracking-tight">
+                Health-Connect
+              </h1>
+            </div>
+            <p className="text-xs text-slate-500 font-medium ml-10">
+              Provider Portal
             </p>
             {user?.role && (
               <span className={`inline-flex items-center mt-3 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
                 user.role === 'doctor' 
-                  ? 'bg-indigo-100 text-indigo-700' 
+                  ? 'bg-teal-100 text-teal-700' 
                   : 'bg-emerald-100 text-emerald-700'
               }`}>
                 {user.role === 'doctor' ? '🩺 Doctor' : '🏥 Patient'}
@@ -106,10 +111,10 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`flex items-center px-6 py-3 text-sm font-medium transition-colors ${
+                  className={`flex items-center px-6 py-3 text-sm font-semibold transition-all ${
                     isActive
-                      ? 'bg-primary-50 text-primary-600 border-r-4 border-primary-600'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      ? 'bg-teal-50 text-teal-700 border-r-4 border-teal-600'
+                      : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
                   }`}
                 >
                   <item.icon className="mr-3 h-5 w-5 shrink-0" />
@@ -126,21 +131,21 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         </div>
 
         {/* Main content */}
-        <div className="flex-1">
+        <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
           {/* Header */}
-          <header className="bg-white shadow-sm border-b border-gray-200">
-            <div className="px-8 py-4">
+          <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200">
+            <div className="px-8 py-5">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-xl font-semibold text-gray-900">
+                  <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
                     {navigation.find(item => item.href === location.pathname)?.name || 'Dashboard'}
                   </h2>
-                  <p className="text-sm text-gray-600 mt-1">
-                    Healthcare Service Supply Chain Management
+                  <p className="text-sm text-slate-500 mt-0.5 font-medium">
+                    Manage your healthcare journey
                   </p>
                 </div>
                 <div className="flex items-center space-x-6">
-                  <span className="text-sm text-gray-500 hidden md:inline-block font-medium">
+                  <span className="text-sm text-slate-500 hidden md:inline-block font-medium">
                     {new Date().toLocaleDateString('en-US', { 
                       weekday: 'long', 
                       year: 'numeric', 
@@ -153,7 +158,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                   {user?.role === 'doctor' && pendingCount > 0 && (
                     <Link
                       to="/doctor-appointments"
-                      className="relative p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
+                      className="relative p-2 text-slate-500 hover:text-teal-600 hover:bg-teal-50 rounded-xl transition-all"
                       title={`${pendingCount} pending appointment${pendingCount > 1 ? 's' : ''}`}
                     >
                       <Bell className="h-5 w-5" />
@@ -163,17 +168,17 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                     </Link>
                   )}
                   
-                  <div className="flex items-center gap-4 bg-gray-50 p-1.5 pr-4 rounded-full border border-gray-100">
-                    <div className="h-9 w-9 bg-indigo-600 rounded-full flex items-center justify-center shadow-md shadow-indigo-100">
+                  <div className="flex items-center gap-4 bg-slate-50 p-1.5 pr-4 rounded-full border border-slate-100">
+                    <div className="h-9 w-9 bg-teal-600 rounded-full flex items-center justify-center shadow-sm border border-slate-200 shadow-teal-100">
                       <span className="text-white text-sm font-bold">
                         {user?.profile?.full_name?.[0] || user?.profile?.first_name?.[0] || 'U'}
                       </span>
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-sm font-bold text-gray-900 leading-none">
+                      <span className="text-sm font-bold text-slate-900 leading-none">
                         {user?.profile?.full_name || `${user?.profile?.first_name} ${user?.profile?.last_name}` || 'User'}
                       </span>
-                      <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-wider mt-0.5">
+                      <span className="text-[10px] font-bold text-teal-600 uppercase tracking-wider mt-0.5">
                         {user?.role || 'Member'}
                       </span>
                     </div>
@@ -181,7 +186,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
                   <button 
                     onClick={handleLogout}
-                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200 group"
+                    className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200 group"
                     title="Logout"
                   >
                     <LogOut className="h-5 w-5 group-hover:translate-x-0.5 transition-transform" />
@@ -192,13 +197,15 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           </header>
 
           {/* Page content */}
-          <main className="p-8">
-            {children}
+          <main className="flex-1 overflow-y-auto p-8">
+            <div className="max-w-7xl mx-auto">
+              {children}
+            </div>
           </main>
 
           {/* Copyright Footer */}
-          <footer className="border-t border-gray-100 bg-white px-8 py-4">
-            <p className="text-center text-xs text-gray-400 font-medium">
+          <footer className="border-t border-slate-100 bg-white px-8 py-4">
+            <p className="text-center text-xs text-slate-400 font-medium">
               All rights are reserved since 2026 &copy; Lokesh and Ayush
             </p>
           </footer>

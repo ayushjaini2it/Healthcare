@@ -31,7 +31,7 @@ function getPasswordStrength(pwd: string): StrengthResult {
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
-const Auth: React.FC = () => {
+const Auth: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [isLogin, setIsLogin] = useState(true)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -156,34 +156,36 @@ const Auth: React.FC = () => {
   const barWidth = strength ? `${(strength.score / 5) * 100}%` : '0%'
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-4">
-      <div className="max-w-md w-full">
-        {/* Logo & Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center p-3 rounded-2xl shadow-lg shadow-indigo-200 mb-4 transform hover:scale-110 transition-transform duration-300">
-            <img src="/logo.png" alt="Health-Connect Logo" className="h-12 w-12" />
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Health-Connect</h1>
-          <p className="text-gray-500 mt-2 font-medium">Your health, our priority</p>
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto"
+      onClick={onClose}
+    >
+      <div 
+        className="max-w-md w-full bg-white rounded-3xl shadow-2xl p-8 relative my-8 border border-slate-100"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button 
+          onClick={onClose}
+          className="absolute top-6 right-6 p-2 border border-slate-200 rounded-xl text-slate-500 hover:bg-slate-50 transition-colors z-20"
+          aria-label="Close"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+
+        {/* Header */}
+        <div className="mb-8 pr-12">
+          <h1 className="text-2xl font-bold text-slate-800">
+            {isLogin ? 'Welcome Back!' : 'Create Account!'}
+          </h1>
+          <h2 className="text-3xl font-extrabold text-slate-900 mt-1 tracking-tight">
+            {isLogin ? 'Login to your account' : 'Join our network'}
+          </h2>
+          <p className="text-slate-500 mt-3">
+            {isLogin ? "It's nice to see you again. Ready to manage your health?" : "Sign up to connect with qualified healthcare professionals."}
+          </p>
         </div>
 
-        {/* Auth Card */}
-        <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8 overflow-hidden relative">
-          <div className="absolute -top-24 -right-24 w-48 h-48 bg-indigo-100 rounded-full blur-3xl opacity-50"></div>
-          <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-purple-100 rounded-full blur-3xl opacity-50"></div>
 
-          <div className="relative z-10">
-            {/* Toggle Login/Signup */}
-            <div className="flex p-1 bg-gray-100 rounded-xl mb-8">
-              <button type="button" onClick={() => switchMode(true)}
-                className={`flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all duration-200 ${isLogin ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
-                Sign In
-              </button>
-              <button type="button" onClick={() => switchMode(false)}
-                className={`flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all duration-200 ${!isLogin ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
-                Sign Up
-              </button>
-            </div>
 
             {/* Error Message */}
             {error && (
@@ -198,23 +200,17 @@ const Auth: React.FC = () => {
                 <>
                   {/* Full Name */}
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 ml-1">Full Name</label>
-                    <div className="relative group">
-                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-indigo-500 transition-colors">
-                        <User className="h-5 w-5" />
-                      </div>
-                      <input type="text" required value={fullName} onChange={e => setFullName(e.target.value)}
-                        className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
-                        placeholder="John Doe" />
-                    </div>
+                    <input type="text" required value={fullName} onChange={e => setFullName(e.target.value)}
+                      className="w-full px-4 py-3.5 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all placeholder:text-slate-400"
+                      placeholder="Your full name" />
                   </div>
 
                   {/* Healthcare professional opt-in */}
-                  <div className="flex items-center gap-3 p-3 bg-indigo-50 rounded-xl border border-indigo-100 cursor-pointer"
+                  <div className="flex items-center gap-3 p-3 bg-teal-50 rounded-xl border border-teal-100 cursor-pointer"
                     onClick={() => { setIsDoctorSignup(v => !v); setInviteCode(''); setInviteError('') }}>
                     <input type="checkbox" id="doctorCheck" checked={isDoctorSignup} onChange={() => {}}
-                      className="h-4 w-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500 pointer-events-none" />
-                    <label htmlFor="doctorCheck" className="flex items-center gap-2 text-sm font-semibold text-indigo-700 pointer-events-none">
+                      className="h-4 w-4 text-teal-600 rounded border-slate-300 focus:ring-teal-500 pointer-events-none" />
+                    <label htmlFor="doctorCheck" className="flex items-center gap-2 text-sm font-semibold text-teal-700 pointer-events-none">
                       <Stethoscope className="h-4 w-4" />
                       I am a registered healthcare professional
                     </label>
@@ -222,84 +218,84 @@ const Auth: React.FC = () => {
 
                   {/* Doctor-only fields */}
                   {isDoctorSignup && (
-                    <div className="space-y-4 p-4 bg-blue-50 border border-blue-100 rounded-2xl">
-                      <p className="text-xs text-blue-600 font-semibold flex items-center gap-1.5">
+                    <div className="space-y-4 p-4 bg-teal-50 border border-teal-100 rounded-2xl">
+                      <p className="text-xs text-teal-600 font-semibold flex items-center gap-1.5">
                         <ShieldCheck className="h-3.5 w-3.5" />
                         Healthcare professional details — invite code required
                       </p>
 
                       {/* ── Invite Code ── */}
                       <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 ml-1">
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 ml-1">
                           Invite Code <span className="text-red-500">*</span>
                         </label>
                         <div className="relative group">
-                          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-indigo-500 transition-colors">
+                          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-teal-500 transition-colors">
                             <KeyRound className="h-5 w-5" />
                           </div>
                           <input type="text" required={isDoctorSignup} value={inviteCode}
                             onChange={handleInviteCodeChange}
-                            className={`w-full pl-11 pr-4 py-3 bg-white border rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-mono tracking-widest ${inviteError ? 'border-red-300' : 'border-gray-100'}`}
+                            className={`w-full pl-11 pr-4 py-3 bg-white border rounded-2xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all font-mono tracking-widest ${inviteError ? 'border-red-300' : 'border-slate-100'}`}
                             placeholder="HC-XXXX-XXXX" />
                         </div>
                         {inviteError && (
                           <p className="mt-1.5 text-xs text-red-500 font-medium ml-1">{inviteError}</p>
                         )}
-                        <p className="mt-1.5 text-xs text-blue-500 ml-1">Provided by your hospital administrator.</p>
+                        <p className="mt-1.5 text-xs text-teal-500 ml-1">Provided by your hospital administrator.</p>
                       </div>
 
                       {/* Specialization */}
                       <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 ml-1">Specialization</label>
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 ml-1">Specialization</label>
                         <div className="relative group">
-                          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-indigo-500 transition-colors">
+                          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-teal-500 transition-colors">
                             <Stethoscope className="h-5 w-5" />
                           </div>
                           <input type="text" required={isDoctorSignup} value={specialization}
                             onChange={e => setSpecialization(e.target.value)}
-                            className="w-full pl-11 pr-4 py-3 bg-white border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+                            className="w-full pl-11 pr-4 py-3 bg-white border border-slate-100 rounded-2xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all"
                             placeholder="e.g. Cardiologist" />
                         </div>
                       </div>
 
                       {/* Phone */}
                       <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 ml-1">Contact Number</label>
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 ml-1">Contact Number</label>
                         <div className="relative group">
-                          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-indigo-500 transition-colors">
+                          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-teal-500 transition-colors">
                             <Phone className="h-5 w-5" />
                           </div>
                           <input type="tel" required={isDoctorSignup} value={phone}
                             onChange={e => setPhone(e.target.value)}
-                            className="w-full pl-11 pr-4 py-3 bg-white border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+                            className="w-full pl-11 pr-4 py-3 bg-white border border-slate-100 rounded-2xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all"
                             placeholder="+91 98765 43210" />
                         </div>
                       </div>
 
                       {/* Hospital Name */}
                       <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 ml-1">Hospital / Clinic Name</label>
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 ml-1">Hospital / Clinic Name</label>
                         <div className="relative group">
-                          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-indigo-500 transition-colors">
+                          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-teal-500 transition-colors">
                             <Building2 className="h-5 w-5" />
                           </div>
                           <input type="text" required={isDoctorSignup} value={hospitalName}
                             onChange={e => setHospitalName(e.target.value)}
-                            className="w-full pl-11 pr-4 py-3 bg-white border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+                            className="w-full pl-11 pr-4 py-3 bg-white border border-slate-100 rounded-2xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all"
                             placeholder="e.g. City General Hospital" />
                         </div>
                       </div>
 
                       {/* Hospital Address */}
                       <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 ml-1">Hospital Address</label>
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 ml-1">Hospital Address</label>
                         <div className="relative group">
-                          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-indigo-500 transition-colors">
+                          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-teal-500 transition-colors">
                             <MapPin className="h-5 w-5" />
                           </div>
                           <input type="text" required={isDoctorSignup} value={hospitalAddress}
                             onChange={e => setHospitalAddress(e.target.value)}
-                            className="w-full pl-11 pr-4 py-3 bg-white border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+                            className="w-full pl-11 pr-4 py-3 bg-white border border-slate-100 rounded-2xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all"
                             placeholder="123 Medical Lane, City, State" />
                         </div>
                       </div>
@@ -310,34 +306,22 @@ const Auth: React.FC = () => {
 
               {/* Email */}
               <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 ml-1">Email Address</label>
-                <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-indigo-500 transition-colors">
-                    <Mail className="h-5 w-5" />
-                  </div>
-                  <input type="email" required value={email} onChange={e => setEmail(e.target.value)}
-                    className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
-                    placeholder="name@example.com" />
-                </div>
+                <input type="email" required value={email} onChange={e => setEmail(e.target.value)}
+                  className="w-full px-4 py-3.5 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all placeholder:text-slate-400"
+                  placeholder="Your username or email" />
               </div>
 
               {/* Password */}
               <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 ml-1">Password</label>
-                <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-indigo-500 transition-colors">
-                    <Lock className="h-5 w-5" />
-                  </div>
-                  <input type="password" required value={password} onChange={handlePasswordChange}
-                    className={`w-full pl-11 pr-4 py-3 bg-gray-50 border rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all ${strength && !strength.canSubmit ? 'border-red-200' : 'border-gray-100'}`}
-                    placeholder={isLogin ? '••••••••' : 'Min 8 chars, uppercase, number, symbol'} />
-                </div>
+                <input type="password" required value={password} onChange={handlePasswordChange}
+                  className={`w-full px-4 py-3.5 bg-white border rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all placeholder:text-slate-400 ${strength && !strength.canSubmit ? 'border-red-300' : 'border-slate-300'}`}
+                  placeholder="Your password" />
 
                 {/* ── Password strength meter (signup only) ── */}
                 {!isLogin && strength && (
                   <div className="mt-2 space-y-1.5">
                     {/* Bar */}
-                    <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                    <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
                       <div
                         className={`h-full rounded-full transition-all duration-300 ${strength.color}`}
                         style={{ width: barWidth }}
@@ -345,7 +329,7 @@ const Auth: React.FC = () => {
                     </div>
                     {/* Label + requirements */}
                     <div className="flex items-center justify-between">
-                      <div className="flex gap-2 text-xs text-gray-400">
+                      <div className="flex gap-2 text-xs text-slate-400">
                         <span className={/[A-Z]/.test(password) ? 'text-green-600 font-medium' : ''}>ABC</span>
                         <span className={/[0-9]/.test(password) ? 'text-green-600 font-medium' : ''}>123</span>
                         <span className={/[^A-Za-z0-9]/.test(password) ? 'text-green-600 font-medium' : ''}>!@#</span>
@@ -365,37 +349,36 @@ const Auth: React.FC = () => {
 
               {/* Submit */}
               <button type="submit" disabled={isSubmitDisabled}
-                className="w-full group relative flex items-center justify-center py-4 px-4 border border-transparent text-sm font-bold rounded-2xl text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-indigo-200">
+                className="w-full mt-2 group relative flex items-center justify-center py-4 px-4 border border-transparent text-lg font-bold rounded-xl text-white bg-[#a3b1c6] hover:bg-teal-600 focus:outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed">
                 {isLoading ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
                 ) : isLogin ? (
-                  <span className="flex items-center gap-2">Sign In <LogIn className="h-4 w-4 group-hover:translate-x-1 transition-transform" /></span>
+                  <span>Log In</span>
                 ) : (
-                  <span className="flex items-center gap-2">Create Account <UserPlus className="h-4 w-4 group-hover:translate-x-1 transition-transform" /></span>
+                  <span>Create Account</span>
                 )}
               </button>
+              
+              {isLogin && (
+                <div className="flex items-center justify-between mt-6">
+                  <div className="flex items-center">
+                    <input id="remember-me" type="checkbox" className="h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-600" />
+                    <label htmlFor="remember-me" className="ml-2 block text-sm text-slate-500">Remember me</label>
+                  </div>
+                  <a href="#" className="text-sm font-medium text-blue-600 hover:text-blue-500">Forgot password?</a>
+                </div>
+              )}
             </form>
 
-            <p className="mt-8 text-center text-sm text-gray-500 font-medium">
+            <p className="mt-8 text-center text-sm text-slate-500 font-medium">
               {isLogin ? "Don't have an account?" : 'Already have an account?'}{' '}
               <button type="button" onClick={() => switchMode(!isLogin)}
-                className="text-indigo-600 hover:text-indigo-500 font-bold underline underline-offset-4 decoration-2 decoration-indigo-100 hover:decoration-indigo-300 transition-all">
+                className="text-teal-600 hover:text-teal-500 font-bold underline underline-offset-4 decoration-2 decoration-teal-100 hover:decoration-teal-300 transition-all">
                 {isLogin ? 'Sign up for free' : 'Sign in to your account'}
               </button>
             </p>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="mt-8 flex items-center justify-center gap-6 text-gray-400 text-xs font-bold uppercase tracking-widest">
-          <a href="#" className="hover:text-indigo-500 transition-colors">Privacy Policy</a>
-          <div className="w-1 h-1 bg-gray-300 rounded-full"></div>
-          <a href="#" className="hover:text-indigo-500 transition-colors">Terms of Service</a>
-          <div className="w-1 h-1 bg-gray-300 rounded-full"></div>
-          <a href="#" className="hover:text-indigo-500 transition-colors">Support</a>
         </div>
       </div>
-    </div>
   )
 }
 

@@ -165,8 +165,8 @@ const Discharge: React.FC = () => {
         </div>
       )}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Patient Discharge</h1>
-        <p className="text-gray-600 mt-2">
+        <h1 className="text-3xl font-bold text-slate-900">Patient Discharge</h1>
+        <p className="text-slate-600 mt-2">
           Complete patient discharge process and finalize documentation.
         </p>
       </div>
@@ -175,7 +175,7 @@ const Discharge: React.FC = () => {
         {/* Discharge Form */}
         <div className="lg:col-span-2">
           <div className="card">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+            <h2 className="text-xl font-semibold text-slate-900 mb-6 flex items-center">
               <FileText className="h-5 w-5 mr-2" />
               Discharge Processing
             </h2>
@@ -184,7 +184,7 @@ const Discharge: React.FC = () => {
               {/* Patient Selection */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
                     Patient *
                   </label>
                   <select {...register('patientId')} className="input-field">
@@ -202,11 +202,11 @@ const Discharge: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
                     Discharge Date *
                   </label>
                   <div className="relative">
-                    <Calendar className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Calendar className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
                     <input
                       {...register('dischargeDate')}
                       type="date"
@@ -221,28 +221,28 @@ const Discharge: React.FC = () => {
 
               {/* Patient Info */}
               {selectedPatient && (
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <h4 className="font-medium text-blue-900">Patient Information</h4>
+                <div className="bg-teal-50 p-4 rounded-lg">
+                  <h4 className="font-medium text-teal-900">Patient Information</h4>
                   <div className="mt-2 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                     <div>
-                      <span className="text-blue-700">Name:</span>
-                      <span className="text-blue-900 ml-2">{selectedPatient.name}</span>
+                      <span className="text-teal-700">Name:</span>
+                      <span className="text-teal-900 ml-2">{selectedPatient.name}</span>
                     </div>
                     <div>
-                      <span className="text-blue-700">Age:</span>
-                      <span className="text-blue-900 ml-2">{selectedPatient.age}</span>
+                      <span className="text-teal-700">Age:</span>
+                      <span className="text-teal-900 ml-2">{selectedPatient.age}</span>
                     </div>
                     <div>
-                      <span className="text-blue-700">Room:</span>
-                      <span className="text-blue-900 ml-2">{selectedPatient.room}</span>
+                      <span className="text-teal-700">Room:</span>
+                      <span className="text-teal-900 ml-2">{selectedPatient.room}</span>
                     </div>
                     <div>
-                      <span className="text-blue-700">Admitted:</span>
-                      <span className="text-blue-900 ml-2">{selectedPatient.admissionDate}</span>
+                      <span className="text-teal-700">Admitted:</span>
+                      <span className="text-teal-900 ml-2">{selectedPatient.admissionDate}</span>
                     </div>
                     <div className="col-span-2 md:col-span-4">
-                      <span className="text-blue-700">Diagnosis:</span>
-                      <span className="text-blue-900 ml-2">{selectedPatient.diagnosis}</span>
+                      <span className="text-teal-700">Diagnosis:</span>
+                      <span className="text-teal-900 ml-2">{selectedPatient.diagnosis}</span>
                     </div>
                   </div>
                 </div>
@@ -251,7 +251,7 @@ const Discharge: React.FC = () => {
               {/* Discharge Details */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
                     Discharge Type *
                   </label>
                   <select {...register('dischargeType')} className="input-field">
@@ -265,7 +265,7 @@ const Discharge: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
                     Follow-up Appointment
                   </label>
                   <input
@@ -279,7 +279,7 @@ const Discharge: React.FC = () => {
               {/* Medical Information */}
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
                     Final Diagnosis *
                   </label>
                   <textarea
@@ -294,7 +294,7 @@ const Discharge: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
                     Treatment Summary *
                   </label>
                   <textarea
@@ -309,7 +309,7 @@ const Discharge: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
                     Discharge Instructions *
                   </label>
                   <textarea
@@ -327,7 +327,7 @@ const Discharge: React.FC = () => {
               {/* Additional Information */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
                     Discharge Medications
                   </label>
                   <textarea
@@ -339,7 +339,7 @@ const Discharge: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
                     Activity Restrictions
                   </label>
                   <textarea
@@ -352,7 +352,7 @@ const Discharge: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
                   Emergency Contact Information
                 </label>
                 <textarea
@@ -388,7 +388,7 @@ const Discharge: React.FC = () => {
         <div className="lg:col-span-1 space-y-6">
           {/* Discharge Checklist */}
           <div className="card">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+            <h2 className="text-xl font-semibold text-slate-900 mb-6 flex items-center">
               <CheckCircle className="h-5 w-5 mr-2" />
               Discharge Checklist
             </h2>
@@ -399,14 +399,14 @@ const Discharge: React.FC = () => {
                   <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
                     item.checked 
                       ? 'bg-green-500 border-green-500' 
-                      : 'border-gray-300'
+                      : 'border-slate-300'
                   }`}>
                     {item.checked && (
                       <CheckCircle className="h-3 w-3 text-white" />
                     )}
                   </div>
                   <span className={`text-sm ${
-                    item.checked ? 'text-gray-900' : 'text-gray-600'
+                    item.checked ? 'text-slate-900' : 'text-slate-600'
                   }`}>
                     {item.item}
                   </span>
@@ -417,23 +417,23 @@ const Discharge: React.FC = () => {
 
           {/* Recent Discharges */}
           <div className="card">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+            <h2 className="text-xl font-semibold text-slate-900 mb-6 flex items-center">
               <Clock className="h-5 w-5 mr-2" />
               Recent Discharges
             </h2>
 
             <div className="space-y-4">
               {recentDischarges.map(discharge => (
-                <div key={discharge.id} className="border border-gray-200 rounded-lg p-4">
+                <div key={discharge.id} className="border border-slate-200 rounded-lg p-4">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <h4 className="font-medium text-gray-900">{discharge.patientName}</h4>
-                      <p className="text-sm text-gray-600 mt-1">{discharge.finalDiagnosis}</p>
+                      <h4 className="font-medium text-slate-900">{discharge.patientName}</h4>
+                      <p className="text-sm text-slate-600 mt-1">{discharge.finalDiagnosis}</p>
                       <div className="mt-2 space-y-1 text-sm">
-                        <p className="text-gray-500">
+                        <p className="text-slate-500">
                           Discharged: {discharge.dischargeDate}
                         </p>
-                        <p className="text-gray-500">
+                        <p className="text-slate-500">
                           Length of Stay: {discharge.lengthOfStay} days
                         </p>
                       </div>
@@ -445,7 +445,7 @@ const Discharge: React.FC = () => {
                       discharge.dischargeType === 'routine'
                         ? 'bg-green-100 text-green-800'
                         : discharge.dischargeType === 'transfer'
-                        ? 'bg-blue-100 text-blue-800'
+                        ? 'bg-teal-100 text-teal-800'
                         : 'bg-yellow-100 text-yellow-800'
                     }`}>
                       {discharge.dischargeType.replace('_', ' ')}
@@ -458,31 +458,31 @@ const Discharge: React.FC = () => {
 
           {/* Discharge Statistics */}
           <div className="card">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Today's Statistics</h2>
+            <h2 className="text-xl font-semibold text-slate-900 mb-6">Today's Statistics</h2>
             
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Pending Discharges</span>
+                <span className="text-sm text-slate-600">Pending Discharges</span>
                 <span className="text-lg font-semibold text-orange-600">3</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Completed Today</span>
+                <span className="text-sm text-slate-600">Completed Today</span>
                 <span className="text-lg font-semibold text-green-600">5</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Average Length of Stay</span>
-                <span className="text-lg font-semibold text-gray-900">4.2 days</span>
+                <span className="text-sm text-slate-600">Average Length of Stay</span>
+                <span className="text-lg font-semibold text-slate-900">4.2 days</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Bed Availability</span>
-                <span className="text-lg font-semibold text-blue-600">8 beds</span>
+                <span className="text-sm text-slate-600">Bed Availability</span>
+                <span className="text-lg font-semibold text-teal-600">8 beds</span>
               </div>
             </div>
           </div>
 
           {/* Important Notes */}
           <div className="card">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+            <h2 className="text-xl font-semibold text-slate-900 mb-6 flex items-center">
               <AlertTriangle className="h-5 w-5 mr-2 text-yellow-600" />
               Important Notes
             </h2>
@@ -500,9 +500,9 @@ const Discharge: React.FC = () => {
                   Verify all medications and provide clear instructions.
                 </p>
               </div>
-              <div className="p-3 bg-blue-50 rounded-lg">
-                <h4 className="font-medium text-blue-900">Follow-up Care</h4>
-                <p className="text-blue-700 text-sm mt-1">
+              <div className="p-3 bg-teal-50 rounded-lg">
+                <h4 className="font-medium text-teal-900">Follow-up Care</h4>
+                <p className="text-teal-700 text-sm mt-1">
                   Schedule necessary follow-up appointments before discharge.
                 </p>
               </div>

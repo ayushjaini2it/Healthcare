@@ -7,8 +7,8 @@ const statusConfig: Record<string, { label: string; color: string; bg: string }>
   pending:    { label: 'Pending',    color: 'text-amber-700',  bg: 'bg-amber-50 border-amber-300' },
   accepted:   { label: 'Accepted',  color: 'text-green-700',  bg: 'bg-green-50 border-green-200' },
   rejected:   { label: 'Rejected',  color: 'text-red-700',    bg: 'bg-red-50 border-red-200' },
-  completed:  { label: 'Completed', color: 'text-blue-700',   bg: 'bg-blue-50 border-blue-200' },
-  cancelled:  { label: 'Cancelled', color: 'text-gray-600',   bg: 'bg-gray-50 border-gray-200' },
+  completed:  { label: 'Completed', color: 'text-teal-700',   bg: 'bg-teal-50 border-teal-200' },
+  cancelled:  { label: 'Cancelled', color: 'text-slate-600',   bg: 'bg-slate-50 border-slate-200' },
 }
 
 const typeIcons: Record<string, string> = {
@@ -127,17 +127,17 @@ const DoctorAppointments: React.FC = () => {
       {/* Header */}
       <div className="mb-8 flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">My Appointments</h1>
-          <p className="text-gray-600 mt-2">Manage patient appointment requests and your schedule.</p>
+          <h1 className="text-3xl font-bold text-slate-900">My Appointments</h1>
+          <p className="text-slate-600 mt-2">Manage patient appointment requests and your schedule.</p>
         </div>
-        <button onClick={loadAppointments} className="px-4 py-2 text-sm text-indigo-600 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition-colors">
+        <button onClick={loadAppointments} className="px-4 py-2 text-sm text-teal-600 border border-teal-200 rounded-lg hover:bg-teal-50 transition-colors">
           ↻ Refresh
         </button>
       </div>
 
       {/* New appointment toast */}
       {newNotif && (
-        <div className="mb-6 p-4 bg-indigo-600 text-white rounded-xl flex items-center gap-3 animate-pulse shadow-lg">
+        <div className="mb-6 p-4 bg-teal-600 text-white rounded-xl flex items-center gap-3 animate-pulse shadow-sm border border-slate-200">
           <Bell className="h-5 w-5 shrink-0" />
           <span className="font-semibold">New appointment request received!</span>
         </div>
@@ -161,10 +161,10 @@ const DoctorAppointments: React.FC = () => {
           <div key={s.label} className={`card py-4 border-l-4 ${
             s.label === 'Pending' ? 'border-l-amber-400' :
             s.label === 'Accepted' ? 'border-l-green-400' :
-            s.label === 'Rejected' ? 'border-l-red-400' : 'border-l-blue-400'
+            s.label === 'Rejected' ? 'border-l-red-400' : 'border-l-teal-400'
           }`}>
-            <p className="text-2xl font-bold text-gray-900">{s.value}</p>
-            <p className="text-sm text-gray-500 mt-1">{s.label}</p>
+            <p className="text-2xl font-bold text-slate-900">{s.value}</p>
+            <p className="text-sm text-slate-500 mt-1">{s.label}</p>
           </div>
         ))}
       </div>
@@ -174,7 +174,7 @@ const DoctorAppointments: React.FC = () => {
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-4">
             <Bell className="h-5 w-5 text-amber-600" />
-            <h2 className="text-lg font-bold text-gray-900">
+            <h2 className="text-lg font-bold text-slate-900">
               Pending Requests
               <span className="ml-2 px-2 py-0.5 bg-amber-100 text-amber-700 text-sm rounded-full">{pending.length}</span>
             </h2>
@@ -182,7 +182,7 @@ const DoctorAppointments: React.FC = () => {
 
           <div className="space-y-4">
             {pending.map(appt => (
-              <div key={appt.id} className="card border-2 border-amber-300 bg-amber-50/40 shadow-md">
+              <div key={appt.id} className="card border-2 border-amber-300 bg-amber-50/40 shadow-sm border border-slate-200">
                 <div className="flex flex-col md:flex-row md:items-start gap-4">
                   {/* Type + Date */}
                   <div className="flex items-center gap-4 md:w-52 shrink-0">
@@ -190,12 +190,12 @@ const DoctorAppointments: React.FC = () => {
                       {typeIcons[appt.appointment_type] || '🩺'}
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900 capitalize">{appt.appointment_type?.replace('_', ' ')}</p>
-                      <div className="flex items-center gap-1 text-sm text-gray-500 mt-0.5">
+                      <p className="font-semibold text-slate-900 capitalize">{appt.appointment_type?.replace('_', ' ')}</p>
+                      <div className="flex items-center gap-1 text-sm text-slate-500 mt-0.5">
                         <Calendar className="h-3.5 w-3.5" />
                         {new Date(appt.appointment_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
                       </div>
-                      <div className="flex items-center gap-1 text-sm text-gray-500">
+                      <div className="flex items-center gap-1 text-sm text-slate-500">
                         <Clock className="h-3.5 w-3.5" /> {appt.time_slot}
                       </div>
                     </div>
@@ -210,19 +210,19 @@ const DoctorAppointments: React.FC = () => {
                         </span>
                       </div>
                       <div>
-                        <p className="font-semibold text-gray-900">{patientName(appt.patients)}</p>
-                        <p className="text-xs text-gray-400">
+                        <p className="font-semibold text-slate-900">{patientName(appt.patients)}</p>
+                        <p className="text-xs text-slate-400">
                           {appt.patients?.age ? `${appt.patients.age} yrs` : ''}
                           {appt.patients?.gender ? ` · ${appt.patients.gender}` : ''}
                         </p>
                       </div>
                     </div>
-                    <div className="flex flex-wrap gap-3 mt-1 text-xs text-gray-500">
+                    <div className="flex flex-wrap gap-3 mt-1 text-xs text-slate-500">
                       {appt.patients?.phone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{appt.patients.phone}</span>}
                       {appt.patients?.email && <span className="flex items-center gap-1"><Mail className="h-3 w-3" />{appt.patients.email}</span>}
                     </div>
-                    <p className="mt-2 text-sm text-gray-700"><span className="font-medium">Reason: </span>{appt.reason}</p>
-                    {appt.notes && <p className="text-xs text-gray-400 mt-1"><span className="font-medium">Notes: </span>{appt.notes}</p>}
+                    <p className="mt-2 text-sm text-slate-700"><span className="font-medium">Reason: </span>{appt.reason}</p>
+                    {appt.notes && <p className="text-xs text-slate-400 mt-1"><span className="font-medium">Notes: </span>{appt.notes}</p>}
                   </div>
 
                   {/* Accept / Reject Actions */}
@@ -255,7 +255,7 @@ const DoctorAppointments: React.FC = () => {
                           </button>
                           <button
                             onClick={() => { setRejectingId(null); setRejectionReason('') }}
-                            className="flex-1 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg text-xs font-semibold transition-colors"
+                            className="flex-1 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-xs font-semibold transition-colors"
                           >
                             Cancel
                           </button>
@@ -279,15 +279,15 @@ const DoctorAppointments: React.FC = () => {
 
       {/* Filter Tabs */}
       <div className="flex items-center gap-2 mb-6 flex-wrap">
-        <Filter className="h-4 w-4 text-gray-400" />
+        <Filter className="h-4 w-4 text-slate-400" />
         {(['all', 'pending', 'accepted', 'rejected', 'completed'] as const).map(f => (
           <button
             key={f}
             onClick={() => setFilter(f)}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all capitalize ${
               filter === f
-                ? 'bg-indigo-600 text-white shadow-sm'
-                : 'bg-white border border-gray-200 text-gray-600 hover:border-indigo-300'
+                ? 'bg-teal-600 text-white shadow-sm'
+                : 'bg-white border border-slate-200 text-slate-600 hover:border-teal-300'
             }`}
           >
             {f === 'all' ? `All (${appointments.length})` : `${f.charAt(0).toUpperCase() + f.slice(1)} (${appointments.filter(a => a.status === f).length})`}
@@ -298,14 +298,14 @@ const DoctorAppointments: React.FC = () => {
       {/* All appointments list */}
       {isLoading ? (
         <div className="flex items-center justify-center py-16">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600" />
-          <span className="ml-4 text-gray-500">Loading...</span>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600" />
+          <span className="ml-4 text-slate-500">Loading...</span>
         </div>
       ) : filtered.length === 0 ? (
         <div className="card text-center py-16">
-          <Calendar className="h-16 w-16 text-gray-200 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-gray-400">No appointments found</h3>
-          <p className="text-gray-400 mt-2 text-sm">
+          <Calendar className="h-16 w-16 text-slate-200 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-slate-400">No appointments found</h3>
+          <p className="text-slate-400 mt-2 text-sm">
             {filter !== 'all' ? `No ${filter} appointments yet.` : 'No appointments booked yet.'}
           </p>
         </div>
@@ -316,23 +316,23 @@ const DoctorAppointments: React.FC = () => {
             const isToday = appt.appointment_date === new Date().toISOString().split('T')[0]
 
             return (
-              <div key={appt.id} className={`card border-l-4 ${isToday ? 'border-l-indigo-500' : 'border-l-gray-200'}`}>
+              <div key={appt.id} className={`card border-l-4 ${isToday ? 'border-l-teal-500' : 'border-l-slate-200'}`}>
                 <div className="flex flex-col md:flex-row md:items-center gap-4">
                   <div className="flex items-center gap-3 md:w-52 shrink-0">
                     <span className="text-2xl">{typeIcons[appt.appointment_type] || '🩺'}</span>
                     <div>
-                      <p className="font-semibold text-gray-900 capitalize text-sm">{appt.appointment_type?.replace('_', ' ')}</p>
-                      <p className="text-xs text-gray-500">
+                      <p className="font-semibold text-slate-900 capitalize text-sm">{appt.appointment_type?.replace('_', ' ')}</p>
+                      <p className="text-xs text-slate-500">
                         {isToday ? '📅 Today' : new Date(appt.appointment_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                       </p>
-                      <p className="text-xs text-gray-500">⏰ {appt.time_slot}</p>
+                      <p className="text-xs text-slate-500">⏰ {appt.time_slot}</p>
                     </div>
                   </div>
 
-                  <div className="flex-1 border-l border-gray-100 pl-4">
-                    <p className="font-semibold text-gray-900">{patientName(appt.patients)}</p>
-                    <p className="text-xs text-gray-400">{appt.patients?.age ? `${appt.patients.age} yrs · ` : ''}{appt.patients?.gender}</p>
-                    <p className="text-sm text-gray-600 mt-1"><span className="font-medium">Reason: </span>{appt.reason}</p>
+                  <div className="flex-1 border-l border-slate-100 pl-4">
+                    <p className="font-semibold text-slate-900">{patientName(appt.patients)}</p>
+                    <p className="text-xs text-slate-400">{appt.patients?.age ? `${appt.patients.age} yrs · ` : ''}{appt.patients?.gender}</p>
+                    <p className="text-sm text-slate-600 mt-1"><span className="font-medium">Reason: </span>{appt.reason}</p>
                     {appt.rejection_reason && (
                       <p className="text-xs text-red-500 mt-1"><span className="font-medium">Rejection reason: </span>{appt.rejection_reason}</p>
                     )}
@@ -346,7 +346,7 @@ const DoctorAppointments: React.FC = () => {
                       <button
                         onClick={() => updateStatus(appt.id, 'completed')}
                         disabled={updatingId === appt.id}
-                        className="text-xs px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                        className="text-xs px-3 py-1.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50"
                       >
                         Mark Complete
                       </button>
