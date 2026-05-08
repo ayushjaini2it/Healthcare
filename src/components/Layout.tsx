@@ -183,7 +183,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
           {/* Page content */}
           <main className="flex-1 overflow-y-auto p-8">
-            <div className="max-w-7xl mx-auto">
+            <div className="max-w-7xl mx-auto animate-fade-in opacity-0 ![animation-fill-mode:both]">
               {children}
             </div>
           </main>

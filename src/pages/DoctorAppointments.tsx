@@ -298,7 +298,7 @@ const DoctorAppointments: React.FC = () => {
       {/* All appointments list */}
       {isLoading ? (
         <div className="flex items-center justify-center py-16">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600" />
+          <div className="w-12 h-12 rounded-full border-4 border-teal-100 border-t-teal-600 animate-spin" />
           <span className="ml-4 text-slate-500">Loading...</span>
         </div>
       ) : filtered.length === 0 ? (

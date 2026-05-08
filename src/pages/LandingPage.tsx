@@ -26,7 +26,7 @@ const LandingPage: React.FC = () => {
     <div className="min-h-screen bg-white font-sans text-slate-900">
       {isAuthOpen && <Auth onClose={closeAuth} />}
       {/* ─── NAVBAR ─── */}
-      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between animate-fade-in opacity-0 ![animation-fill-mode:both]">
         <div className="flex items-center gap-2">
           <div className="flex items-center">
             <img src="/logo.png" alt="Health Connect Logo" className="h-10 w-auto" />
@@ -51,7 +51,7 @@ const LandingPage: React.FC = () => {
 
       {/* ─── HERO SECTION ─── */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28 flex flex-col md:flex-row items-center gap-12">
-        <div className="flex-1 space-y-8">
+        <div className="flex-1 space-y-8 animate-slide-up opacity-0 ![animation-delay:100ms]">
           <h1 className="text-5xl md:text-6xl font-extrabold text-slate-900 leading-tight">
             Your Health, <span className="text-teal-600">Connected</span>
           </h1>
@@ -77,13 +77,13 @@ const LandingPage: React.FC = () => {
         </div>
         
         {/* Hero Illustration */}
-        <div className="flex-1 relative flex justify-center items-center w-full max-w-lg mx-auto">
+        <div className="flex-1 relative flex justify-center items-center w-full max-w-lg mx-auto animate-fade-in opacity-0 ![animation-delay:300ms]">
           <img src="/hero.png" alt="Healthcare professionals" className="w-full h-auto object-contain drop-shadow-xl" />
         </div>
       </section>
 
       {/* ─── FEATURES SECTION ─── */}
-      <section id="features" className="bg-slate-50 py-24 border-y border-slate-100">
+      <section id="features" className="bg-slate-50 py-24 border-y border-slate-100 animate-slide-up opacity-0 ![animation-delay:500ms]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Why Choose Health Connect?</h2>
           <p className="text-slate-600 mb-16 max-w-2xl mx-auto">Comprehensive healthcare management at your fingertips</p>
@@ -110,7 +110,7 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* ─── HOW IT WORKS ─── */}
-      <section id="how-it-works" className="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <section id="how-it-works" className="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center animate-slide-up opacity-0 ![animation-delay:700ms]">
         <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">How It Works</h2>
         <p className="text-slate-600 mb-16 max-w-2xl mx-auto">Get started in three simple steps</p>
         
@@ -135,7 +135,7 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* ─── CTA SECTION ─── */}
-      <section className="bg-teal-600 py-20 text-center px-4">
+      <section className="bg-teal-600 py-20 text-center px-4 animate-slide-up opacity-0 ![animation-delay:900ms]">
         <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">Ready to Take Control of Your Health?</h2>
         <p className="text-teal-50 mb-10 text-lg">Join thousands of patients who trust Health Connect for their healthcare needs.</p>
         <button 

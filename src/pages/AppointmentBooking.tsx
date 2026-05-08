@@ -260,7 +260,7 @@ const AppointmentBooking: React.FC = () => {
             </h2>
             {isLoading ? (
               <div className="flex items-center gap-2 text-slate-500 py-4">
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-teal-600" />
+                <div className="w-5 h-5 rounded-full border-[3px] border-teal-100 border-t-teal-600 animate-spin" />
                 Loading doctors...
               </div>
             ) : doctors.length === 0 ? (
@@ -377,7 +377,7 @@ const AppointmentBooking: React.FC = () => {
               >
                 {isSubmitting ? (
                   <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                    <div className="w-4 h-4 rounded-full border-2 border-white/20 border-t-white animate-spin" />
                     Booking...
                   </>
                 ) : (

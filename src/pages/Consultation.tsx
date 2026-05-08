@@ -145,7 +145,7 @@ const Consultation: React.FC = () => {
     return (
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center justify-center p-8">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+          <div className="w-12 h-12 rounded-full border-4 border-teal-100 border-t-teal-600 animate-spin"></div>
           <span className="ml-3">Loading patients and doctors...</span>
         </div>
       </div>
