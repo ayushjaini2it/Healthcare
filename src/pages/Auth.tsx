@@ -3,7 +3,7 @@ import { supabaseServices } from '../services/supabaseServices'
 import { supabase } from '../lib/supabase'
 import {
   User, Mail, Lock, UserPlus, LogIn, Loader2,
-  Phone, Building2, MapPin, Stethoscope, ShieldCheck,
+  Phone, Building2, MapPin, Stethoscope, ShieldCheck, KeyRound,
 } from 'lucide-react'
 
 // ─── Password strength engine ────────────────────────────────────────────────
@@ -41,7 +41,8 @@ const Auth: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   // Doctor-specific
   const [isDoctorSignup, setIsDoctorSignup] = useState(false)
-  const [location, setLocation] = useState('')
+  const [inviteCode, setInviteCode] = useState('')
+  const [inviteError, setInviteError] = useState('')
   const [specialization, setSpecialization] = useState('')
   const [phone, setPhone] = useState('')
   const [hospitalName, setHospitalName] = useState('')
@@ -68,11 +69,15 @@ const Auth: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     }
   }
 
-
+  const handleInviteCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInviteCode(e.target.value)
+    setInviteError('')
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setInviteError('')
 
     // Client-side guards on signup
     if (!isLogin) {
@@ -83,7 +88,18 @@ const Auth: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         return
       }
 
-
+      // Doctor invite code validation
+      if (isDoctorSignup) {
+        const validCode = import.meta.env.VITE_DOCTOR_INVITE_CODE
+        if (!inviteCode.trim()) {
+          setInviteError('An invite code is required for healthcare professional accounts.')
+          return
+        }
+        if (inviteCode.trim() !== validCode) {
+          setInviteError('Invalid invite code. Contact your hospital administrator.')
+          return
+        }
+      }
     }
 
     setIsLoading(true)
@@ -128,7 +144,8 @@ const Auth: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const switchMode = (login: boolean) => {
     setIsLogin(login)
     setError('')
-    setError('')
+    setInviteError('')
+    setInviteCode('')
     setStrength(null)
     setIsDoctorSignup(false)
   }
@@ -190,7 +207,7 @@ const Auth: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
                   {/* Healthcare professional opt-in */}
                   <div className="flex items-center gap-3 p-3 bg-teal-50 rounded-xl border border-teal-100 cursor-pointer"
-                    onClick={() => { setIsDoctorSignup(v => !v); }}>
+                    onClick={() => { setIsDoctorSignup(v => !v); setInviteCode(''); setInviteError('') }}>
                     <input type="checkbox" id="doctorCheck" checked={isDoctorSignup} onChange={() => {}}
                       className="h-4 w-4 text-teal-600 rounded border-slate-300 focus:ring-teal-500 pointer-events-none" />
                     <label htmlFor="doctorCheck" className="flex items-center gap-2 text-sm font-semibold text-teal-700 pointer-events-none">
@@ -204,8 +221,28 @@ const Auth: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     <div className="space-y-4 p-4 bg-teal-50 border border-teal-100 rounded-2xl">
                       <p className="text-xs text-teal-600 font-semibold flex items-center gap-1.5">
                         <ShieldCheck className="h-3.5 w-3.5" />
-                        Healthcare professional details
+                        Healthcare professional details — invite code required
                       </p>
+
+                      {/* ── Invite Code ── */}
+                      <div>
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 ml-1">
+                          Invite Code <span className="text-red-500">*</span>
+                        </label>
+                        <div className="relative group">
+                          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-teal-500 transition-colors">
+                            <KeyRound className="h-5 w-5" />
+                          </div>
+                          <input type="text" required={isDoctorSignup} value={inviteCode}
+                            onChange={handleInviteCodeChange}
+                            className={`w-full pl-11 pr-4 py-3 bg-white border rounded-2xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all font-mono tracking-widest ${inviteError ? 'border-red-300' : 'border-slate-100'}`}
+                            placeholder="HC-XXXX-XXXX" />
+                        </div>
+                        {inviteError && (
+                          <p className="mt-1.5 text-xs text-red-500 font-medium ml-1">{inviteError}</p>
+                        )}
+                        <p className="mt-1.5 text-xs text-teal-500 ml-1">Provided by your hospital administrator.</p>
+                      </div>
 
                       {/* Specialization */}
                       <div>
