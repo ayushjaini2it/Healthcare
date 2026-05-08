@@ -3,13 +3,12 @@ import { useAuth } from '../context/AuthContext'
 
 interface Props {
   children: React.ReactNode
-  allowedRole: 'doctor' | 'patient'
+  allowedRole: 'doctor' | 'patient' | 'pharmacist' | 'admin' | string[]
 }
 
 /**
  * Wraps a route and redirects to "/" if the logged-in user's role
- * does not match the required role. This prevents patients from
- * accessing doctor-only pages (and vice versa) by typing URLs directly.
+ * does not match the required role(s).
  */
 export function RoleProtectedRoute({ children, allowedRole }: Props) {
   const { currentUser, isLoading } = useAuth()
@@ -23,7 +22,12 @@ export function RoleProtectedRoute({ children, allowedRole }: Props) {
   }
 
   if (!currentUser) return <Navigate to="/?login=true" replace />
-  if (currentUser.role !== allowedRole) return <Navigate to="/" replace />
+  
+  const hasAccess = Array.isArray(allowedRole) 
+    ? allowedRole.includes(currentUser.role)
+    : currentUser.role === allowedRole;
+
+  if (!hasAccess) return <Navigate to="/" replace />
 
   return <>{children}</>
 }

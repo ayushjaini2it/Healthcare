@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { supabaseServices } from '../services/supabaseServices'
 import { useAuth } from '../context/AuthContext'
+import { useSearchParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -27,16 +28,28 @@ const Consultation: React.FC = () => {
   const [patients, setPatients] = useState<any[]>([])
   const [errorMessage, setErrorMessage] = useState('')
   const [isLoading, setIsLoading] = useState(true)
+  const [searchParams] = useSearchParams()
+  const prefillPatientId = searchParams.get('patientId')
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
-    watch
+    watch,
+    setValue
   } = useForm<ConsultationFormData>({
-    resolver: zodResolver(consultationSchema)
+    resolver: zodResolver(consultationSchema),
+    defaultValues: {
+      patientId: prefillPatientId || '',
+    }
   })
+
+  useEffect(() => {
+    if (prefillPatientId && patients.length > 0) {
+      setValue('patientId', prefillPatientId);
+    }
+  }, [prefillPatientId, patients, setValue])
 
   // Load patients and doctors when component mounts
   useEffect(() => {
@@ -46,7 +59,7 @@ const Consultation: React.FC = () => {
   const loadPatientsAndDoctors = async () => {
     try {
       setIsLoading(true)
-      const patientsData = await supabaseServices.patientServices.getAllPatients()
+      const patientsData = await supabaseServices.patientServices.getPatientsByStatus(['registered', 'in_consultation'])
       setPatients(patientsData || [])
     } catch (error) {
       console.error('Error loading data:', error)

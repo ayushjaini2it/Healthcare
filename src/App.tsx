@@ -3,7 +3,10 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import Layout from './components/Layout'
 import { RoleProtectedRoute } from './components/RoleProtectedRoute'
 import Dashboard from './pages/Dashboard'
+import PatientDashboard from './pages/PatientDashboard'
 import PatientRegistration from './pages/PatientRegistration'
+import PatientMedications from './pages/PatientMedications'
+import PatientInvoices from './pages/PatientInvoices'
 import Consultation from './pages/Consultation'
 import Diagnosis from './pages/Diagnosis'
 import TreatmentDecision from './pages/TreatmentDecision'
@@ -42,8 +45,10 @@ function App() {
   return (
       <Layout>
         <Routes>
-          {/* Shared routes — accessible by any authenticated user */}
-          <Route path="/" element={<Dashboard />} />
+          {/* Dynamic Home Route based on Role */}
+          <Route path="/" element={
+            currentUser?.role === 'doctor' ? <Dashboard /> : <PatientDashboard />
+          } />
 
           {/* Doctor-only routes */}
           <Route path="/doctor-appointments" element={
@@ -62,6 +67,13 @@ function App() {
             <RoleProtectedRoute allowedRole="doctor"><Discharge /></RoleProtectedRoute>
           } />
 
+          <Route path="/pharmacy" element={
+            <RoleProtectedRoute allowedRole={['pharmacist', 'doctor']}><Pharmacy /></RoleProtectedRoute>
+          } />
+          <Route path="/billing" element={
+            <RoleProtectedRoute allowedRole={['admin', 'doctor']}><Billing /></RoleProtectedRoute>
+          } />
+
           {/* Patient-only routes */}
           <Route path="/registration" element={
             <RoleProtectedRoute allowedRole="patient"><PatientRegistration /></RoleProtectedRoute>
@@ -69,11 +81,11 @@ function App() {
           <Route path="/appointments" element={
             <RoleProtectedRoute allowedRole="patient"><AppointmentBooking /></RoleProtectedRoute>
           } />
-          <Route path="/pharmacy" element={
-            <RoleProtectedRoute allowedRole="patient"><Pharmacy /></RoleProtectedRoute>
+          <Route path="/my-medications" element={
+            <RoleProtectedRoute allowedRole="patient"><PatientMedications /></RoleProtectedRoute>
           } />
-          <Route path="/billing" element={
-            <RoleProtectedRoute allowedRole="patient"><Billing /></RoleProtectedRoute>
+          <Route path="/my-bills" element={
+            <RoleProtectedRoute allowedRole="patient"><PatientInvoices /></RoleProtectedRoute>
           } />
           <Route path="/feedback" element={
             <RoleProtectedRoute allowedRole="patient"><Feedback /></RoleProtectedRoute>
