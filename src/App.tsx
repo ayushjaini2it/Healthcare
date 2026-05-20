@@ -20,6 +20,8 @@ import FeedbackDashboard from './pages/FeedbackDashboard'
 import AppointmentBooking from './pages/AppointmentBooking'
 import DoctorAppointments from './pages/DoctorAppointments'
 import LandingPage from './pages/LandingPage'
+import ResetPassword from './pages/ResetPassword'
+import { AboutUs, Contact, PrivacyPolicy, Resources } from './pages/StaticPages'
 import { supabase } from './lib/supabase'
 import { useAuth } from './context/AuthContext'
 
@@ -39,6 +41,11 @@ function App() {
     return (
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/about" element={<AboutUs />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/resources" element={<Resources />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     )
@@ -98,6 +105,13 @@ function App() {
           <Route path="/feedback" element={
             <RoleProtectedRoute allowedRole="patient"><Feedback /></RoleProtectedRoute>
           } />
+
+          {/* Static Pages for authenticated users as well */}
+          <Route path="/about" element={<AboutUs />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/resources" element={<Resources />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
           {/* Catch-all */}
           <Route path="*" element={<Navigate to="/" replace />} />

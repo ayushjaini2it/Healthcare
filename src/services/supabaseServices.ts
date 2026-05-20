@@ -759,6 +759,16 @@ export const authServices = {
   },
 
   /**
+   * Reset password for email
+   */
+  async resetPassword(email: string) {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    })
+    if (error) throw error
+  },
+
+  /**
    * Get current user and their profile (doctor or patient)
    */
   async getCurrentUser() {
