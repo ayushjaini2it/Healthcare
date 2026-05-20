@@ -7,6 +7,7 @@ import PatientDashboard from './pages/PatientDashboard'
 import PatientRegistration from './pages/PatientRegistration'
 import PatientMedications from './pages/PatientMedications'
 import PatientInvoices from './pages/PatientInvoices'
+import PatientRecords from './pages/PatientRecords'
 import Consultation from './pages/Consultation'
 import Diagnosis from './pages/Diagnosis'
 import TreatmentDecision from './pages/TreatmentDecision'
@@ -14,6 +15,7 @@ import Pharmacy from './pages/Pharmacy'
 import Billing from './pages/Billing'
 import Discharge from './pages/Discharge'
 import Feedback from './pages/Feedback'
+import FeedbackDashboard from './pages/FeedbackDashboard'
 
 import AppointmentBooking from './pages/AppointmentBooking'
 import DoctorAppointments from './pages/DoctorAppointments'
@@ -73,6 +75,9 @@ function App() {
           <Route path="/billing" element={
             <RoleProtectedRoute allowedRole={['admin', 'doctor']}><Billing /></RoleProtectedRoute>
           } />
+          <Route path="/feedback-dashboard" element={
+            <RoleProtectedRoute allowedRole={['admin', 'doctor']}><FeedbackDashboard /></RoleProtectedRoute>
+          } />
 
           {/* Patient-only routes */}
           <Route path="/registration" element={
@@ -80,6 +85,9 @@ function App() {
           } />
           <Route path="/appointments" element={
             <RoleProtectedRoute allowedRole="patient"><AppointmentBooking /></RoleProtectedRoute>
+          } />
+          <Route path="/my-records" element={
+            <RoleProtectedRoute allowedRole="patient"><PatientRecords /></RoleProtectedRoute>
           } />
           <Route path="/my-medications" element={
             <RoleProtectedRoute allowedRole="patient"><PatientMedications /></RoleProtectedRoute>

@@ -65,6 +65,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     { name: 'Diagnosis', href: '/diagnosis', icon: Microscope, badge: 0 },
     { name: 'Treatment', href: '/treatment', icon: Activity, badge: 0 },
     { name: 'Discharge', href: '/discharge', icon: FileText, badge: 0 },
+    { name: 'Patient Feedback', href: '/feedback-dashboard', icon: MessageSquare, badge: 0 },
   ]
 
   const pharmacistNav = [
@@ -73,12 +74,14 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   const adminNav = [
     { name: 'Billing & Invoices', href: '/billing', icon: CreditCard, badge: 0 },
+    { name: 'Patient Feedback', href: '/feedback-dashboard', icon: MessageSquare, badge: 0 },
   ]
 
   const patientNav = [
     { name: 'Dashboard', href: '/', icon: Home, badge: 0 },
     { name: 'My Profile', href: '/registration', icon: UserCheck, badge: 0 },
     { name: 'Appointments', href: '/appointments', icon: Calendar, badge: 0 },
+    { name: 'Clinical Records', href: '/my-records', icon: FileText, badge: 0 },
     { name: 'My Medications', href: '/my-medications', icon: Pill, badge: 0 },
     { name: 'My Bills', href: '/my-bills', icon: CreditCard, badge: 0 },
     { name: 'Feedback', href: '/feedback', icon: MessageSquare, badge: 0 },

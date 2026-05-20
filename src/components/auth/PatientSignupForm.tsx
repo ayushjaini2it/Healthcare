@@ -61,6 +61,7 @@ export const PatientSignupForm: React.FC<PatientSignupFormProps> = ({ onSuccess,
         <input 
           {...register('fullName')}
           type="text" 
+          autoComplete="name"
           className={`w-full px-4 py-3.5 bg-white border rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all placeholder:text-slate-400 ${errors.fullName ? 'border-red-300' : 'border-slate-300'}`}
           placeholder="Your full name" 
         />
@@ -71,6 +72,7 @@ export const PatientSignupForm: React.FC<PatientSignupFormProps> = ({ onSuccess,
         <input 
           {...register('email')}
           type="email" 
+          autoComplete="email"
           className={`w-full px-4 py-3.5 bg-white border rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all placeholder:text-slate-400 ${errors.email ? 'border-red-300' : 'border-slate-300'}`}
           placeholder="Your email address" 
         />
@@ -81,6 +83,7 @@ export const PatientSignupForm: React.FC<PatientSignupFormProps> = ({ onSuccess,
         <input 
           {...register('password')}
           type="password" 
+          autoComplete="new-password"
           className={`w-full px-4 py-3.5 bg-white border rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all placeholder:text-slate-400 ${errors.password || (passwordValue && !canSubmitPwd) ? 'border-red-300' : 'border-slate-300'}`}
           placeholder="Create a password" 
         />
@@ -89,7 +92,7 @@ export const PatientSignupForm: React.FC<PatientSignupFormProps> = ({ onSuccess,
       </div>
 
       <button type="submit" disabled={isLoading || (!!passwordValue && !canSubmitPwd)}
-        className="w-full mt-2 group relative flex items-center justify-center py-4 px-4 border border-transparent text-lg font-bold rounded-xl text-white bg-[#a3b1c6] hover:bg-teal-600 focus:outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+        className="w-full mt-2 group relative flex items-center justify-center py-4 px-4 border border-transparent text-lg font-bold rounded-xl text-white bg-teal-600 hover:bg-teal-700 focus:outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed">
         {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <span>Create Patient Account</span>}
       </button>
     </form>

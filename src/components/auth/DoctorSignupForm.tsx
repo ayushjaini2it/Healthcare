@@ -70,6 +70,7 @@ export const DoctorSignupForm: React.FC<DoctorSignupFormProps> = ({ onSuccess, s
         <input 
           {...register('fullName')}
           type="text" 
+          autoComplete="name"
           className={`w-full px-4 py-3.5 bg-white border rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all placeholder:text-slate-400 ${errors.fullName ? 'border-red-300' : 'border-slate-300'}`}
           placeholder="Your full name" 
         />
@@ -117,7 +118,7 @@ export const DoctorSignupForm: React.FC<DoctorSignupFormProps> = ({ onSuccess, s
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-teal-500 transition-colors">
               <Phone className="h-5 w-5" />
             </div>
-            <input {...register('phone')} type="tel"
+            <input {...register('phone')} type="tel" autoComplete="tel"
               className={`w-full pl-11 pr-4 py-3 bg-white border rounded-2xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all ${errors.phone ? 'border-red-300' : 'border-slate-100'}`}
               placeholder="+91 98765 43210" />
           </div>
@@ -131,7 +132,7 @@ export const DoctorSignupForm: React.FC<DoctorSignupFormProps> = ({ onSuccess, s
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-teal-500 transition-colors">
               <Building2 className="h-5 w-5" />
             </div>
-            <input {...register('hospitalName')} type="text"
+            <input {...register('hospitalName')} type="text" autoComplete="organization"
               className={`w-full pl-11 pr-4 py-3 bg-white border rounded-2xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all ${errors.hospitalName ? 'border-red-300' : 'border-slate-100'}`}
               placeholder="e.g. City General Hospital" />
           </div>
@@ -145,7 +146,7 @@ export const DoctorSignupForm: React.FC<DoctorSignupFormProps> = ({ onSuccess, s
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-teal-500 transition-colors">
               <MapPin className="h-5 w-5" />
             </div>
-            <input {...register('hospitalAddress')} type="text"
+            <input {...register('hospitalAddress')} type="text" autoComplete="street-address"
               className={`w-full pl-11 pr-4 py-3 bg-white border rounded-2xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all ${errors.hospitalAddress ? 'border-red-300' : 'border-slate-100'}`}
               placeholder="123 Medical Lane, City, State" />
           </div>
@@ -157,6 +158,7 @@ export const DoctorSignupForm: React.FC<DoctorSignupFormProps> = ({ onSuccess, s
         <input 
           {...register('email')}
           type="email" 
+          autoComplete="email"
           className={`w-full px-4 py-3.5 bg-white border rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all placeholder:text-slate-400 ${errors.email ? 'border-red-300' : 'border-slate-300'}`}
           placeholder="Your email address" 
         />
@@ -167,6 +169,7 @@ export const DoctorSignupForm: React.FC<DoctorSignupFormProps> = ({ onSuccess, s
         <input 
           {...register('password')}
           type="password" 
+          autoComplete="new-password"
           className={`w-full px-4 py-3.5 bg-white border rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all placeholder:text-slate-400 ${errors.password || (passwordValue && !canSubmitPwd) ? 'border-red-300' : 'border-slate-300'}`}
           placeholder="Create a password" 
         />
@@ -175,7 +178,7 @@ export const DoctorSignupForm: React.FC<DoctorSignupFormProps> = ({ onSuccess, s
       </div>
 
       <button type="submit" disabled={isLoading || (!!passwordValue && !canSubmitPwd)}
-        className="w-full mt-2 group relative flex items-center justify-center py-4 px-4 border border-transparent text-lg font-bold rounded-xl text-white bg-[#a3b1c6] hover:bg-teal-600 focus:outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+        className="w-full mt-2 group relative flex items-center justify-center py-4 px-4 border border-transparent text-lg font-bold rounded-xl text-white bg-teal-600 hover:bg-teal-700 focus:outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed">
         {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <span>Create Doctor Account</span>}
       </button>
     </form>

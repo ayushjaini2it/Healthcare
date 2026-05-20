@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Calendar, Clock, User, Stethoscope, CheckCircle, AlertCircle, ChevronRight, Star } from 'lucide-react'
+import { Calendar, Clock, User, Stethoscope, CheckCircle, AlertCircle, ChevronRight, Star, MapPin } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 
@@ -42,6 +42,9 @@ const AppointmentBooking: React.FC = () => {
   const [bookedAppointment, setBookedAppointment] = useState<any>(null)
   const [myAppointments, setMyAppointments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [allDoctors, setAllDoctors] = useState<any[]>([])
+  const [showAllDoctors, setShowAllDoctors] = useState(false)
+  const [patientLocation, setPatientLocation] = useState('')
 
   const {
     register,
@@ -56,7 +59,8 @@ const AppointmentBooking: React.FC = () => {
   })
 
   const selectedDoctorId = watch('doctorId')
-  const selectedDoctor = doctors.find(d => d.id === selectedDoctorId)
+  const displayedDoctors = showAllDoctors ? allDoctors : doctors
+  const selectedDoctor = allDoctors.find(d => d.id === selectedDoctorId)
   const today = new Date().toISOString().split('T')[0]
 
   useEffect(() => {
@@ -67,18 +71,34 @@ const AppointmentBooking: React.FC = () => {
     setIsLoading(true)
     try {
       const { data: doctorsData } = await supabase.from('doctors').select('*')
-      setDoctors(doctorsData || [])
+      const fetchedDoctors = doctorsData || []
+      setAllDoctors(fetchedDoctors)
 
       // Look up the patient record linked to this auth user
       if (currentUser?.id) {
         const { data: patientRecord } = await supabase
           .from('patients')
-          .select('id')
+          .select('*')
           .eq('auth_user_id', currentUser.id)
           .maybeSingle()
 
         if (patientRecord?.id) {
           setPatientRecordId(patientRecord.id)
+          
+          const pAddr = patientRecord.address || ''
+          setPatientLocation(pAddr)
+
+          // Filter doctors by location (simple token match on address > 3 chars)
+          if (pAddr) {
+            const pTokens = pAddr.toLowerCase().split(/[\s,]+/).filter((t: string) => t.length > 3)
+            const nearby = fetchedDoctors.filter((doc: any) => {
+              const dAddr = (doc.hospital_address || '').toLowerCase()
+              return pTokens.some((token: string) => dAddr.includes(token))
+            })
+            setDoctors(nearby)
+          } else {
+            setDoctors(fetchedDoctors)
+          }
 
           const { data: appts } = await supabase
             .from('appointments')
@@ -254,20 +274,57 @@ const AppointmentBooking: React.FC = () => {
 
           {/* Step 2: Select Doctor */}
           <div className="card">
-            <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
-              <span className="w-7 h-7 rounded-full bg-teal-600 text-white text-sm flex items-center justify-center font-bold">2</span>
-              Choose a Doctor
-            </h2>
-            {isLoading ? (
-              <div className="flex items-center gap-2 text-slate-500 py-4">
-                <div className="w-5 h-5 rounded-full border-[3px] border-teal-100 border-t-teal-600 animate-spin" />
-                Loading doctors...
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                <span className="w-7 h-7 rounded-full bg-teal-600 text-white text-sm flex items-center justify-center font-bold">2</span>
+                Choose a Doctor
+              </h2>
+              {patientLocation && (
+                <label className="flex items-center text-sm text-slate-600 cursor-pointer bg-slate-50 px-3 py-1 rounded-full border border-slate-200 hover:bg-slate-100 transition-colors">
+                  <input 
+                    type="checkbox" 
+                    checked={showAllDoctors} 
+                    onChange={(e) => setShowAllDoctors(e.target.checked)}
+                    className="mr-2 accent-teal-600"
+                  />
+                  Show all locations
+                </label>
+              )}
+            </div>
+            
+            {patientLocation && !showAllDoctors && (
+              <div className="bg-teal-50 border border-teal-100 rounded-lg p-3 mb-4 flex items-start gap-2">
+                <MapPin className="h-4 w-4 text-teal-600 mt-0.5 shrink-0" />
+                <p className="text-sm text-teal-800">
+                  Showing doctors near your registered location: <span className="font-semibold">{patientLocation}</span>
+                </p>
               </div>
-            ) : doctors.length === 0 ? (
-              <p className="text-slate-500 text-sm py-4">No doctors available. Please try again later.</p>
+            )}
+
+            {isLoading ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex items-center gap-4 p-4 rounded-xl border-2 border-slate-100 animate-pulse bg-slate-50">
+                    <div className="w-12 h-12 bg-slate-200 rounded-full shrink-0"></div>
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 bg-slate-200 rounded w-1/3"></div>
+                      <div className="h-3 bg-slate-200 rounded w-1/4"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : displayedDoctors.length === 0 ? (
+              <div className="text-center py-6 bg-slate-50 rounded-xl border border-slate-100">
+                <p className="text-slate-500 text-sm">No doctors available in your area.</p>
+                {!showAllDoctors && (
+                  <button type="button" onClick={() => setShowAllDoctors(true)} className="mt-2 text-teal-600 text-sm font-medium hover:underline">
+                    View doctors in all locations
+                  </button>
+                )}
+              </div>
             ) : (
               <div className="space-y-3">
-                {doctors.map(doctor => (
+                {displayedDoctors.map((doctor: any) => (
                   <label
                     key={doctor.id}
                     className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${

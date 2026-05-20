@@ -47,10 +47,13 @@ const Feedback: React.FC = () => {
       }
 
       // Fetch appointments for the current user
+      const { data: patient } = await supabase.from('patients').select('id').eq('auth_user_id', user.id).single()
+      if (!patient) return;
+
       const { data: appointmentsData } = await supabase
         .from('appointments')
         .select('*, doctors(*)')
-        .eq('patient_id', user.id)
+        .eq('patient_id', patient.id)
         .eq('status', 'completed')
       
       // Extract unique doctors from appointments
@@ -154,11 +157,14 @@ const Feedback: React.FC = () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('User not authenticated')
 
+      const { data: patient } = await supabase.from('patients').select('id').eq('auth_user_id', user.id).single()
+      if (!patient) throw new Error('Patient profile not found')
+
       await supabase
         .from('feedback')
         .insert([{
           doctor_id: data.doctorId,
-          patient_id: user.id,
+          patient_id: patient.id,
           rating: data.rating,
           comments: data.comments,
           created_at: new Date().toISOString()

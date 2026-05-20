@@ -36,7 +36,8 @@ export interface Consultation {
   diagnosis: string
   notes: string
   vitalSigns: {
-    bloodPressure: string
+    systolicBP: number
+    diastolicBP: number
     heartRate: number
     temperature: number
     weight: number

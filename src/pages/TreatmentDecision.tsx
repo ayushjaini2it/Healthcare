@@ -492,11 +492,15 @@ const TreatmentDecision: React.FC = () => {
                       <div className="grid grid-cols-2 gap-2 bg-slate-50 p-2 rounded border border-slate-100 mt-2">
                         <div>
                           <span className="text-slate-500 block text-xs mb-0.5">Vitals (BP)</span>
-                          <span className="font-medium text-slate-900">{clinicalHistory.consultation.vitals_bp || 'N/A'}</span>
+                          <span className="font-medium text-slate-900">
+                            {clinicalHistory.consultation.systolic_bp && clinicalHistory.consultation.diastolic_bp 
+                              ? `${clinicalHistory.consultation.systolic_bp}/${clinicalHistory.consultation.diastolic_bp}` 
+                              : 'N/A'}
+                          </span>
                         </div>
                         <div>
                           <span className="text-slate-500 block text-xs mb-0.5">Temp</span>
-                          <span className="font-medium text-slate-900">{clinicalHistory.consultation.vitals_temp || 'N/A'}</span>
+                          <span className="font-medium text-slate-900">{clinicalHistory.consultation.temperature ? `${clinicalHistory.consultation.temperature}°C` : 'N/A'}</span>
                         </div>
                       </div>
                     </div>

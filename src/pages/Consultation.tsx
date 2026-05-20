@@ -10,7 +10,8 @@ import { Stethoscope, Heart, Thermometer, Scale, Activity, Clock, User } from 'l
 const consultationSchema = z.object({
   patientId: z.string().min(1, 'Please select a patient'),
   symptoms: z.string().min(10, 'Please describe symptoms in detail'),
-  bloodPressure: z.string().min(5, 'Please enter blood pressure'),
+  systolicBP: z.coerce.number().min(50).max(250, 'Systolic must be 50-250'),
+  diastolicBP: z.coerce.number().min(30).max(150, 'Diastolic must be 30-150'),
   heartRate: z.coerce.number().min(40).max(200, 'Heart rate must be between 40-200'),
   temperature: z.coerce.number().min(35).max(42, 'Temperature must be between 35-42°C'),
   weight: z.coerce.number().min(1).max(500, 'Weight must be between 1-500 kg'),
@@ -24,6 +25,7 @@ type ConsultationFormData = z.infer<typeof consultationSchema>
 const Consultation: React.FC = () => {
   const { currentUser } = useAuth()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitAction, setSubmitAction] = useState<'needs_lab' | 'direct_diagnosis'>('needs_lab')
   const [consultationSuccess, setConsultationSuccess] = useState(false)
   const [patients, setPatients] = useState<any[]>([])
   const [errorMessage, setErrorMessage] = useState('')
@@ -90,7 +92,8 @@ const Consultation: React.FC = () => {
         diagnosis: data.preliminaryDiagnosis,
         notes: data.notes,
         vitalSigns: {
-          bloodPressure: data.bloodPressure,
+          systolicBP: data.systolicBP,
+          diastolicBP: data.diastolicBP,
           heartRate: data.heartRate,
           temperature: data.temperature,
           weight: data.weight,
@@ -104,10 +107,11 @@ const Consultation: React.FC = () => {
         consultationData
       )
 
-      // Step 3: Update patient status to "in_consultation"
+      // Step 3: Update patient status based on the selected workflow
+      const nextStatus = submitAction === 'direct_diagnosis' ? 'diagnosed' : 'in_consultation'
       await supabaseServices.patientServices.updatePatientStatus(
         data.patientId,
-        'in_consultation'
+        nextStatus
       )
 
       // Step 4: Show success and reset
@@ -138,7 +142,9 @@ const Consultation: React.FC = () => {
             <div className="ml-4">
               <h3 className="text-lg font-semibold text-green-900">Consultation Completed!</h3>
               <p className="text-green-700 mt-1">
-                Patient consultation has been recorded and diagnosis orders sent.
+                {submitAction === 'direct_diagnosis' 
+                  ? 'Patient consultation has been recorded and patient is ready for treatment.'
+                  : 'Patient consultation has been recorded and diagnosis orders sent.'}
               </p>
               <button
                 onClick={() => setConsultationSuccess(false)}
@@ -247,18 +253,35 @@ const Consultation: React.FC = () => {
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Blood Pressure *
-              </label>
-              <input
-                {...register('bloodPressure')}
-                className="input-field"
-                placeholder="120/80 mmHg"
-              />
-              {errors.bloodPressure && (
-                <p className="text-red-500 text-sm mt-1">{errors.bloodPressure.message}</p>
-              )}
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Systolic BP *
+                </label>
+                <input
+                  {...register('systolicBP')}
+                  type="number"
+                  className="input-field"
+                  placeholder="120"
+                />
+                {errors.systolicBP && (
+                  <p className="text-red-500 text-sm mt-1">{errors.systolicBP.message}</p>
+                )}
+              </div>
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Diastolic BP *
+                </label>
+                <input
+                  {...register('diastolicBP')}
+                  type="number"
+                  className="input-field"
+                  placeholder="80"
+                />
+                {errors.diastolicBP && (
+                  <p className="text-red-500 text-sm mt-1">{errors.diastolicBP.message}</p>
+                )}
+              </div>
             </div>
 
             <div>
@@ -396,26 +419,35 @@ const Consultation: React.FC = () => {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-between items-center">
-          <div className="flex items-center text-slate-600">
+        <div className="flex flex-col sm:flex-row justify-between items-center mt-8 gap-4 border-t border-slate-200 pt-6">
+          <div className="flex items-center text-slate-600 w-full sm:w-auto">
             <Clock className="h-4 w-4 mr-2" />
             <span className="text-sm">Consultation time: ~15 minutes</span>
           </div>
           
-          <div className="flex space-x-4">
+          <div className="flex flex-wrap items-center justify-end gap-3 w-full sm:w-auto">
             <button
               type="button"
               onClick={() => reset()}
-              className="btn-secondary"
+              className="px-4 py-2 text-slate-600 hover:text-slate-800 font-medium transition-colors order-3 sm:order-1"
             >
               Clear Form
             </button>
             <button
               type="submit"
+              onClick={() => setSubmitAction('needs_lab')}
               disabled={isSubmitting}
-              className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-5 py-2.5 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed border border-slate-300 order-2 sm:order-2"
             >
-              {isSubmitting ? 'Saving...' : 'Complete Consultation'}
+              {isSubmitting && submitAction === 'needs_lab' ? 'Saving...' : 'Requires Lab Test'}
+            </button>
+            <button
+              type="submit"
+              onClick={() => setSubmitAction('direct_diagnosis')}
+              disabled={isSubmitting}
+              className="bg-teal-600 hover:bg-teal-700 text-white px-5 py-2.5 rounded-lg font-semibold transition-all shadow-sm shadow-teal-200 disabled:opacity-50 disabled:cursor-not-allowed order-1 sm:order-3"
+            >
+              {isSubmitting && submitAction === 'direct_diagnosis' ? 'Saving...' : 'Direct Diagnosis (Skip Labs)'}
             </button>
           </div>
         </div>
