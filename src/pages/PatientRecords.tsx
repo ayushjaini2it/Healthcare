@@ -217,16 +217,16 @@ const PatientRecords: React.FC = () => {
                     </div>
                     
                     {item.data.status === 'completed' ? (
-                      <div className="mt-4 bg-blue-50/50 rounded-lg p-4 border border-blue-100">
+                      <div className="mt-4 bg-teal-50/50 rounded-lg p-4 border border-teal-100">
                         {item.data.results && (
                           <div className="mb-3">
-                            <h4 className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-1">Test Results</h4>
+                            <h4 className="text-xs font-bold text-teal-400 uppercase tracking-wider mb-1">Test Results</h4>
                             <p className="text-slate-800">{item.data.results}</p>
                           </div>
                         )}
                         {item.data.interpretation && (
                           <div>
-                            <h4 className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-1">Clinical Interpretation</h4>
+                            <h4 className="text-xs font-bold text-teal-400 uppercase tracking-wider mb-1">Clinical Interpretation</h4>
                             <p className="text-slate-700 italic">{item.data.interpretation}</p>
                           </div>
                         )}

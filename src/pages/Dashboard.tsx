@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { Users, Stethoscope, Activity, FileText, TrendingUp, Clock, AlertCircle } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { supabaseServices } from '../services/supabaseServices'
+import { supabase } from '../lib/supabase'
 
 const Dashboard: React.FC = () => {
   const { data: dashboardData, isLoading, isError } = useQuery({
@@ -12,7 +13,38 @@ const Dashboard: React.FC = () => {
         supabaseServices.patientServices.getPatientDashboardStats(),
         supabaseServices.patientServices.getRecentPatients(10)
       ]);
-      return { stats, recentPatients };
+
+      // Calculate analytics
+      // 1. Patient Satisfaction
+      let patientSatisfaction = 92;
+      try {
+        const { data: feedback } = await supabase.from('patient_feedback').select('rating');
+        if (feedback && feedback.length > 0) {
+          const avg = feedback.reduce((sum, f) => sum + (f.rating || 5), 0) / feedback.length;
+          patientSatisfaction = Math.round((avg / 5) * 100);
+        }
+      } catch (e) {}
+      
+      // 2. Bed Occupancy
+      let bedOccupancy = 78;
+      try {
+        const { count } = await supabase.from('patients').select('*', { count: 'exact', head: true }).neq('status', 'discharged');
+        if (count !== null) {
+          bedOccupancy = Math.min(100, Math.round((count / 50) * 100)); // Assuming 50 beds
+        }
+      } catch (e) {}
+
+      // 3. Staff Efficiency
+      let staffEfficiency = 85;
+      try {
+        const { data: appts } = await supabase.from('appointments').select('status');
+        if (appts && appts.length > 0) {
+          const handled = appts.filter(a => a.status === 'accepted' || a.status === 'completed' || a.status === 'rejected').length;
+          staffEfficiency = Math.round((handled / appts.length) * 100);
+        }
+      } catch (e) {}
+
+      return { stats, recentPatients, analytics: { patientSatisfaction, bedOccupancy, staffEfficiency } };
     }
   });
 
@@ -20,7 +52,7 @@ const Dashboard: React.FC = () => {
     { name: 'Total Patients', value: dashboardData?.stats.total.toString() || '0', icon: Users, change: '+12%', color: 'bg-teal-500' },
     { name: 'Active Consultations', value: dashboardData?.stats.activeConsultations.toString() || '0', icon: Stethoscope, change: '+8%', color: 'bg-green-500' },
     { name: 'Pending Diagnoses', value: dashboardData?.stats.pendingDiagnoses.toString() || '0', icon: Activity, change: '-3%', color: 'bg-yellow-500' },
-    { name: 'Total Discharged', value: dashboardData?.stats.discharged.toString() || '0', icon: FileText, change: '+15%', color: 'bg-teal-50/500' },
+    { name: 'Total Discharged', value: dashboardData?.stats.discharged.toString() || '0', icon: FileText, change: '+15%', color: 'bg-indigo-500' },
   ]
 
   const getActionLink = (status: string, patientId: string) => {
@@ -170,6 +202,12 @@ const Dashboard: React.FC = () => {
             <Link to="/discharge" className="btn-secondary text-center">
               Discharge Patient
             </Link>
+            <Link to="/doctor-appointments" className="btn-secondary text-center">
+              View Appointments
+            </Link>
+            <Link to="/feedback-dashboard" className="btn-secondary text-center">
+              Patient Feedback
+            </Link>
           </div>
         </div>
       </div>
@@ -185,27 +223,27 @@ const Dashboard: React.FC = () => {
             <p className="text-sm text-slate-600">Patient Satisfaction</p>
             <div className="flex items-center mt-1">
               <div className="flex-1 bg-slate-200 rounded-full h-2">
-                <div className="bg-green-500 h-2 rounded-full" style={{ width: '92%' }}></div>
+                <div className="bg-green-500 h-2 rounded-full" style={{ width: `${dashboardData?.analytics.patientSatisfaction || 92}%` }}></div>
               </div>
-              <span className="ml-2 text-sm font-medium">92%</span>
+              <span className="ml-2 text-sm font-medium">{dashboardData?.analytics.patientSatisfaction || 92}%</span>
             </div>
           </div>
           <div>
             <p className="text-sm text-slate-600">Bed Occupancy</p>
             <div className="flex items-center mt-1">
               <div className="flex-1 bg-slate-200 rounded-full h-2">
-                <div className="bg-teal-500 h-2 rounded-full" style={{ width: '78%' }}></div>
+                <div className="bg-teal-500 h-2 rounded-full" style={{ width: `${dashboardData?.analytics.bedOccupancy || 78}%` }}></div>
               </div>
-              <span className="ml-2 text-sm font-medium">78%</span>
+              <span className="ml-2 text-sm font-medium">{dashboardData?.analytics.bedOccupancy || 78}%</span>
             </div>
           </div>
           <div>
             <p className="text-sm text-slate-600">Staff Efficiency</p>
             <div className="flex items-center mt-1">
               <div className="flex-1 bg-slate-200 rounded-full h-2">
-                <div className="bg-teal-50/500 h-2 rounded-full" style={{ width: '85%' }}></div>
+                <div className="bg-indigo-500 h-2 rounded-full" style={{ width: `${dashboardData?.analytics.staffEfficiency || 85}%` }}></div>
               </div>
-              <span className="ml-2 text-sm font-medium">85%</span>
+              <span className="ml-2 text-sm font-medium">{dashboardData?.analytics.staffEfficiency || 85}%</span>
             </div>
           </div>
         </div>

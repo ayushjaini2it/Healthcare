@@ -13,8 +13,10 @@ const PatientDashboard: React.FC = () => {
   const quickLinks = [
     { name: 'My Profile', href: '/registration', icon: UserCheck, color: 'bg-blue-500' },
     { name: 'Appointments', href: '/appointments', icon: Calendar, color: 'bg-teal-500' },
+    { name: 'My Records', href: '/my-records', icon: Activity, color: 'bg-indigo-500' },
     { name: 'My Medications', href: '/my-medications', icon: Pill, color: 'bg-green-500' },
     { name: 'My Bills', href: '/my-bills', icon: CreditCard, color: 'bg-orange-500' },
+    { name: 'Feedback', href: '/feedback', icon: Clock, color: 'bg-purple-500' },
   ]
 
   return (
