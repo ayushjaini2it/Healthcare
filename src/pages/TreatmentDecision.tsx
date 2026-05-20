@@ -1,19 +1,22 @@
 import React, { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { supabaseServices } from '../services/supabaseServices'
-import { useForm } from 'react-hook-form'
+import { useSearchParams } from 'react-router-dom'
+import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Activity, Pill, Calendar, FileText, Clock, CheckCircle, AlertTriangle, AlertCircle } from 'lucide-react'
+import { Activity, Pill, Calendar, FileText, Clock, CheckCircle, AlertTriangle, AlertCircle, Stethoscope, Microscope, Plus, Trash2 } from 'lucide-react'
 
 const treatmentSchema = z.object({
   patientId: z.string().min(1, 'Please select a patient'),
   treatmentPlan: z.string().min(20, 'Treatment plan must be at least 20 characters'),
-  medicationName: z.string().min(3, 'Medication name is required'),
-  dosage: z.string().min(2, 'Dosage is required'),
-  frequency: z.string().min(2, 'Frequency is required'),
-  duration: z.string().min(2, 'Duration is required'),
-  medicationInstructions: z.string().min(10, 'Medication instructions are required'),
+  medications: z.array(z.object({
+    name: z.string().min(3, 'Required'),
+    dosage: z.string().min(2, 'Required'),
+    frequency: z.string().min(2, 'Required'),
+    duration: z.string().min(2, 'Required'),
+    instructions: z.string().min(5, 'Required'),
+  })).min(1, 'At least one medication is required'),
   procedures: z.string().optional(),
   followUpDate: z.string().min(1, 'Follow-up date is required'),
   additionalNotes: z.string().optional(),
@@ -27,30 +30,89 @@ const TreatmentDecision: React.FC = () => {
   const [patients, setPatients] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
-  const existingTreatments = [
-    { id: '1', patientName: 'John Doe', diagnosis: 'Hypertension', plan: 'Lifestyle changes + Lisinopril 10mg', startDate: '2024-01-10', followUpDate: '2024-02-10', status: 'in_progress' },
-    { id: '2', patientName: 'Jane Smith', diagnosis: 'Pneumonia', plan: 'Antibiotics + Rest', startDate: '2024-01-14', followUpDate: '2024-01-28', status: 'completed' },
-    { id: '3', patientName: 'Robert Johnson', diagnosis: 'Type 2 Diabetes', plan: 'Metformin 500mg + Diet control', startDate: '2024-01-15', followUpDate: '2024-02-15', status: 'in_progress' },
-  ]
+  const [searchParams] = useSearchParams()
+  const prefillPatientId = searchParams.get('patientId')
+
 
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors },
-    reset
+    reset,
+    setValue,
+    watch
   } = useForm<TreatmentFormData>({
-    resolver: zodResolver(treatmentSchema)
+    resolver: zodResolver(treatmentSchema),
+    defaultValues: {
+      patientId: prefillPatientId || '',
+      medications: [{ name: '', dosage: '', frequency: '', duration: '', instructions: '' }]
+    }
   })
 
-  // Load data when component mounts
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "medications"
+  })
+
+  useEffect(() => {
+    if (prefillPatientId && patients.length > 0) {
+      setValue('patientId', prefillPatientId);
+    }
+  }, [prefillPatientId, patients, setValue])
+
+  const selectedPatientId = watch('patientId');
+  const [clinicalHistory, setClinicalHistory] = useState<any>(null)
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false)
+
+  // Load patient list when component mounts
   useEffect(() => {
     loadData()
   }, [])
 
+  // Load clinical history when a patient is selected
+  useEffect(() => {
+    if (selectedPatientId) {
+      loadPatientHistory(selectedPatientId)
+    } else {
+      setClinicalHistory(null)
+    }
+  }, [selectedPatientId])
+
+  const loadPatientHistory = async (id: string) => {
+    setIsLoadingHistory(true)
+    try {
+      // fetch latest consultation
+      const { data: consData } = await supabase
+        .from('consultations')
+        .select('*')
+        .eq('patient_id', id)
+        .order('consultation_date', { ascending: false })
+        .limit(1)
+
+      // fetch latest diagnosis
+      const { data: diagData } = await supabase
+        .from('diagnoses')
+        .select('*')
+        .eq('patient_id', id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+
+      setClinicalHistory({
+        consultation: consData?.[0] || null,
+        diagnosis: diagData?.[0] || null
+      })
+    } catch (error) {
+      console.error('Failed to fetch clinical history:', error)
+    } finally {
+      setIsLoadingHistory(false)
+    }
+  }
+
   const loadData = async () => {
     try {
       setIsLoading(true)
-      const patientsData = await supabaseServices.patientServices.getAllPatients()
+      const patientsData = await supabaseServices.patientServices.getPatientsByStatus(['diagnosed', 'treatment'])
       setPatients(patientsData || [])
     } catch (error) {
       console.error('Error loading data:', error)
@@ -93,18 +155,20 @@ const TreatmentDecision: React.FC = () => {
         followUpDate: new Date(data.followUpDate),
       })
 
-      // Add the single medication from the form
-      if (treatment?.id) {
-        await supabaseServices.treatmentServices.addMedication(
-          treatment.id,
-          {
-            name: data.medicationName,
-            dosage: data.dosage,
-            frequency: data.frequency,
-            duration: data.duration,
-            instructions: data.medicationInstructions,
-          }
-        )
+      // Add medications
+      if (treatment?.id && data.medications.length > 0) {
+        await Promise.all(data.medications.map(med => 
+          supabaseServices.treatmentServices.addMedication(
+            treatment.id,
+            {
+              name: med.name,
+              dosage: med.dosage,
+              frequency: med.frequency,
+              duration: med.duration,
+              instructions: med.instructions,
+            }
+          )
+        ))
       }
 
       // Update patient status
@@ -228,85 +292,97 @@ const TreatmentDecision: React.FC = () => {
                 )}
               </div>
 
-              {/* Medication Details */}
-              <div className="border border-slate-200 rounded-lg p-4">
-                <h3 className="text-lg font-medium text-slate-900 mb-4 flex items-center">
-                  <Pill className="h-5 w-5 mr-2" />
-                  Medication Prescription
-                </h3>
+              {/* Medication Details Array */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-lg font-medium text-slate-900 flex items-center">
+                    <Pill className="h-5 w-5 mr-2 text-teal-600" />
+                    Medication Prescriptions
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => append({ name: '', dosage: '', frequency: '', duration: '', instructions: '' })}
+                    className="flex items-center text-sm font-medium text-teal-600 hover:text-teal-700 bg-teal-50 px-3 py-1.5 rounded-lg transition-colors"
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    Add Medication
+                  </button>
+                </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
-                      Medication Name *
-                    </label>
-                    <input
-                      {...register('medicationName')}
-                      className="input-field"
-                      placeholder="e.g., Lisinopril"
-                    />
-                    {errors.medicationName && (
-                      <p className="text-red-500 text-sm mt-1">{errors.medicationName.message}</p>
+                {fields.map((field, index) => (
+                  <div key={field.id} className="border border-slate-200 rounded-lg p-4 bg-slate-50/50 relative group transition-all hover:border-teal-300">
+                    {fields.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => remove(index)}
+                        className="absolute top-4 right-4 text-slate-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                        title="Remove medication"
+                      >
+                        <Trash2 className="h-5 w-5" />
+                      </button>
                     )}
-                  </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                      <div>
+                        <label className="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">
+                          Name *
+                        </label>
+                        <input
+                          {...register(`medications.${index}.name` as const)}
+                          className={`input-field ${errors.medications?.[index]?.name ? 'border-red-300' : ''}`}
+                          placeholder="e.g. Lisinopril"
+                        />
+                      </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
-                      Dosage *
-                    </label>
-                    <input
-                      {...register('dosage')}
-                      className="input-field"
-                      placeholder="e.g., 10mg"
-                    />
-                    {errors.dosage && (
-                      <p className="text-red-500 text-sm mt-1">{errors.dosage.message}</p>
-                    )}
-                  </div>
+                      <div>
+                        <label className="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">
+                          Dosage *
+                        </label>
+                        <input
+                          {...register(`medications.${index}.dosage` as const)}
+                          className={`input-field ${errors.medications?.[index]?.dosage ? 'border-red-300' : ''}`}
+                          placeholder="e.g. 10mg"
+                        />
+                      </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
-                      Frequency *
-                    </label>
-                    <input
-                      {...register('frequency')}
-                      className="input-field"
-                      placeholder="e.g., Twice daily"
-                    />
-                    {errors.frequency && (
-                      <p className="text-red-500 text-sm mt-1">{errors.frequency.message}</p>
-                    )}
-                  </div>
+                      <div>
+                        <label className="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">
+                          Frequency *
+                        </label>
+                        <input
+                          {...register(`medications.${index}.frequency` as const)}
+                          className={`input-field ${errors.medications?.[index]?.frequency ? 'border-red-300' : ''}`}
+                          placeholder="e.g. Twice daily"
+                        />
+                      </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
-                      Duration *
-                    </label>
-                    <input
-                      {...register('duration')}
-                      className="input-field"
-                      placeholder="e.g., 30 days"
-                    />
-                    {errors.duration && (
-                      <p className="text-red-500 text-sm mt-1">{errors.duration.message}</p>
-                    )}
-                  </div>
-                </div>
+                      <div>
+                        <label className="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">
+                          Duration *
+                        </label>
+                        <input
+                          {...register(`medications.${index}.duration` as const)}
+                          className={`input-field ${errors.medications?.[index]?.duration ? 'border-red-300' : ''}`}
+                          placeholder="e.g. 30 days"
+                        />
+                      </div>
+                    </div>
 
-                <div className="mt-4">
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Medication Instructions *
-                  </label>
-                  <textarea
-                    {...register('medicationInstructions')}
-                    rows={3}
-                    className="input-field"
-                    placeholder="Specific instructions for medication administration..."
-                  />
-                  {errors.medicationInstructions && (
-                    <p className="text-red-500 text-sm mt-1">{errors.medicationInstructions.message}</p>
-                  )}
-                </div>
+                    <div>
+                      <label className="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">
+                        Instructions *
+                      </label>
+                      <input
+                        {...register(`medications.${index}.instructions` as const)}
+                        className={`input-field ${errors.medications?.[index]?.instructions ? 'border-red-300' : ''}`}
+                        placeholder="e.g. Take with food..."
+                      />
+                    </div>
+                  </div>
+                ))}
+                {errors.medications?.root && (
+                  <p className="text-red-500 text-sm mt-1">{errors.medications.root.message}</p>
+                )}
               </div>
 
               {/* Procedures */}
@@ -375,52 +451,96 @@ const TreatmentDecision: React.FC = () => {
           </div>
         </div>
 
-        {/* Existing Treatments */}
+        {/* Patient Clinical History */}
         <div className="lg:col-span-1">
           <div className="card">
             <h2 className="text-xl font-semibold text-slate-900 mb-6 flex items-center">
               <FileText className="h-5 w-5 mr-2" />
-              Active Treatments
+              Patient Clinical History
             </h2>
 
-            <div className="space-y-4">
-              {existingTreatments.map(treatment => (
-                <div key={treatment.id} className="border border-slate-200 rounded-lg p-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h4 className="font-medium text-slate-900">{treatment.patientName}</h4>
-                      <p className="text-sm text-slate-600 mt-1">{treatment.diagnosis}</p>
-                      <p className="text-sm text-slate-500 mt-2">{treatment.plan}</p>
+            {!selectedPatientId ? (
+              <div className="text-center p-6 text-slate-500 bg-slate-50 rounded-lg border border-dashed border-slate-200">
+                <AlertCircle className="h-8 w-8 mx-auto mb-2 text-slate-400" />
+                Select a patient to view their consultation notes and diagnosis results.
+              </div>
+            ) : isLoadingHistory ? (
+              <div className="flex justify-center p-8">
+                <div className="w-8 h-8 rounded-full border-4 border-teal-100 border-t-teal-600 animate-spin"></div>
+              </div>
+            ) : !clinicalHistory?.consultation && !clinicalHistory?.diagnosis ? (
+              <div className="text-center p-6 text-slate-500 bg-slate-50 rounded-lg border border-slate-200">
+                No recent clinical history found for this patient.
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {clinicalHistory.consultation && (
+                  <div className="border border-slate-200 rounded-lg p-4 bg-white shadow-sm">
+                    <h3 className="font-semibold text-slate-900 border-b border-slate-100 pb-2 mb-3 flex items-center">
+                      <Stethoscope className="h-4 w-4 mr-2 text-teal-600" />
+                      Consultation Notes
+                    </h3>
+                    <div className="space-y-3 text-sm">
+                      <div>
+                        <span className="text-slate-500 block text-xs uppercase tracking-wider mb-1">Symptoms</span>
+                        <p className="text-slate-900 font-medium">{clinicalHistory.consultation.symptoms}</p>
+                      </div>
+                      <div>
+                        <span className="text-slate-500 block text-xs uppercase tracking-wider mb-1">Doctor's Notes</span>
+                        <p className="text-slate-700">{clinicalHistory.consultation.notes}</p>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 bg-slate-50 p-2 rounded border border-slate-100 mt-2">
+                        <div>
+                          <span className="text-slate-500 block text-xs mb-0.5">Vitals (BP)</span>
+                          <span className="font-medium text-slate-900">
+                            {clinicalHistory.consultation.systolic_bp && clinicalHistory.consultation.diastolic_bp 
+                              ? `${clinicalHistory.consultation.systolic_bp}/${clinicalHistory.consultation.diastolic_bp}` 
+                              : 'N/A'}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-slate-500 block text-xs mb-0.5">Temp</span>
+                          <span className="font-medium text-slate-900">{clinicalHistory.consultation.temperature ? `${clinicalHistory.consultation.temperature}°C` : 'N/A'}</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  
-                  <div className="mt-3 space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-slate-500">Start Date:</span>
-                      <span className="text-slate-900">{treatment.startDate}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-slate-500">Follow-up:</span>
-                      <span className="text-slate-900">{treatment.followUpDate}</span>
-                    </div>
-                  </div>
+                )}
 
-                  <div className="mt-3 flex items-center justify-between">
-                    <div className={`flex items-center text-sm font-medium ${
-                      treatment.status === 'completed' 
-                        ? 'text-green-600'
-                        : treatment.status === 'in_progress'
-                        ? 'text-teal-600'
-                        : 'text-slate-600'
-                    }`}>
-                      {treatment.status === 'completed' && <CheckCircle className="h-3 w-3 mr-1" />}
-                      {treatment.status === 'in_progress' && <Clock className="h-3 w-3 mr-1" />}
-                      {treatment.status ? treatment.status.replace('_', ' ') : 'Unknown'}
+                {clinicalHistory.diagnosis && (
+                  <div className="border border-slate-200 rounded-lg p-4 bg-white shadow-sm">
+                    <h3 className="font-semibold text-slate-900 border-b border-slate-100 pb-2 mb-3 flex items-center">
+                      <Microscope className="h-4 w-4 mr-2 text-blue-600" />
+                      Diagnosis Results
+                    </h3>
+                    <div className="space-y-3 text-sm">
+                      <div>
+                        <span className="text-slate-500 block text-xs uppercase tracking-wider mb-1">Test Name</span>
+                        <p className="text-slate-900 font-bold text-base">{clinicalHistory.diagnosis.test_name}</p>
+                      </div>
+                      {clinicalHistory.diagnosis.results && (
+                        <div>
+                          <span className="text-slate-500 block text-xs uppercase tracking-wider mb-1">Results</span>
+                          <p className="text-slate-700">{clinicalHistory.diagnosis.results}</p>
+                        </div>
+                      )}
+                      <div>
+                        <span className="text-slate-500 block text-xs uppercase tracking-wider mb-1">Type</span>
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium uppercase bg-blue-100 text-blue-800">
+                          {clinicalHistory.diagnosis.test_type}
+                        </span>
+                      </div>
+                      {clinicalHistory.diagnosis.interpretation && (
+                        <div>
+                          <span className="text-slate-500 block text-xs uppercase tracking-wider mb-1">Interpretation</span>
+                          <p className="text-slate-700 italic">{clinicalHistory.diagnosis.interpretation}</p>
+                        </div>
+                      )}
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Treatment Guidelines */}

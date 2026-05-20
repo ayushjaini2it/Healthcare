@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
+import { useSearchParams } from 'react-router-dom'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { FileText, CheckCircle, Clock, AlertTriangle, Calendar, AlertCircle } from 'lucide-react'
@@ -28,6 +29,8 @@ const Discharge: React.FC = () => {
   const [recentDischarges, setRecentDischarges] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
+  const [searchParams] = useSearchParams()
+  const prefillPatientId = searchParams.get('patientId')
 
   useEffect(() => {
     loadDischargePatients()
@@ -37,14 +40,14 @@ const Discharge: React.FC = () => {
     try {
       setIsLoading(true)
       
-      // Fetch patients ready for discharge
-      const patientsData = await supabaseServices.patientServices.getAllPatients()
-      const readyForDischarge = patientsData?.filter(p => 
-        p.status === 'billing' || p.status === 'treatment' || p.status === 'discharge'
-      ) || []
+      // Fetch patients ready for discharge and recently discharged
+      const [readyForDischarge, dischargedList] = await Promise.all([
+        supabaseServices.patientServices.getPatientsByStatus(['billing', 'treatment']),
+        supabaseServices.patientServices.getPatientsByStatus(['discharged'])
+      ])
       
       // Map to UI expectations
-      setPatients(readyForDischarge.map(p => ({
+      setPatients((readyForDischarge || []).map(p => ({
         id: p.id,
         name: p.name,
         age: p.age,
@@ -55,8 +58,7 @@ const Discharge: React.FC = () => {
       })))
 
       // Map discharged patients 
-      const dischargedList = patientsData?.filter(p => p.status === 'discharged') || []
-      setRecentDischarges(dischargedList.map(p => ({
+      setRecentDischarges((dischargedList || []).map(p => ({
         id: p.id,
         patientName: p.name,
         dischargeDate: p.registrationDate ? new Date(p.registrationDate).toLocaleDateString() : 'N/A',
@@ -89,10 +91,21 @@ const Discharge: React.FC = () => {
     handleSubmit,
     formState: { errors },
     reset,
-    watch
+    watch,
+    setValue
   } = useForm<DischargeFormData>({
-    resolver: zodResolver(dischargeSchema)
+    resolver: zodResolver(dischargeSchema),
+    defaultValues: {
+      patientId: prefillPatientId || '',
+      dischargeType: 'routine'
+    }
   })
+
+  useEffect(() => {
+    if (prefillPatientId && patients.length > 0) {
+      setValue('patientId', prefillPatientId);
+    }
+  }, [prefillPatientId, patients, setValue])
 
   const selectedPatient = patients.find(p => p.id === watch('patientId'))
 

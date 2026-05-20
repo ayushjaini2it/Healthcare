@@ -65,18 +65,32 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     { name: 'Diagnosis', href: '/diagnosis', icon: Microscope, badge: 0 },
     { name: 'Treatment', href: '/treatment', icon: Activity, badge: 0 },
     { name: 'Discharge', href: '/discharge', icon: FileText, badge: 0 },
+    { name: 'Patient Feedback', href: '/feedback-dashboard', icon: MessageSquare, badge: 0 },
+  ]
+
+  const pharmacistNav = [
+    { name: 'Pharmacy Queue', href: '/pharmacy', icon: Pill, badge: 0 },
+  ]
+
+  const adminNav = [
+    { name: 'Billing & Invoices', href: '/billing', icon: CreditCard, badge: 0 },
+    { name: 'Patient Feedback', href: '/feedback-dashboard', icon: MessageSquare, badge: 0 },
   ]
 
   const patientNav = [
     { name: 'Dashboard', href: '/', icon: Home, badge: 0 },
     { name: 'My Profile', href: '/registration', icon: UserCheck, badge: 0 },
     { name: 'Appointments', href: '/appointments', icon: Calendar, badge: 0 },
-    { name: 'Pharmacy', href: '/pharmacy', icon: Pill, badge: 0 },
-    { name: 'Billing', href: '/billing', icon: CreditCard, badge: 0 },
+    { name: 'Clinical Records', href: '/my-records', icon: FileText, badge: 0 },
+    { name: 'My Medications', href: '/my-medications', icon: Pill, badge: 0 },
+    { name: 'My Bills', href: '/my-bills', icon: CreditCard, badge: 0 },
     { name: 'Feedback', href: '/feedback', icon: MessageSquare, badge: 0 },
   ]
 
-  const navigation = user?.role === 'doctor' ? doctorNav : patientNav
+  let navigation = patientNav;
+  if (user?.role === 'doctor') navigation = doctorNav;
+  if (user?.role === 'pharmacist') navigation = pharmacistNav;
+  if (user?.role === 'admin') navigation = adminNav;
 
   return (
     <div className="min-h-screen bg-slate-50">

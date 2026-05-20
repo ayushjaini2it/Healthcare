@@ -4,7 +4,6 @@
 import { supabase } from '../lib/supabase'
 import type {
   Patient,
-  Doctor,
   Consultation,
   Diagnosis,
   Treatment,
@@ -79,6 +78,69 @@ export const patientServices = {
   },
 
   /**
+   * Get lightweight patient list filtered by status (Optimized for dropdowns)
+   */
+  async getPatientsByStatus(statuses: string[]) {
+    const { data, error } = await supabase
+      .from('patients')
+      .select('id, first_name, last_name, status, age, registration_date')
+      .in('status', statuses)
+      .order('updated_at', { ascending: false })
+
+    if (error) throw error
+    return data?.map((p: any) => ({
+      id: p.id,
+      name: `${p.first_name} ${p.last_name}`,
+      status: p.status,
+      age: p.age,
+      registrationDate: p.registration_date
+    }))
+  },
+
+  /**
+   * Get dashboard statistics using optimized COUNT queries
+   */
+  async getPatientDashboardStats() {
+    const [
+      { count: total },
+      { count: activeConsultations },
+      { count: pendingDiagnoses },
+      { count: discharged }
+    ] = await Promise.all([
+      supabase.from('patients').select('*', { count: 'exact', head: true }),
+      supabase.from('patients').select('*', { count: 'exact', head: true }).in('status', ['registered', 'in_consultation']),
+      supabase.from('patients').select('*', { count: 'exact', head: true }).in('status', ['diagnosed', 'treatment']),
+      supabase.from('patients').select('*', { count: 'exact', head: true }).eq('status', 'discharged')
+    ])
+
+    return {
+      total: total || 0,
+      activeConsultations: activeConsultations || 0,
+      pendingDiagnoses: pendingDiagnoses || 0,
+      discharged: discharged || 0
+    }
+  },
+
+  /**
+   * Get recent patients (Optimized for Dashboard list)
+   */
+  async getRecentPatients(limit: number = 10) {
+    const { data, error } = await supabase
+      .from('patients')
+      .select('id, first_name, last_name, status, registration_date')
+      .order('updated_at', { ascending: false })
+      .limit(limit)
+
+    if (error) throw error
+    return data?.map((p: any) => ({
+      id: p.id,
+      name: `${p.first_name} ${p.last_name}`,
+      status: p.status,
+      registrationDate: p.registration_date
+    }))
+  },
+
+  /**
    * Get patient by ID
    */
   async getPatientById(patientId: string) {
@@ -86,28 +148,63 @@ export const patientServices = {
       .from('patients')
       .select('*')
       .eq('id', patientId)
-      .single()
+      .limit(1)
 
     if (error) throw error
-    if (!data) return null;
+    if (!data || data.length === 0) return null;
+    const patientData = data[0];
     return {
-      id: data.id,
-      authUserId: data.auth_user_id,
-      name: `${data.first_name} ${data.last_name}`,
-      age: data.age,
-      gender: data.gender,
-      email: data.email,
-      phone: data.phone,
-      address: data.address,
+      id: patientData.id,
+      authUserId: patientData.auth_user_id,
+      name: `${patientData.first_name} ${patientData.last_name}`,
+      age: patientData.age,
+      gender: patientData.gender,
+      email: patientData.email,
+      phone: patientData.phone,
+      address: patientData.address,
       emergencyContact: {
-        name: data.emergency_contact_name,
-        phone: data.emergency_contact_phone,
-        relationship: data.emergency_contact_relationship
+        name: patientData.emergency_contact_name,
+        phone: patientData.emergency_contact_phone,
+        relationship: patientData.emergency_contact_relationship
       },
-      medicalHistory: data.medical_history ? data.medical_history.split(',') : [],
-      allergies: data.allergies ? data.allergies.split(',') : [],
-      registrationDate: data.registration_date,
-      status: data.status
+      medicalHistory: patientData.medical_history ? patientData.medical_history.split(',') : [],
+      allergies: patientData.allergies ? patientData.allergies.split(',') : [],
+      registrationDate: patientData.registration_date,
+      status: patientData.status
+    }
+  },
+
+  /**
+   * Get patient by Auth User ID
+   */
+  async getPatientByAuthId(authId: string) {
+    const { data, error } = await supabase
+      .from('patients')
+      .select('*')
+      .eq('auth_user_id', authId)
+      .limit(1)
+
+    if (error) throw error
+    if (!data || data.length === 0) return null;
+    const patientData = data[0];
+    return {
+      id: patientData.id,
+      authUserId: patientData.auth_user_id,
+      name: `${patientData.first_name} ${patientData.last_name}`,
+      age: patientData.age,
+      gender: patientData.gender,
+      email: patientData.email,
+      phone: patientData.phone,
+      address: patientData.address,
+      emergencyContact: {
+        name: patientData.emergency_contact_name,
+        phone: patientData.emergency_contact_phone,
+        relationship: patientData.emergency_contact_relationship
+      },
+      medicalHistory: patientData.medical_history ? patientData.medical_history.split(',') : [],
+      allergies: patientData.allergies ? patientData.allergies.split(',') : [],
+      registrationDate: patientData.registration_date,
+      status: patientData.status
     }
   },
 
@@ -159,7 +256,8 @@ export const consultationServices = {
         : consultationData.symptoms,
       diagnosis: consultationData.diagnosis || null,
       notes: consultationData.notes || null,
-      blood_pressure: consultationData.vitalSigns?.bloodPressure || null,
+      systolic_bp: consultationData.vitalSigns?.systolicBP || null,
+      diastolic_bp: consultationData.vitalSigns?.diastolicBP || null,
       heart_rate: consultationData.vitalSigns?.heartRate || null,
       temperature: consultationData.vitalSigns?.temperature || null,
       weight: consultationData.vitalSigns?.weight || null,
@@ -199,7 +297,8 @@ export const consultationServices = {
       diagnosis: c.diagnosis,
       notes: c.notes,
       vitalSigns: {
-        bloodPressure: c.blood_pressure,
+        systolicBP: c.systolic_bp,
+        diastolicBP: c.diastolic_bp,
         heartRate: c.heart_rate,
         temperature: c.temperature,
         weight: c.weight,
@@ -352,19 +451,19 @@ export const treatmentServices = {
       .eq('patient_id', patientId)
       .order('created_at', { ascending: false })
       .limit(1)
-      .single()
 
-    if (error && error.code !== 'PGRST116') throw error
-    if (!data) return null;
+    if (error) throw error
+    if (!data || data.length === 0) return null;
+    const treatmentData = data[0];
     return {
-      id: data.id,
-      patientId: data.patient_id,
-      consultationId: data.consultation_id,
-      diagnosisId: data.diagnosis_id,
-      plan: data.treatment_plan,
-      procedures: data.procedures ? data.procedures.split(',') : [],
-      followUpDate: data.follow_up_date,
-      status: data.status,
+      id: treatmentData.id,
+      patientId: treatmentData.patient_id,
+      consultationId: treatmentData.consultation_id,
+      diagnosisId: treatmentData.diagnosis_id,
+      plan: treatmentData.treatment_plan,
+      procedures: treatmentData.procedures ? treatmentData.procedures.split(',') : [],
+      followUpDate: treatmentData.follow_up_date,
+      status: treatmentData.status,
       medications: []
     }
   },
@@ -442,10 +541,9 @@ export const billingServices = {
       .eq('patient_id', patientId)
       .order('created_at', { ascending: false })
       .limit(1)
-      .single()
 
-    if (error && error.code !== 'PGRST116') throw error
-    return data
+    if (error) throw error
+    return data?.[0] || null
   },
 
   /**
@@ -483,7 +581,7 @@ export const feedbackServices = {
           rating: feedbackData.rating,
           comments: feedbackData.comments,
           category: feedbackData.category,
-          feedback_date: new Date(),
+          created_at: new Date(),
           status: 'submitted'
         }
       ])
@@ -501,7 +599,7 @@ export const feedbackServices = {
       .from('feedback')
       .select('*')
       .eq('patient_id', patientId)
-      .order('feedback_date', { ascending: false })
+      .order('created_at', { ascending: false })
 
     if (error) throw error
     return data
@@ -514,10 +612,24 @@ export const feedbackServices = {
     const { data, error } = await supabase
       .from('feedback')
       .select('*, patients(first_name, last_name)')
-      .order('feedback_date', { ascending: false })
+      .order('created_at', { ascending: false })
 
     if (error) throw error
     return data
+  },
+
+  /**
+   * Update feedback status
+   */
+  async updateFeedbackStatus(feedbackId: string, status: 'reviewed') {
+    const { data, error } = await supabase
+      .from('feedback')
+      .update({ status })
+      .eq('id', feedbackId)
+      .select()
+
+    if (error) throw error
+    return data?.[0]
   }
 }
 
@@ -533,7 +645,8 @@ export const authServices = {
     specialization: string,
     phone: string,
     hospitalName: string,
-    hospitalAddress: string
+    hospitalAddress: string,
+    inviteCode: string
   ) {
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
@@ -543,33 +656,29 @@ export const authServices = {
     if (authError) throw authError
     if (!authData.user) throw new Error('Signup failed')
 
-    const { data, error } = await supabase
-      .from('doctors')
-      .insert([
-        {
-          id: authData.user.id,
-          full_name: fullName,
-          email: email,
-          specialization: specialization,
-          phone: phone,
-          hospital_name: hospitalName,
-          hospital_address: hospitalAddress,
-        }
-      ])
-      .select()
+    const { error } = await supabase.rpc('register_doctor_profile', {
+      p_user_id: authData.user.id,
+      p_full_name: fullName,
+      p_email: email,
+      p_specialization: specialization,
+      p_phone: phone,
+      p_hospital_name: hospitalName,
+      p_hospital_address: hospitalAddress,
+      p_invite_code: inviteCode
+    })
 
     if (error) throw error
 
     // If user is confirmed, sign them in automatically
     if (authData.user && authData.user.email_confirmed_at) {
-      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+      const { error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
       if (signInError) throw signInError
     }
 
-    return { user: authData.user, profile: data?.[0] }
+    return { user: authData.user }
   },
 
   /**
@@ -605,7 +714,7 @@ export const authServices = {
 
     // If user is confirmed, sign them in automatically
     if (authData.user && authData.user.email_confirmed_at) {
-      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+      const { error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
@@ -663,7 +772,12 @@ export const authServices = {
       .eq('id', user.id)
       .single()
 
-    if (doctor) return { ...user, profile: doctor, role: 'doctor' }
+    if (doctor) {
+      const spec = doctor.specialization?.toLowerCase() || ''
+      if (spec.includes('pharmacist')) return { ...user, profile: doctor, role: 'pharmacist' }
+      if (spec.includes('admin') || spec.includes('billing')) return { ...user, profile: doctor, role: 'admin' }
+      return { ...user, profile: doctor, role: 'doctor' }
+    }
 
     // Check if patient
     const { data: patient } = await supabase

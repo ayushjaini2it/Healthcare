@@ -1,39 +1,48 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import { Link } from 'react-router-dom'
-import { Users, Stethoscope, Activity, FileText, TrendingUp, Clock } from 'lucide-react'
+import { Users, Stethoscope, Activity, FileText, TrendingUp, Clock, AlertCircle } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
 import { supabaseServices } from '../services/supabaseServices'
-import { Patient } from '../types'
 
 const Dashboard: React.FC = () => {
-  const [patients, setPatients] = useState<Patient[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    const fetchPatients = async () => {
-      try {
-        const data = await supabaseServices.patientServices.getAllPatients()
-        if (data) setPatients(data)
-      } catch (error) {
-        console.error('Error fetching patients:', error)
-      } finally {
-        setIsLoading(false)
-      }
+  const { data: dashboardData, isLoading, isError } = useQuery({
+    queryKey: ['dashboardData'],
+    queryFn: async () => {
+      const [stats, recentPatients] = await Promise.all([
+        supabaseServices.patientServices.getPatientDashboardStats(),
+        supabaseServices.patientServices.getRecentPatients(10)
+      ]);
+      return { stats, recentPatients };
     }
-    fetchPatients()
-  }, [])
+  });
+
   const stats = [
-    { name: 'Total Patients', value: '1,246', icon: Users, change: '+12%', color: 'bg-teal-500' },
-    { name: 'Active Consultations', value: '45', icon: Stethoscope, change: '+8%', color: 'bg-green-500' },
-    { name: 'Pending Diagnoses', value: '23', icon: Activity, change: '-3%', color: 'bg-yellow-500' },
-    { name: 'Discharges Today', value: '18', icon: FileText, change: '+15%', color: 'bg-teal-50/500' },
+    { name: 'Total Patients', value: dashboardData?.stats.total.toString() || '0', icon: Users, change: '+12%', color: 'bg-teal-500' },
+    { name: 'Active Consultations', value: dashboardData?.stats.activeConsultations.toString() || '0', icon: Stethoscope, change: '+8%', color: 'bg-green-500' },
+    { name: 'Pending Diagnoses', value: dashboardData?.stats.pendingDiagnoses.toString() || '0', icon: Activity, change: '-3%', color: 'bg-yellow-500' },
+    { name: 'Total Discharged', value: dashboardData?.stats.discharged.toString() || '0', icon: FileText, change: '+15%', color: 'bg-teal-50/500' },
   ]
 
-  const recentPatients = patients.slice(0, 10).map(p => ({
+  const getActionLink = (status: string, patientId: string) => {
+    switch (status) {
+      case 'registered': return `/consultation?patientId=${patientId}`;
+      case 'in_consultation': return `/diagnosis?patientId=${patientId}`;
+      case 'diagnosed': return `/treatment?patientId=${patientId}`;
+      case 'treatment': return `/pharmacy?patientId=${patientId}`;
+      case 'pharmacy': return `/billing?patientId=${patientId}`;
+      case 'billing': return `/discharge?patientId=${patientId}`;
+      case 'discharged': return `/`;
+      default: return `/consultation?patientId=${patientId}`;
+    }
+  }
+
+  const recentPatients = dashboardData?.recentPatients.map(p => ({
     id: p.id,
     name: p.name,
-    status: p.status.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+    rawStatus: p.status,
+    status: p.status.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()),
     time: new Date(p.registrationDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-  }))
+  })) || []
 
   const flowSteps = [
     { name: 'Patient Entry', path: '/registration', status: 'active' },
@@ -108,24 +117,33 @@ const Dashboard: React.FC = () => {
           <h2 className="text-xl font-semibold text-slate-900 mb-4">Recent Patients</h2>
           <div className="space-y-3">
             {isLoading ? (
-              <div className="text-center py-4 text-slate-500">Loading patients...</div>
+              <div className="flex flex-col items-center justify-center py-8 text-slate-500 space-y-3">
+                <div className="w-8 h-8 rounded-full border-4 border-slate-200 border-t-teal-600 animate-spin"></div>
+                <p>Loading patients...</p>
+              </div>
+            ) : isError ? (
+              <div className="flex items-center gap-2 p-4 bg-red-50 text-red-600 rounded-lg">
+                <AlertCircle className="h-5 w-5" />
+                <p className="text-sm font-medium">Failed to load patients. Please try again.</p>
+              </div>
             ) : recentPatients.length > 0 ? (
               recentPatients.map((patient) => (
-                <div key={patient.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                <div key={patient.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
                   <div>
                     <p className="font-medium text-slate-900">{patient.name}</p>
                     <p className="text-sm text-slate-600">{patient.status}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-slate-500">{patient.time}</p>
-                    <Link to={`/registration`} className="text-primary-600 hover:text-primary-700 text-sm">
+                    <p className="text-sm text-slate-500 mb-1">{patient.time}</p>
+                    <Link to={getActionLink(patient.rawStatus, patient.id)} className="text-teal-600 hover:text-teal-700 text-sm font-medium">
+
                       View Details
                     </Link>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="text-center py-4 text-slate-500">No recent patients found.</div>
+              <div className="text-center py-8 text-slate-500">No recent patients found.</div>
             )}
           </div>
         </div>
