@@ -23,26 +23,13 @@ CREATE OR REPLACE FUNCTION register_doctor_profile(
     p_specialization TEXT,
     p_phone TEXT,
     p_hospital_name TEXT,
-    p_hospital_address TEXT,
-    p_invite_code TEXT
+    p_hospital_address TEXT
 )
 RETURNS boolean
 LANGUAGE plpgsql
 SECURITY DEFINER 
 AS $$
-DECLARE
-    valid_code boolean;
 BEGIN
-    -- Check if invite code is valid
-    SELECT EXISTS(
-        SELECT 1 FROM doctor_invite_codes 
-        WHERE code = p_invite_code AND is_active = true
-    ) INTO valid_code;
-    
-    IF NOT valid_code THEN
-        RAISE EXCEPTION 'Invalid or expired invite code';
-    END IF;
-
     -- Insert into doctors table securely
     INSERT INTO doctors (id, full_name, email, specialization, phone, hospital_name, hospital_address)
     VALUES (p_user_id, p_full_name, p_email, p_specialization, p_phone, p_hospital_name, p_hospital_address);
