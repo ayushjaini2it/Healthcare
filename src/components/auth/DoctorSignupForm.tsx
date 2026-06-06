@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { supabaseServices } from '../../services/supabaseServices';
-import { Loader2, KeyRound, Stethoscope, Phone, Building2, MapPin, ShieldCheck } from 'lucide-react';
+import { Loader2, Stethoscope, Phone, Building2, MapPin, ShieldCheck } from 'lucide-react';
 import { PasswordStrengthMeter } from './PasswordStrengthMeter';
 import { supabase } from '../../lib/supabase';
 
@@ -11,7 +11,6 @@ const doctorSignupSchema = z.object({
   fullName: z.string().min(2, 'Full name is required'),
   email: z.string().email('Please enter a valid email address'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
-  inviteCode: z.string().min(1, 'Invite code is required'),
   specialization: z.string().min(2, 'Specialization is required'),
   phone: z.string().min(5, 'Valid phone number required'),
   hospitalName: z.string().min(2, 'Hospital name is required'),
@@ -42,7 +41,7 @@ export const DoctorSignupForm: React.FC<DoctorSignupFormProps> = ({ onSuccess, s
     setError('');
     try {
       await supabaseServices.authServices.signupDoctor(
-        data.email, data.password, data.fullName, data.specialization, data.phone, data.hospitalName, data.hospitalAddress, data.inviteCode
+        data.email, data.password, data.fullName, data.specialization, data.phone, data.hospitalName, data.hospitalAddress
       );
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
@@ -52,9 +51,7 @@ export const DoctorSignupForm: React.FC<DoctorSignupFormProps> = ({ onSuccess, s
       }
     } catch (err: any) {
       const msg = err?.message || '';
-      if (msg.toLowerCase().includes('invalid or expired invite code')) {
-         setError('Invalid invite code. Contact your hospital administrator.');
-      } else if (msg.toLowerCase().includes('already registered') || msg.toLowerCase().includes('already been registered')) {
+      if (msg.toLowerCase().includes('already registered') || msg.toLowerCase().includes('already been registered')) {
         setError('An account with this email already exists. Try signing in instead.');
       } else {
         setError(msg || 'Something went wrong. Please try again or contact support.');
@@ -80,22 +77,8 @@ export const DoctorSignupForm: React.FC<DoctorSignupFormProps> = ({ onSuccess, s
       <div className="space-y-4 p-4 bg-teal-50 border border-teal-100 rounded-2xl">
         <p className="text-xs text-teal-600 font-semibold flex items-center gap-1.5">
           <ShieldCheck className="h-3.5 w-3.5" />
-          Healthcare professional details — invite code required
+          Healthcare professional details
         </p>
-
-        {/* Invite Code */}
-        <div>
-          <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 ml-1">Invite Code <span className="text-red-500">*</span></label>
-          <div className="relative group">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-teal-500 transition-colors">
-              <KeyRound className="h-5 w-5" />
-            </div>
-            <input {...register('inviteCode')} type="text"
-              className={`w-full pl-11 pr-4 py-3 bg-white border rounded-2xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all font-mono tracking-widest ${errors.inviteCode ? 'border-red-300' : 'border-slate-100'}`}
-              placeholder="HC-XXXX-XXXX" />
-          </div>
-          {errors.inviteCode && <p className="mt-1.5 text-xs text-red-500 font-medium ml-1">{errors.inviteCode.message}</p>}
-        </div>
 
         {/* Specialization */}
         <div>
