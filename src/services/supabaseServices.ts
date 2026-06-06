@@ -645,7 +645,8 @@ export const authServices = {
     specialization: string,
     phone: string,
     hospitalName: string,
-    hospitalAddress: string
+    hospitalAddress: string,
+    inviteCode: string
   ) {
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
@@ -662,7 +663,8 @@ export const authServices = {
       p_specialization: specialization,
       p_phone: phone,
       p_hospital_name: hospitalName,
-      p_hospital_address: hospitalAddress
+      p_hospital_address: hospitalAddress,
+      p_invite_code: inviteCode
     })
 
     if (error) throw error
@@ -753,6 +755,16 @@ export const authServices = {
    */
   async signOut() {
     const { error } = await supabase.auth.signOut()
+    if (error) throw error
+  },
+
+  /**
+   * Reset password for email
+   */
+  async resetPassword(email: string) {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    })
     if (error) throw error
   },
 
