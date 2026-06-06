@@ -645,7 +645,8 @@ export const authServices = {
     specialization: string,
     phone: string,
     hospitalName: string,
-    hospitalAddress: string
+    hospitalAddress: string,
+    inviteCode: string
   ) {
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
@@ -662,7 +663,8 @@ export const authServices = {
       p_specialization: specialization,
       p_phone: phone,
       p_hospital_name: hospitalName,
-      p_hospital_address: hospitalAddress
+      p_hospital_address: hospitalAddress,
+      p_invite_code: inviteCode
     })
 
     if (error) throw error

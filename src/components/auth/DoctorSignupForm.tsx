@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { supabaseServices } from '../../services/supabaseServices';
-import { Loader2, Stethoscope, Phone, Building2, MapPin, ShieldCheck } from 'lucide-react';
+import { Loader2, Stethoscope, Phone, Building2, MapPin, ShieldCheck, KeyRound } from 'lucide-react';
 import { PasswordStrengthMeter } from './PasswordStrengthMeter';
 import { supabase } from '../../lib/supabase';
 
@@ -15,6 +15,7 @@ const doctorSignupSchema = z.object({
   phone: z.string().min(5, 'Valid phone number required'),
   hospitalName: z.string().min(2, 'Hospital name is required'),
   hospitalAddress: z.string().min(5, 'Hospital address is required'),
+  inviteCode: z.string().min(1, 'Doctor invite code is required'),
 });
 
 type DoctorSignupData = z.infer<typeof doctorSignupSchema>;
@@ -41,7 +42,7 @@ export const DoctorSignupForm: React.FC<DoctorSignupFormProps> = ({ onSuccess, s
     setError('');
     try {
       await supabaseServices.authServices.signupDoctor(
-        data.email, data.password, data.fullName, data.specialization, data.phone, data.hospitalName, data.hospitalAddress
+        data.email, data.password, data.fullName, data.specialization, data.phone, data.hospitalName, data.hospitalAddress, data.inviteCode
       );
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
@@ -53,6 +54,8 @@ export const DoctorSignupForm: React.FC<DoctorSignupFormProps> = ({ onSuccess, s
       const msg = err?.message || '';
       if (msg.toLowerCase().includes('already registered') || msg.toLowerCase().includes('already been registered')) {
         setError('An account with this email already exists. Try signing in instead.');
+      } else if (msg.toLowerCase().includes('invalid invite code') || msg.toLowerCase().includes('invite')) {
+        setError('Invalid or inactive doctor invite code. Please contact your administrator.');
       } else {
         setError(msg || 'Something went wrong. Please try again or contact support.');
       }
@@ -72,6 +75,26 @@ export const DoctorSignupForm: React.FC<DoctorSignupFormProps> = ({ onSuccess, s
           placeholder="Your full name" 
         />
         {errors.fullName && <p className="mt-1 text-xs text-red-500">{errors.fullName.message}</p>}
+      </div>
+
+      {/* Invite Code */}
+      <div>
+        <div className="relative group">
+          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-teal-500 transition-colors">
+            <KeyRound className="h-5 w-5" />
+          </div>
+          <input
+            {...register('inviteCode')}
+            type="text"
+            autoComplete="off"
+            className={`w-full pl-11 pr-4 py-3.5 bg-amber-50 border rounded-xl focus:ring-2 focus:ring-amber-400/20 focus:border-amber-500 outline-none transition-all placeholder:text-slate-400 font-mono tracking-wider ${
+              errors.inviteCode ? 'border-red-300' : 'border-amber-200'
+            }`}
+            placeholder="Doctor Invite Code (e.g. HC-2026-DOC)"
+          />
+        </div>
+        {errors.inviteCode && <p className="mt-1 text-xs text-red-500">{errors.inviteCode.message}</p>}
+        <p className="mt-1 text-xs text-amber-600 font-medium">🔑 Contact your hospital administrator for an invite code.</p>
       </div>
 
       <div className="space-y-4 p-4 bg-teal-50 border border-teal-100 rounded-2xl">
