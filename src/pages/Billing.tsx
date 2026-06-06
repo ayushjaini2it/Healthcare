@@ -66,58 +66,11 @@ const Billing: React.FC = () => {
     setIsProcessing(true)
     setErrorMessage('')
     try {
-      const items: any[] = []
-
-      // 1. Fetch Consultations
-      const consultations = await supabaseServices.consultationServices.getPatientConsultations(selectedPatientId)
-      if (consultations && consultations.length > 0) {
-        items.push({
-          description: `Consultation Visits (${consultations.length})`,
-          quantity: consultations.length,
-          unitPrice: 150,
-          totalPrice: consultations.length * 150,
-          category: 'consultation' as const
-        })
-      }
-
-      // 2. Fetch Lab Tests
-      const diagnoses = await supabaseServices.diagnosisServices.getPatientDiagnoses(selectedPatientId)
-      if (diagnoses && diagnoses.length > 0) {
-        items.push({
-          description: `Laboratory Tests (${diagnoses.length})`,
-          quantity: diagnoses.length,
-          unitPrice: 85,
-          totalPrice: diagnoses.length * 85,
-          category: 'lab' as const
-        })
-      }
-
-      // 3. Fetch Medications
-      const treatment = await supabaseServices.treatmentServices.getPatientTreatment(selectedPatientId)
-      if (treatment && treatment.id) {
-        const meds = await supabaseServices.treatmentServices.getTreatmentMedications(treatment.id)
-        if (meds && meds.length > 0) {
-          items.push({
-            description: `Prescription Medications (${meds.length})`,
-            quantity: meds.length,
-            unitPrice: 45,
-            totalPrice: meds.length * 45,
-            category: 'medication' as const
-          })
-        }
-      }
-
-      // 4. Default Base Charge if no records exist yet
-      if (items.length === 0) {
-         items.push({
-          description: 'General Hospital Stay (Base Charge)',
-          quantity: 1,
-          unitPrice: 200,
-          totalPrice: 200,
-          category: 'consultation' as const
-        })
-      }
-
+      const items = [
+        { description: 'General Consultation', quantity: 1, unitPrice: 150, totalPrice: 150, category: 'consultation' as const },
+        { description: 'Laboratory Tests', quantity: 1, unitPrice: 85, totalPrice: 85, category: 'lab' as const },
+        { description: 'Prescription Medications', quantity: 1, unitPrice: 45, totalPrice: 45, category: 'medication' as const }
+      ]
       const totalAmount = items.reduce((sum, item) => sum + item.totalPrice, 0)
       
       const newBill = await supabaseServices.billingServices.createBill(selectedPatientId, items, totalAmount)
