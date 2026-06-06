@@ -45,7 +45,6 @@ const AppointmentBooking: React.FC = () => {
   const [allDoctors, setAllDoctors] = useState<any[]>([])
   const [showAllDoctors, setShowAllDoctors] = useState(false)
   const [patientLocation, setPatientLocation] = useState('')
-  const [bookedSlots, setBookedSlots] = useState<string[]>([])
 
   const {
     register,
@@ -60,38 +59,9 @@ const AppointmentBooking: React.FC = () => {
   })
 
   const selectedDoctorId = watch('doctorId')
-  const selectedDate = watch('date')
   const displayedDoctors = showAllDoctors ? allDoctors : doctors
   const selectedDoctor = allDoctors.find(d => d.id === selectedDoctorId)
   const today = new Date().toISOString().split('T')[0]
-
-  useEffect(() => {
-    if (selectedDoctorId && selectedDate) {
-      loadBookedSlots(selectedDoctorId, selectedDate)
-    } else {
-      setBookedSlots([])
-    }
-    setValue('timeSlot', '')
-  }, [selectedDoctorId, selectedDate, setValue])
-
-  const loadBookedSlots = async (docId: string, dateStr: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('appointments')
-        .select('time_slot')
-        .eq('doctor_id', docId)
-        .eq('appointment_date', dateStr)
-        .neq('status', 'rejected')
-        .neq('status', 'cancelled')
-      
-      if (error) throw error
-      if (data) {
-        setBookedSlots(data.map(d => d.time_slot))
-      }
-    } catch (e) {
-      console.error("Failed to load booked slots", e)
-    }
-  }
 
   useEffect(() => {
     loadData()
@@ -409,23 +379,18 @@ const AppointmentBooking: React.FC = () => {
                   <Clock className="h-4 w-4" /> Time Slot *
                 </label>
                 <div className="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto pr-1">
-                  {timeSlots.map(slot => {
-                    const isBooked = bookedSlots.includes(slot);
-                    return (
-                      <label key={slot} className={`cursor-pointer ${isBooked ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                        <input type="radio" value={slot} disabled={isBooked} {...register('timeSlot')} className="sr-only" />
-                        <div className={`text-center text-xs py-2 px-1 rounded-lg border transition-all ${
-                          isBooked
-                            ? 'bg-slate-100 text-slate-400 border-slate-200'
-                            : watch('timeSlot') === slot
-                              ? 'bg-teal-600 text-white border-teal-600 font-semibold'
-                              : 'border-slate-200 text-slate-700 hover:border-teal-300 hover:bg-teal-50'
-                        }`}>
-                          {slot}
-                        </div>
-                      </label>
-                    )
-                  })}
+                  {timeSlots.map(slot => (
+                    <label key={slot} className="cursor-pointer">
+                      <input type="radio" value={slot} {...register('timeSlot')} className="sr-only" />
+                      <div className={`text-center text-xs py-2 px-1 rounded-lg border transition-all ${
+                        watch('timeSlot') === slot
+                          ? 'bg-teal-600 text-white border-teal-600 font-semibold'
+                          : 'border-slate-200 text-slate-700 hover:border-teal-300 hover:bg-teal-50'
+                      }`}>
+                        {slot}
+                      </div>
+                    </label>
+                  ))}
                 </div>
                 {errors.timeSlot && <p className="text-red-500 text-sm mt-1">{errors.timeSlot.message}</p>}
               </div>
