@@ -19,9 +19,8 @@ interface LoginFormProps {
 
 export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, setError }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [successMsg, setSuccessMsg] = useState('');
 
-  const { register, handleSubmit, getValues, formState: { errors } } = useForm<LoginFormData>({
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   });
 
@@ -47,35 +46,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, setError }) => 
     }
   };
 
-  const handleResetPassword = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    const email = getValues('email');
-    if (!email) {
-      setError('Please enter your email address first to reset your password.');
-      setSuccessMsg('');
-      return;
-    }
-    
-    setIsLoading(true);
-    setError('');
-    setSuccessMsg('');
-    try {
-      await supabaseServices.authServices.resetPassword(email);
-      setSuccessMsg('Password reset link has been sent to your email.');
-    } catch (err: any) {
-      setError(err?.message || 'Failed to send reset link.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-      {successMsg && (
-        <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700">
-          {successMsg}
-        </div>
-      )}
       <div>
         <input 
           {...register('email')}
@@ -97,7 +69,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, setError }) => 
       </div>
 
       <button type="submit" disabled={isLoading}
-        className="w-full mt-2 group relative flex items-center justify-center py-4 px-4 border border-transparent text-lg font-bold rounded-xl text-white bg-teal-600 hover:bg-teal-700 focus:outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+        className="w-full mt-2 group relative flex items-center justify-center py-4 px-4 border border-transparent text-lg font-bold rounded-xl text-white bg-[#a3b1c6] hover:bg-teal-600 focus:outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed">
         {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <span>Log In</span>}
       </button>
 
@@ -106,7 +78,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, setError }) => 
           <input id="remember-me" type="checkbox" className="h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-600" />
           <label htmlFor="remember-me" className="ml-2 block text-sm text-slate-500">Remember me</label>
         </div>
-        <button type="button" onClick={handleResetPassword} disabled={isLoading} className="text-sm font-medium text-teal-600 hover:text-teal-700 disabled:opacity-50">Forgot password?</button>
+        <a href="#" className="text-sm font-medium text-blue-600 hover:text-blue-500">Forgot password?</a>
       </div>
     </form>
   );

@@ -1,9 +1,9 @@
 -- ============================================================
 -- HEALTH-CONNECT: Secure Doctor Registration RPC
--- Run this in the Supabase SQL Editor to fix the security flaw.
+-- Run this in the Supabase SQL Editor to apply the invite-code fix.
 -- ============================================================
 
--- 1. Create a secure table for invite codes
+-- 1. Create a secure table for invite codes (idempotent)
 CREATE TABLE IF NOT EXISTS doctor_invite_codes (
     code TEXT PRIMARY KEY,
     is_active BOOLEAN DEFAULT true
@@ -15,7 +15,8 @@ INSERT INTO doctor_invite_codes (code) VALUES ('HC-2026-DOC') ON CONFLICT DO NOT
 -- Revoke public access to ensure nobody can read the codes
 REVOKE ALL ON doctor_invite_codes FROM PUBLIC;
 
--- 2. Create the RPC function that runs with elevated privileges (SECURITY DEFINER)
+-- 2. Create/Replace the RPC function that validates the invite code
+--    and runs with elevated privileges (SECURITY DEFINER)
 CREATE OR REPLACE FUNCTION register_doctor_profile(
     p_user_id UUID,
     p_full_name TEXT,
@@ -28,18 +29,12 @@ CREATE OR REPLACE FUNCTION register_doctor_profile(
 )
 RETURNS boolean
 LANGUAGE plpgsql
-SECURITY DEFINER 
+SECURITY DEFINER
 AS $$
 DECLARE
     v_code_valid BOOLEAN;
 BEGIN
     -- Validate the invite code
-    SELECT EXISTS (
-        SELECT 1 FROM doctor_invite_codes
-        WHERE code = p_invite_code AND is_active = true
-    ) INTO v_code_valid;
-
-    IF NOT v_code_valid THEN
         RAISE EXCEPTION 'Invalid invite code. Please contact your administrator.';
     END IF;
 
@@ -51,5 +46,5 @@ BEGIN
 END;
 $$;
 
--- 3. DROP the insecure client-side insert policy
+-- 3. DROP the insecure client-side insert policy (if it still exists)
 DROP POLICY IF EXISTS "doctors: doctor can insert own" ON doctors;

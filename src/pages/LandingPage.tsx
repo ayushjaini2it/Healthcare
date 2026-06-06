@@ -2,7 +2,8 @@ import React from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import Auth from './Auth';
 import { 
-  Search, Calendar, UserCircle, Clock, Shield, Heart
+  Search, Calendar, UserCircle, Clock, Shield, Heart, 
+  Stethoscope, Activity, Pill, PlusSquare
 } from 'lucide-react';
 
 const LandingPage: React.FC = () => {
@@ -50,7 +51,7 @@ const LandingPage: React.FC = () => {
 
       {/* ─── HERO SECTION ─── */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28 flex flex-col md:flex-row items-center gap-12">
-        <div className="flex-1 space-y-8 animate-slide-up opacity-0" style={{ animationDelay: '100ms', animationFillMode: 'both' }}>
+        <div className="flex-1 space-y-8 animate-slide-up opacity-0 ![animation-delay:100ms]">
           <h1 className="text-5xl md:text-6xl font-extrabold text-slate-900 leading-tight">
             Your Health, <span className="text-teal-600">Connected</span>
           </h1>
@@ -76,13 +77,13 @@ const LandingPage: React.FC = () => {
         </div>
         
         {/* Hero Illustration */}
-        <div className="flex-1 relative flex justify-center items-center w-full max-w-lg mx-auto animate-fade-in opacity-0" style={{ animationDelay: '300ms', animationFillMode: 'both' }}>
+        <div className="flex-1 relative flex justify-center items-center w-full max-w-lg mx-auto animate-fade-in opacity-0 ![animation-delay:300ms]">
           <img src="/hero.png" alt="Healthcare professionals" className="w-full h-auto object-contain drop-shadow-xl" />
         </div>
       </section>
 
       {/* ─── FEATURES SECTION ─── */}
-      <section id="features" className="bg-slate-50 py-24 border-y border-slate-100 animate-slide-up opacity-0" style={{ animationDelay: '500ms', animationFillMode: 'both' }}>
+      <section id="features" className="bg-slate-50 py-24 border-y border-slate-100 animate-slide-up opacity-0 ![animation-delay:500ms]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Why Choose Health Connect?</h2>
           <p className="text-slate-600 mb-16 max-w-2xl mx-auto">Comprehensive healthcare management at your fingertips</p>
@@ -96,7 +97,7 @@ const LandingPage: React.FC = () => {
               { icon: Shield, title: "Secure & Private", desc: "Your health data is encrypted and protected with industry-leading security standards." },
               { icon: Heart, title: "Quality Care", desc: "Connect with verified, experienced healthcare professionals committed to your wellbeing." },
             ].map((feature, idx) => (
-              <div key={idx} className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+              <div key={idx} className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
                 <div className="w-12 h-12 bg-teal-50 text-teal-600 rounded-xl flex items-center justify-center mb-6">
                   <feature.icon className="w-6 h-6" />
                 </div>
@@ -109,13 +110,13 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* ─── HOW IT WORKS ─── */}
-      <section id="how-it-works" className="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center animate-slide-up opacity-0" style={{ animationDelay: '700ms', animationFillMode: 'both' }}>
+      <section id="how-it-works" className="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center animate-slide-up opacity-0 ![animation-delay:700ms]">
         <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">How It Works</h2>
         <p className="text-slate-600 mb-16 max-w-2xl mx-auto">Get started in three simple steps</p>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
           {/* Connector Line (Desktop) */}
-          <div className="hidden md:block absolute top-12 left-[16.666%] right-[16.666%] h-0.5 bg-teal-100 -z-10"></div>
+          <div className="hidden md:block absolute top-12 left-1/6 right-1/6 h-0.5 bg-teal-100 -z-10"></div>
           
           {[
             { step: "1", title: "Create Your Profile", desc: "Sign up and add your health information securely to help doctors serve you better." },
@@ -134,7 +135,7 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* ─── CTA SECTION ─── */}
-      <section className="bg-teal-600 py-20 text-center px-4 animate-slide-up opacity-0" style={{ animationDelay: '900ms', animationFillMode: 'both' }}>
+      <section className="bg-teal-600 py-20 text-center px-4 animate-slide-up opacity-0 ![animation-delay:900ms]">
         <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">Ready to Take Control of Your Health?</h2>
         <p className="text-teal-50 mb-10 text-lg">Join thousands of patients who trust Health Connect for their healthcare needs.</p>
         <button 
@@ -146,7 +147,7 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* ─── FOOTER ─── */}
-      <footer id="about" className="bg-slate-900 text-slate-400 py-16 px-4">
+      <footer className="bg-slate-900 text-slate-400 py-16 px-4">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
           <div className="col-span-1 md:col-span-1">
             <div className="flex items-center gap-2 mb-6">
@@ -172,16 +173,16 @@ const LandingPage: React.FC = () => {
             <ul className="space-y-3 text-sm">
               <li><button onClick={openAuth} className="hover:text-white transition-colors">Join Network</button></li>
               <li><button onClick={openAuth} className="hover:text-white transition-colors">Manage Appointments</button></li>
-              <li><Link to="/resources" className="hover:text-white transition-colors">Resources</Link></li>
+              <li><a href="#" className="hover:text-white transition-colors">Resources</a></li>
             </ul>
           </div>
           
           <div>
             <h4 className="text-white font-semibold mb-6">Company</h4>
             <ul className="space-y-3 text-sm">
-              <li><Link to="/about" className="hover:text-white transition-colors">About Us</Link></li>
-              <li><Link to="/contact" className="hover:text-white transition-colors">Contact</Link></li>
-              <li><Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+              <li><a href="#about" className="hover:text-white transition-colors">About Us</a></li>
+              <li><a href="#" className="hover:text-white transition-colors">Contact</a></li>
+              <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
             </ul>
           </div>
         </div>

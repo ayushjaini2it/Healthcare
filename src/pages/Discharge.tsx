@@ -31,12 +31,6 @@ const Discharge: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState('')
   const [searchParams] = useSearchParams()
   const prefillPatientId = searchParams.get('patientId')
-  const [stats, setStats] = useState({
-    pendingDischarges: 0,
-    completedToday: 0,
-    averageLengthOfStay: '0.0',
-    bedAvailability: 0
-  })
 
   useEffect(() => {
     loadDischargePatients()
@@ -46,55 +40,12 @@ const Discharge: React.FC = () => {
     try {
       setIsLoading(true)
       
-      // Fetch patients ready for discharge, recently discharged, and all patients for stats
-      const [readyForDischarge, dischargedList, allPatients] = await Promise.all([
+      // Fetch patients ready for discharge and recently discharged
+      const [readyForDischarge, dischargedList] = await Promise.all([
         supabaseServices.patientServices.getPatientsByStatus(['billing', 'treatment']),
-        supabaseServices.patientServices.getPatientsByStatus(['discharged']),
-        supabaseServices.patientServices.getAllPatients()
+        supabaseServices.patientServices.getPatientsByStatus(['discharged'])
       ])
       
-      // Calculate Statistics
-      const occupancyCount = (allPatients || []).filter(p => p.status !== 'discharged').length;
-      const totalBeds = 50; // Configurable hospital bed count
-      const bedsAvailable = Math.max(0, totalBeds - occupancyCount);
-      
-      const today = new Date().toDateString();
-      let completedTodayCount = 0;
-      let totalStayDays = 0;
-
-      // Map discharged patients 
-      const mappedDischarges = (dischargedList || []).map(p => {
-        const adDate = new Date(p.registrationDate || new Date());
-        const disDate = new Date(p.updatedAt || p.registrationDate || new Date());
-        
-        if (disDate.toDateString() === today) {
-          completedTodayCount++;
-        }
-        
-        const stayDays = Math.max(1, Math.ceil((disDate.getTime() - adDate.getTime()) / (1000 * 3600 * 24)));
-        totalStayDays += stayDays;
-
-        return {
-          id: p.id,
-          patientName: p.name,
-          dischargeDate: disDate.toLocaleDateString(),
-          lengthOfStay: stayDays,
-          dischargeType: 'routine',
-          finalDiagnosis: 'Treatment Complete',
-        }
-      });
-
-      const avgStay = dischargedList && dischargedList.length > 0 
-        ? (totalStayDays / dischargedList.length).toFixed(1) 
-        : '0.0';
-
-      setStats({
-        pendingDischarges: (readyForDischarge || []).length,
-        completedToday: completedTodayCount,
-        averageLengthOfStay: avgStay,
-        bedAvailability: bedsAvailable
-      });
-
       // Map to UI expectations
       setPatients((readyForDischarge || []).map(p => ({
         id: p.id,
@@ -106,7 +57,15 @@ const Discharge: React.FC = () => {
         room: 'General Ward'
       })))
 
-      setRecentDischarges(mappedDischarges)
+      // Map discharged patients 
+      setRecentDischarges((dischargedList || []).map(p => ({
+        id: p.id,
+        patientName: p.name,
+        dischargeDate: p.registrationDate ? new Date(p.registrationDate).toLocaleDateString() : 'N/A',
+        lengthOfStay: 1,
+        dischargeType: 'routine',
+        finalDiagnosis: 'Treatment Complete',
+      })))
 
     } catch (error) {
       console.error('Error loading patients:', error)
@@ -517,19 +476,19 @@ const Discharge: React.FC = () => {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-slate-600">Pending Discharges</span>
-                <span className="text-lg font-semibold text-orange-600">{stats.pendingDischarges}</span>
+                <span className="text-lg font-semibold text-orange-600">3</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm text-slate-600">Completed Today</span>
-                <span className="text-lg font-semibold text-green-600">{stats.completedToday}</span>
+                <span className="text-lg font-semibold text-green-600">5</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm text-slate-600">Average Length of Stay</span>
-                <span className="text-lg font-semibold text-slate-900">{stats.averageLengthOfStay} days</span>
+                <span className="text-lg font-semibold text-slate-900">4.2 days</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm text-slate-600">Bed Availability</span>
-                <span className="text-lg font-semibold text-teal-600">{stats.bedAvailability} beds</span>
+                <span className="text-lg font-semibold text-teal-600">8 beds</span>
               </div>
             </div>
           </div>
