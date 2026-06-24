@@ -21,6 +21,8 @@ import AppointmentBooking from './pages/AppointmentBooking'
 import DoctorAppointments from './pages/DoctorAppointments'
 import LandingPage from './pages/LandingPage'
 import ResetPassword from './pages/ResetPassword'
+import DoctorDirectory from './pages/DoctorDirectory'
+import Legal from './pages/Legal'
 import { useAuth } from './context/AuthContext'
 
 function App() {
@@ -40,6 +42,9 @@ function App() {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/doctors" element={<DoctorDirectory />} />
+        <Route path="/privacy" element={<Legal />} />
+        <Route path="/terms" element={<Legal />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     )
@@ -59,6 +64,9 @@ function App() {
     <Routes>
       {/* Standalone Route for Reset Password even when authenticated */}
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/doctors" element={<DoctorDirectory />} />
+      <Route path="/privacy" element={<Legal />} />
+      <Route path="/terms" element={<Legal />} />
       
       {/* All other authenticated routes wrapped in Layout */}
       <Route path="/*" element={
