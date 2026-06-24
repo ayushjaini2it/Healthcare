@@ -73,6 +73,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   ]
 
   const adminNav = [
+    { name: 'Admin Invitations', href: '/admin/invitations', icon: UserCheck, badge: 0 },
     { name: 'Billing & Invoices', href: '/billing', icon: CreditCard, badge: 0 },
     { name: 'Patient Feedback', href: '/feedback-dashboard', icon: MessageSquare, badge: 0 },
   ]

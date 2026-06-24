@@ -639,15 +639,27 @@ export const authServices = {
    * Signup a new doctor
    */
   async signupDoctor(
-    email: string,
-    password: string,
-    fullName: string,
-    specialization: string,
-    phone: string,
-    hospitalName: string,
-    hospitalAddress: string,
-    inviteCode: string
+    email: string, password: string, fullName: string, specialization: string, 
+    phone: string, hospitalName: string, hospitalAddress: string, inviteCode: string
   ) {
+    // 1. Pre-flight Validation: Check if invite code is valid before creating Auth user
+    const { data: inviteData, error: inviteError } = await supabase
+      .from('doctor_invitations')
+      .select('id, current_uses, max_uses, expires_at, hospital_name')
+      .eq('code', inviteCode)
+      .single()
+
+    if (inviteError || !inviteData) {
+      throw new Error('Invalid invite code. Please check and try again.')
+    }
+    if (inviteData.current_uses >= inviteData.max_uses) {
+      throw new Error('This invite code has reached its maximum number of uses.')
+    }
+    if (new Date(inviteData.expires_at) < new Date()) {
+      throw new Error('This invite code has expired.')
+    }
+
+    // 2. Create Auth User
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
@@ -662,12 +674,16 @@ export const authServices = {
       p_email: email,
       p_specialization: specialization,
       p_phone: phone,
-      p_hospital_name: hospitalName,
+      p_hospital_name: inviteData.hospital_name || hospitalName, // Enforce hospital name if invite has it
       p_hospital_address: hospitalAddress,
       p_invite_code: inviteCode
     })
 
-    if (error) throw error
+    if (error) {
+      // Best-effort message if RPC fails after auth creates the user
+      console.error('Doctor profile creation failed:', error)
+      throw new Error(error.message || 'Failed to create doctor profile.')
+    }
 
     // If user is confirmed, sign them in automatically
     if (authData.user && authData.user.email_confirmed_at) {
@@ -684,7 +700,7 @@ export const authServices = {
   /**
    * Signup a new patient
    */
-  async signupPatient(email: string, password: string, fullName: string) {
+  async signupPatient(email: string, password: string, fullName: string, age: number, gender: string) {
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
@@ -693,16 +709,21 @@ export const authServices = {
     if (authError) throw authError
     if (!authData.user) throw new Error('Signup failed')
 
+    // Improved name parsing to handle mononyms and multiple words
+    const nameParts = fullName.trim().split(/\s+/);
+    const firstName = nameParts[0] || 'Unknown';
+    const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+
     const { data, error } = await supabase
       .from('patients')
       .insert([
         {
           auth_user_id: authData.user.id,
-          first_name: fullName.split(' ')[0],
-          last_name: fullName.split(' ').slice(1).join(' '),
+          first_name: firstName,
+          last_name: lastName,
           email: email,
-          age: 0, // Default values
-          gender: 'other',
+          age: age,
+          gender: gender,
           phone: '',
           address: '',
           status: 'registered'
@@ -710,7 +731,10 @@ export const authServices = {
       ])
       .select()
 
-    if (error) throw error
+    if (error) {
+      console.error('Patient profile creation failed:', error)
+      throw new Error(error.message || 'Failed to create patient profile.')
+    }
 
     // If user is confirmed, sign them in automatically
     if (authData.user && authData.user.email_confirmed_at) {
@@ -751,20 +775,28 @@ export const authServices = {
   },
 
   /**
-   * Sign out
-   */
-  async signOut() {
-    const { error } = await supabase.auth.signOut()
-    if (error) throw error
-  },
-
-  /**
-   * Reset password for email
+   * Send password reset email
    */
   async resetPassword(email: string) {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`,
-    })
+    });
+    if (error) throw error;
+  },
+
+  /**
+   * Update user password
+   */
+  async updatePassword(password: string) {
+    const { error } = await supabase.auth.updateUser({ password });
+    if (error) throw error;
+  },
+
+  /**
+   * Sign out
+   */
+  async signOut() {
+    const { error } = await supabase.auth.signOut()
     if (error) throw error
   },
 
@@ -814,6 +846,64 @@ export const authServices = {
       .from('doctors')
       .select('*')
       .order('full_name')
+
+    if (error) throw error
+    return data
+  }
+}
+
+// ============= ADMIN SERVICES =============
+
+export const adminServices = {
+  /**
+   * Get all doctor invitations
+   */
+  async getInvitations() {
+    const { data, error } = await supabase
+      .from('doctor_invitations')
+      .select('*')
+      .order('created_at', { ascending: false })
+    
+    if (error) throw error
+    return data
+  },
+
+  /**
+   * Generate a new doctor invitation code
+   */
+  async generateInvitation(email?: string, daysValid: number = 7, maxUses: number = 1, hospitalName?: string) {
+    const code = 'HC-' + Math.random().toString(36).substring(2, 8).toUpperCase() + '-' + new Date().getFullYear()
+    
+    const expiresAt = new Date()
+    expiresAt.setDate(expiresAt.getDate() + daysValid)
+
+    const { data, error } = await supabase
+      .from('doctor_invitations')
+      .insert([
+        {
+          code,
+          assigned_email: email || null,
+          expires_at: expiresAt.toISOString(),
+          max_uses: maxUses,
+          current_uses: 0,
+          hospital_name: hospitalName || null
+        }
+      ])
+      .select()
+    
+    if (error) throw error
+    return data[0]
+  },
+
+  /**
+   * Revoke an active invitation
+   */
+  async revokeInvitation(id: string) {
+    const { data, error } = await supabase
+      .from('doctor_invitations')
+      .update({ is_used: true, expires_at: new Date().toISOString() }) // Burn the code
+      .eq('id', id)
+      .select()
 
     if (error) throw error
     return data
@@ -874,5 +964,6 @@ export const supabaseServices = {
   billingServices,
   feedbackServices,
   authServices,
+  adminServices,
   subscriptionServices
 }

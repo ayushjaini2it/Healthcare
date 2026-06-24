@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Layout from './components/Layout'
 import { RoleProtectedRoute } from './components/RoleProtectedRoute'
@@ -16,15 +15,16 @@ import Billing from './pages/Billing'
 import Discharge from './pages/Discharge'
 import Feedback from './pages/Feedback'
 import FeedbackDashboard from './pages/FeedbackDashboard'
+import { AdminInvitations } from './pages/admin/AdminInvitations'
 
 import AppointmentBooking from './pages/AppointmentBooking'
 import DoctorAppointments from './pages/DoctorAppointments'
 import LandingPage from './pages/LandingPage'
-import { supabase } from './lib/supabase'
+import ResetPassword from './pages/ResetPassword'
 import { useAuth } from './context/AuthContext'
 
 function App() {
-  const { currentUser, isInitialLoading } = useAuth()
+  const { currentUser, isInitialLoading, requiresPasswordReset } = useAuth()
 
   if (isInitialLoading) {
     return (
@@ -39,24 +39,41 @@ function App() {
     return (
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     )
   }
 
-  return (
-      <Layout>
-        <Routes>
-          {/* Dynamic Home Route based on Role */}
-          <Route path="/" element={
-            currentUser?.role === 'doctor' ? <Dashboard /> : <PatientDashboard />
-          } />
+  // FORCE Password Reset: If the user accessed via a recovery link, they MUST reset their password.
+  // We completely block the rest of the application.
+  if (requiresPasswordReset) {
+    return (
+      <Routes>
+        <Route path="*" element={<ResetPassword />} />
+      </Routes>
+    )
+  }
 
-          {/* Doctor-only routes */}
-          <Route path="/doctor-appointments" element={
-            <RoleProtectedRoute allowedRole="doctor"><DoctorAppointments /></RoleProtectedRoute>
-          } />
-          <Route path="/consultation" element={
+  return (
+    <Routes>
+      {/* Standalone Route for Reset Password even when authenticated */}
+      <Route path="/reset-password" element={<ResetPassword />} />
+      
+      {/* All other authenticated routes wrapped in Layout */}
+      <Route path="/*" element={
+        <Layout>
+          <Routes>
+            {/* Dynamic Home Route based on Role */}
+            <Route path="/" element={
+              currentUser?.role === 'doctor' ? <Dashboard /> : <PatientDashboard />
+            } />
+
+            {/* Doctor-only routes */}
+            <Route path="/doctor-appointments" element={
+              <RoleProtectedRoute allowedRole="doctor"><DoctorAppointments /></RoleProtectedRoute>
+            } />
+            <Route path="/consultation" element={
             <RoleProtectedRoute allowedRole="doctor"><Consultation /></RoleProtectedRoute>
           } />
           <Route path="/diagnosis" element={
@@ -77,6 +94,11 @@ function App() {
           } />
           <Route path="/feedback-dashboard" element={
             <RoleProtectedRoute allowedRole={['admin', 'doctor']}><FeedbackDashboard /></RoleProtectedRoute>
+          } />
+
+          {/* Admin-only routes */}
+          <Route path="/admin/invitations" element={
+            <RoleProtectedRoute allowedRole="admin"><AdminInvitations /></RoleProtectedRoute>
           } />
 
           {/* Patient-only routes */}
@@ -101,8 +123,10 @@ function App() {
 
           {/* Catch-all */}
           <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Layout>
+          </Routes>
+        </Layout>
+      } />
+    </Routes>
   )
 }
 
