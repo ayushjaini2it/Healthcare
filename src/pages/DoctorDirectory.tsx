@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Search, MapPin, Star, UserCircle, ArrowLeft } from 'lucide-react';
 
 const mockDoctors = [
@@ -12,8 +12,15 @@ const mockDoctors = [
 ];
 
 const DoctorDirectory: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || "");
   const navigate = useNavigate();
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    setSearchParams(value ? { search: value } : {}, { replace: true });
+  };
 
   const filteredDoctors = mockDoctors.filter(doc => 
     doc.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -41,7 +48,7 @@ const DoctorDirectory: React.FC = () => {
               className="block w-full pl-12 pr-4 py-4 rounded-xl border-0 ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-inset focus:ring-teal-500 sm:text-lg text-slate-900 shadow-sm bg-white"
               placeholder="Search by name, specialty, or location..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={handleSearch}
             />
           </div>
         </div>

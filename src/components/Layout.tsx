@@ -59,7 +59,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   }, [user?.id, user?.role])
 
   const doctorNav = [
-    { name: 'Dashboard', href: '/', icon: Home, badge: 0 },
+    { name: 'Dashboard', href: '/dashboard', icon: Home, badge: 0 },
     { name: 'Appointments', href: '/doctor-appointments', icon: Calendar, badge: pendingCount },
     { name: 'Consultation', href: '/consultation', icon: Stethoscope, badge: 0 },
     { name: 'Diagnosis', href: '/diagnosis', icon: Microscope, badge: 0 },
@@ -79,7 +79,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   ]
 
   const patientNav = [
-    { name: 'Dashboard', href: '/', icon: Home, badge: 0 },
+    { name: 'Dashboard', href: '/dashboard', icon: Home, badge: 0 },
     { name: 'My Profile', href: '/registration', icon: UserCheck, badge: 0 },
     { name: 'Appointments', href: '/appointments', icon: Calendar, badge: 0 },
     { name: 'Clinical Records', href: '/my-records', icon: FileText, badge: 0 },
@@ -99,12 +99,12 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         {/* Sidebar */}
         <div className="w-64 bg-white border-r border-slate-200 min-h-screen flex flex-col">
           <div className="p-6">
-            <div className="flex items-center gap-2 mb-1">
+            <Link to="/" className="flex items-center gap-2 mb-1 group hover:bg-slate-50 p-2 -ml-2 rounded-xl transition-colors cursor-pointer">
               <img src="/logo.png" alt="Health Connect Logo" className="h-8 w-auto" />
-              <h1 className="text-xl font-bold text-slate-900 tracking-tight">
+              <h1 className="text-xl font-bold text-slate-900 tracking-tight group-hover:text-teal-700 transition-colors">
                 Health-Connect
               </h1>
-            </div>
+            </Link>
           </div>
           
           <nav className="mt-6">

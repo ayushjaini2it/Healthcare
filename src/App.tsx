@@ -23,6 +23,7 @@ import LandingPage from './pages/LandingPage'
 import ResetPassword from './pages/ResetPassword'
 import DoctorDirectory from './pages/DoctorDirectory'
 import Legal from './pages/Legal'
+import ContactUs from './pages/ContactUs'
 import { useAuth } from './context/AuthContext'
 
 function App() {
@@ -43,9 +44,10 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/doctors" element={<DoctorDirectory />} />
+        <Route path="/contact" element={<ContactUs />} />
         <Route path="/privacy" element={<Legal />} />
         <Route path="/terms" element={<Legal />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to="/?login=true" replace />} />
       </Routes>
     )
   }
@@ -62,9 +64,11 @@ function App() {
 
   return (
     <Routes>
-      {/* Standalone Route for Reset Password even when authenticated */}
+      {/* Public routes accessible even when authenticated */}
+      <Route path="/" element={<LandingPage />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/doctors" element={<DoctorDirectory />} />
+      <Route path="/contact" element={<ContactUs />} />
       <Route path="/privacy" element={<Legal />} />
       <Route path="/terms" element={<Legal />} />
       
@@ -72,8 +76,8 @@ function App() {
       <Route path="/*" element={
         <Layout>
           <Routes>
-            {/* Dynamic Home Route based on Role */}
-            <Route path="/" element={
+            {/* Dynamic Dashboard Route based on Role */}
+            <Route path="/dashboard" element={
               currentUser?.role === 'doctor' ? <Dashboard /> : <PatientDashboard />
             } />
 

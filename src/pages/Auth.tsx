@@ -4,7 +4,7 @@ import { LoginForm } from '../components/auth/LoginForm';
 import { PatientSignupForm } from '../components/auth/PatientSignupForm';
 import { DoctorSignupForm } from '../components/auth/DoctorSignupForm';
 
-const Auth: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+const Auth: React.FC<{ onClose: () => void, onSuccessLogin?: () => void }> = ({ onClose, onSuccessLogin }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [isDoctorSignup, setIsDoctorSignup] = useState(false);
   const [error, setError] = useState('');
@@ -81,8 +81,12 @@ const Auth: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       setSuccessMsg(msg);
       setError('');
     } else {
-      // Login or auto-login success — close the modal
-      onClose();
+      // Login or auto-login success — trigger callback or close the modal
+      if (onSuccessLogin) {
+        onSuccessLogin();
+      } else {
+        onClose();
+      }
     }
   };
 
