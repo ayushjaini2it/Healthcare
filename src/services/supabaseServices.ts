@@ -642,6 +642,14 @@ export const authServices = {
     email: string, password: string, fullName: string, specialization: string, 
     phone: string, hospitalName: string, hospitalAddress: string, inviteCode: string
   ) {
+    // Ensure Supabase credentials are configured
+    // This prevents confusing runtime failures during development when env vars are missing.
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { isSupabaseConfigured } = await import('../lib/supabase')
+    if (!isSupabaseConfigured) {
+      throw new Error('Supabase is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env.local (see .env.example).')
+    }
+
     // 1. Pre-flight Validation: Check if invite code is valid before creating Auth user
     const { data: inviteData, error: inviteError } = await supabase
       .from('doctor_invitations')
@@ -701,6 +709,13 @@ export const authServices = {
    * Signup a new patient
    */
   async signupPatient(email: string, password: string, fullName: string, age: number, gender: string) {
+    // Ensure Supabase credentials are configured before attempting signup
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { isSupabaseConfigured } = await import('../lib/supabase')
+    if (!isSupabaseConfigured) {
+      throw new Error('Supabase is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env.local (see .env.example).')
+    }
+
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
