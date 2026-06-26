@@ -130,8 +130,8 @@ const ContactUs: React.FC = () => {
                   <h4 className="text-lg font-bold text-slate-900 mb-1">Office</h4>
                   <p className="text-slate-500">
                     Health Connect HQ<br />
-                    123 Innovation Drive<br />
-                    Tech District, 400001
+                    Infosys Phase-1 Hinjewadi<br />
+                    Pune district, Maharashtra 411057
                   </p>
                 </div>
               </div>
