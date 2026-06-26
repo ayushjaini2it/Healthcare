@@ -378,13 +378,11 @@ const LandingPage: React.FC = () => {
           <div className="flex flex-col lg:flex-row items-center gap-12">
             <div className="flex-1 relative">
               <div className="absolute -inset-4 bg-teal-100 rounded-[3rem] blur-xl opacity-50 -z-10 animate-pulse-soft"></div>
-              <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-white/80 backdrop-blur-sm border border-white">
-                <img 
-                  src="/about_us.png" 
-                  alt="Healthcare professionals collaborating" 
-                  className="w-full h-[400px] object-contain"
-                />
-              </div>
+              <img 
+                src="/about_us.png" 
+                alt="Healthcare professionals collaborating" 
+                className="relative w-full h-auto rounded-3xl shadow-2xl bg-white/80 backdrop-blur-sm border border-white"
+              />
             </div>
             <div className="flex-1 space-y-6">
               <h2 className="text-sm font-bold tracking-widest text-teal-600 uppercase">About Us</h2>
