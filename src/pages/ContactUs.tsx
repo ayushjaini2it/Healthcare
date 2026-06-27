@@ -16,10 +16,25 @@ const ContactUs: React.FC = () => {
     const form = e.currentTarget;
     const formData = new FormData(form);
 
-    // Retrieve Web3Forms access key
+    // Retrieve Web3Forms access key. If missing, fall back to opening a mailto: link
+    // so site visitors can still contact support without a configured API key.
     const accessKey = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY;
     if (!accessKey) {
-      setError("Web3Forms access key is missing in environment configuration.");
+      const subject = String(formData.get('subject') || 'Contact from Health Connect');
+      const email = String(formData.get('email') || '');
+      const firstName = String(formData.get('firstName') || '');
+      const lastName = String(formData.get('lastName') || '');
+      const message = String(formData.get('message') || '');
+      const bodyLines = [
+        `Name: ${firstName} ${lastName}`,
+        `Email: ${email}`,
+        '',
+        message,
+      ];
+      const body = encodeURIComponent(bodyLines.join('\n'));
+      // Open user's mail client as a graceful fallback
+      window.location.href = `mailto:lokeshjhuria7@gmail.com?subject=${encodeURIComponent(subject)}&body=${body}`;
+      setIsSubmitted(true);
       setIsLoading(false);
       return;
     }

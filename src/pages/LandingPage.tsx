@@ -10,11 +10,11 @@ import {
 import { useAuth } from '../context/AuthContext';
 
 const testimonials = [
-  { name: "Sarah Jenkins", role: "Patient", text: "Finding a specialist used to take weeks of phone calls. With Health Connect, I found my cardiologist and booked an appointment the same afternoon." },
-  { name: "Michael Chang", role: "Patient", text: "Having all my health records and upcoming appointments in one app gives me incredible peace of mind. The UI is gorgeous and so easy to use." },
-  { name: "Emily Rodriguez", role: "Patient", text: "The automated reminders and seamless check-in process have completely changed how I manage my family's healthcare. Highly recommended." },
-  { name: "David Thompson", role: "Patient", text: "I love the ability to sync my fitness data directly with my doctor. It makes our consultations so much more productive." },
-  { name: "Priya Patel", role: "Patient", text: "The telemedicine feature is a lifesaver. I can consult with my pediatrician without dragging my sick child to the clinic." }
+  { name: "Asha Singh", role: "Patient", text: "I found a local ENT specialist within a day and got a same-week appointment. The reminders and easy rescheduling saved me so much time." },
+  { name: "Rahul Mehta", role: "Patient", text: "All my records are in one place and I could share them with my new doctor instantly. Billing was clear and straightforward — no hidden surprises." },
+  { name: "Sanjay Kumar", role: "Patient", text: "Booked a teleconsultation for my elderly mother. The video call quality was good and the doctor explained the medicines clearly. Very helpful." },
+  { name: "Neha Sharma", role: "Patient", text: "The appointment reminders and check-in flow make visiting the clinic stress-free. I also appreciated the polite notifications from the clinic staff." },
+  { name: "Anjali Rao", role: "Patient", text: "I referred my parents and they completed their registration in minutes. The team followed up quickly and the overall experience felt professional and secure." }
 ];
 
 const faqCategories = [
