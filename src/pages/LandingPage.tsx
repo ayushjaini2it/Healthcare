@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import Auth from './Auth';
 import { 
   Search, Calendar, UserCircle, Clock, Shield, Heart, 
@@ -202,10 +203,10 @@ const LandingPage: React.FC = () => {
           </Link>
           
           <div className="hidden md:flex items-center gap-8 font-medium text-slate-600">
-            <a href="#features" className={`hover:text-teal-600 transition-colors ${activeSection === 'features' ? 'text-teal-600 font-bold' : ''}`}>Features</a>
-            <a href="#how-it-works" className={`hover:text-teal-600 transition-colors ${activeSection === 'how-it-works' ? 'text-teal-600 font-bold' : ''}`}>How It Works</a>
-            <a href="#about" className={`hover:text-teal-600 transition-colors ${activeSection === 'about' ? 'text-teal-600 font-bold' : ''}`}>About Us</a>
-            <Link to="/contact" className="hover:text-teal-600 transition-colors">Contact Us</Link>
+            <a href="#features" className={`micro-link hover:text-teal-600 transition-colors ${activeSection === 'features' ? 'text-teal-600 font-bold after:w-full' : ''}`}>Features</a>
+            <a href="#how-it-works" className={`micro-link hover:text-teal-600 transition-colors ${activeSection === 'how-it-works' ? 'text-teal-600 font-bold after:w-full' : ''}`}>How It Works</a>
+            <a href="#about" className={`micro-link hover:text-teal-600 transition-colors ${activeSection === 'about' ? 'text-teal-600 font-bold after:w-full' : ''}`}>About Us</a>
+            <Link to="/contact" className="micro-link hover:text-teal-600 transition-colors">Contact Us</Link>
           </div>
           
           <div className="hidden md:flex items-center gap-4">
@@ -221,7 +222,7 @@ const LandingPage: React.FC = () => {
                 </div>
                 <Link 
                   to="/dashboard"
-                  className="px-6 py-2.5 bg-teal-600 text-white font-semibold rounded-xl hover:bg-teal-700 transition-all shadow-md shadow-teal-600/20 hover:shadow-lg hover:shadow-teal-600/30 hover:-translate-y-0.5"
+                  className="px-6 py-2.5 bg-teal-600 text-white font-semibold rounded-xl hover:bg-teal-700 shadow-md shadow-teal-600/20 hover:shadow-lg hover:shadow-teal-600/30 hover:-translate-y-0.5 micro-btn"
                 >
                   Dashboard
                 </Link>
@@ -230,13 +231,13 @@ const LandingPage: React.FC = () => {
               <>
                 <button 
                   onClick={openAuth}
-                  className="px-5 py-2.5 text-teal-700 font-semibold hover:bg-teal-50 rounded-xl transition-all"
+                  className="px-5 py-2.5 text-teal-700 font-semibold hover:bg-teal-50 rounded-xl micro-btn"
                 >
                   Log In
                 </button>
                 <button 
                   onClick={openAuth}
-                  className="px-6 py-2.5 bg-teal-600 text-white font-semibold rounded-xl hover:bg-teal-700 transition-all shadow-md shadow-teal-600/20 hover:shadow-lg hover:shadow-teal-600/30 hover:-translate-y-0.5"
+                  className="px-6 py-2.5 bg-teal-600 text-white font-semibold rounded-xl hover:bg-teal-700 shadow-md shadow-teal-600/20 hover:shadow-lg hover:shadow-teal-600/30 hover:-translate-y-0.5 micro-btn"
                 >
                   Sign Up
                 </button>
@@ -341,16 +342,16 @@ const LandingPage: React.FC = () => {
                 </div>
                 <button 
                   type="submit"
-                  className="px-6 py-3 bg-teal-600 text-white font-semibold rounded-xl sm:rounded-full hover:bg-teal-700 transition-all flex items-center justify-center gap-2 whitespace-nowrap shadow-md shadow-teal-600/20"
+                  className="px-6 py-3 bg-teal-600 text-white font-semibold rounded-xl sm:rounded-full hover:bg-teal-700 flex items-center justify-center gap-2 whitespace-nowrap shadow-md shadow-teal-600/20 micro-btn"
                 >
                   Find Doctors
                 </button>
               </form>
-              <div className="flex items-center gap-3 text-sm text-slate-500 sm:pl-4 font-medium flex-wrap">
+              <div className="flex items-center gap-4 text-sm text-slate-500 sm:pl-4 font-medium flex-wrap">
                 <span>Popular:</span>
-                <button onClick={() => { setHeroSearch('Cardiologist'); navigate('/doctors?search=Cardiologist'); }} className="hover:text-teal-600 transition-colors cursor-pointer">Cardiologist</button>
-                <button onClick={() => { setHeroSearch('Dermatologist'); navigate('/doctors?search=Dermatologist'); }} className="hover:text-teal-600 transition-colors cursor-pointer">Dermatologist</button>
-                <button onClick={() => { setHeroSearch('Pediatrician'); navigate('/doctors?search=Pediatrician'); }} className="hover:text-teal-600 transition-colors cursor-pointer">Pediatrician</button>
+                <button onClick={() => { setHeroSearch('Cardiologist'); navigate('/doctors?search=Cardiologist'); }} className="micro-link hover:text-teal-600 cursor-pointer">Cardiologist</button>
+                <button onClick={() => { setHeroSearch('Dermatologist'); navigate('/doctors?search=Dermatologist'); }} className="micro-link hover:text-teal-600 cursor-pointer">Dermatologist</button>
+                <button onClick={() => { setHeroSearch('Pediatrician'); navigate('/doctors?search=Pediatrician'); }} className="micro-link hover:text-teal-600 cursor-pointer">Pediatrician</button>
               </div>
             </div>
           </div>
@@ -373,7 +374,14 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* ─── ABOUT SECTION ─── */}
-      <section id="about" className="scroll-mt-20 py-12 md:py-16 bg-white border-t border-slate-100">
+      <motion.section 
+        id="about" 
+        className="scroll-mt-20 py-12 md:py-16 bg-white border-t border-slate-100"
+        initial={{ opacity: 0, y: 30 }} 
+        whileInView={{ opacity: 1, y: 0 }} 
+        viewport={{ once: true, amount: 0.1 }} 
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row items-center gap-12">
             <div className="flex-1 relative">
@@ -407,10 +415,17 @@ const LandingPage: React.FC = () => {
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* ─── FEATURES SECTION ─── */}
-      <section id="features" className="scroll-mt-20 py-12 md:py-16 bg-slate-50 border-t border-slate-200">
+      <motion.section 
+        id="features" 
+        className="scroll-mt-20 py-12 md:py-16 bg-slate-50 border-t border-slate-200"
+        initial={{ opacity: 0, y: 30 }} 
+        whileInView={{ opacity: 1, y: 0 }} 
+        viewport={{ once: true, amount: 0.1 }} 
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-sm font-bold tracking-widest text-teal-600 uppercase mb-3">Our Services</h2>
           <h3 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">Comprehensive care, curated for you</h3>
@@ -425,20 +440,32 @@ const LandingPage: React.FC = () => {
               { icon: Shield, title: "Ironclad Security", desc: "Your health data is encrypted and protected with industry-leading HIPAA-compliant security standards.", delay: "500" },
               { icon: Heart, title: "Quality Care", desc: "Connect with verified, experienced healthcare professionals deeply committed to your wellbeing.", delay: "700" },
             ].map((feature, idx) => (
-              <div key={idx} className={`group bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-teal-600/10 hover:-translate-y-1.5 hover:bg-gradient-to-br hover:from-white hover:to-teal-50/50 transition-all duration-300 animate-slide-up animate-delay-${feature.delay}`}>
+              <motion.div 
+                key={idx} 
+                className="group bg-white p-6 rounded-3xl border border-slate-100 shadow-sm transition-colors duration-300 animate-slide-up"
+                style={{ animationDelay: `${feature.delay}ms` }}
+                whileHover={{ y: -8, scale: 1.02, boxShadow: "0 20px 25px -5px rgba(13, 148, 136, 0.1)" }}
+              >
                 <div className="w-12 h-12 bg-teal-50 text-teal-600 rounded-2xl flex items-center justify-center mb-4 border border-teal-100/50 group-hover:scale-110 group-hover:bg-teal-100 transition-transform duration-300">
                   <feature.icon className="w-6 h-6" />
                 </div>
                 <h4 className="text-xl font-bold text-slate-900 mb-3">{feature.title}</h4>
                 <p className="text-slate-600 leading-relaxed group-hover:text-slate-700 transition-colors">{feature.desc}</p>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* ─── HOW IT WORKS ─── */}
-      <section id="how-it-works" className="scroll-mt-20 py-12 md:py-16 bg-white border-t border-slate-100">
+      <motion.section 
+        id="how-it-works" 
+        className="scroll-mt-20 py-12 md:py-16 bg-white border-t border-slate-100"
+        initial={{ opacity: 0, y: 30 }} 
+        whileInView={{ opacity: 1, y: 0 }} 
+        viewport={{ once: true, amount: 0.1 }} 
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-sm font-bold tracking-widest text-teal-600 uppercase mb-3">Simple Process</h2>
           <h3 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">Get started in three simple steps</h3>
@@ -462,10 +489,17 @@ const LandingPage: React.FC = () => {
             ))}
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* ─── TESTIMONIALS ─── */}
-      <section id="testimonials" className="scroll-mt-20 py-16 md:py-24 bg-slate-50 border-t border-slate-100 overflow-hidden">
+      <motion.section 
+        id="testimonials" 
+        className="scroll-mt-20 py-16 md:py-24 bg-slate-50 border-t border-slate-100 overflow-hidden"
+        initial={{ opacity: 0, y: 30 }} 
+        whileInView={{ opacity: 1, y: 0 }} 
+        viewport={{ once: true, amount: 0.1 }} 
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="text-center mb-12">
             <h2 className="text-sm font-bold tracking-widest text-teal-600 uppercase mb-3">Patient Stories</h2>
@@ -553,10 +587,17 @@ const LandingPage: React.FC = () => {
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* ─── FAQ SECTION ─── */}
-      <section id="faq" className="scroll-mt-20 py-16 lg:py-24 bg-slate-50 border-t border-slate-200">
+      <motion.section 
+        id="faq" 
+        className="scroll-mt-20 py-16 lg:py-24 bg-slate-50 border-t border-slate-200"
+        initial={{ opacity: 0, y: 30 }} 
+        whileInView={{ opacity: 1, y: 0 }} 
+        viewport={{ once: true, amount: 0.1 }} 
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-12 lg:mb-16">
             <h2 className="text-sm font-bold tracking-widest text-teal-600 uppercase mb-3">FAQ</h2>
@@ -605,24 +646,42 @@ const LandingPage: React.FC = () => {
                         <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${openFaq === idx ? 'rotate-180' : ''}`} />
                       </div>
                     </button>
-                    <div 
-                      id={`faq-content-${idx}`}
-                      role="region"
-                      aria-labelledby={`faq-button-${idx}`}
-                      className={`px-5 lg:px-6 text-slate-600 leading-relaxed overflow-hidden transition-all duration-300 ease-in-out ${openFaq === idx ? 'max-h-96 pb-4 lg:pb-5 opacity-100' : 'max-h-0 pb-0 opacity-0'}`}
-                    >
-                      <p className="text-sm">{faq.a}</p>
-                    </div>
+                    <AnimatePresence initial={false}>
+                      {openFaq === idx && (
+                        <motion.div 
+                          id={`faq-content-${idx}`}
+                          role="region"
+                          aria-labelledby={`faq-button-${idx}`}
+                          initial="collapsed"
+                          animate="open"
+                          exit="collapsed"
+                          variants={{
+                            open: { opacity: 1, height: "auto", paddingBottom: "1.25rem" },
+                            collapsed: { opacity: 0, height: 0, paddingBottom: 0 }
+                          }}
+                          transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
+                          className="px-5 lg:px-6 text-slate-600 leading-relaxed overflow-hidden"
+                        >
+                          <p className="text-sm">{faq.a}</p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 ))}
               </div>
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* ─── CTA SECTION ─── */}
-      <section className="py-20 lg:py-24 bg-white px-4 sm:px-6 lg:px-8">
+      <motion.section 
+        className="py-20 lg:py-24 bg-white px-4 sm:px-6 lg:px-8"
+        initial={{ opacity: 0, scale: 0.95, y: 20 }} 
+        whileInView={{ opacity: 1, scale: 1, y: 0 }} 
+        viewport={{ once: true, amount: 0.3 }} 
+        transition={{ duration: 0.7, ease: [0.21, 0.47, 0.32, 0.98] }}
+      >
         <div className="max-w-5xl mx-auto">
           <div className="relative rounded-[2.5rem] overflow-hidden bg-gradient-to-br from-teal-100/90 via-white to-teal-50/90 px-6 py-16 md:py-20 text-center shadow-xl shadow-teal-900/5 border border-teal-200/60">
             {/* Background Decorations */}
@@ -648,7 +707,7 @@ const LandingPage: React.FC = () => {
               <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
                 <button 
                   onClick={openAuth}
-                  className="inline-flex justify-center items-center gap-2 px-8 py-4 bg-teal-600 text-white font-bold rounded-xl hover:bg-teal-700 hover:shadow-lg hover:shadow-teal-600/20 transition-all hover:-translate-y-0.5 text-base shadow-md shadow-teal-600/10"
+                  className="inline-flex justify-center items-center gap-2 px-8 py-4 bg-teal-600 text-white font-bold rounded-xl hover:bg-teal-700 hover:shadow-lg hover:shadow-teal-600/20 hover:-translate-y-0.5 text-base shadow-md shadow-teal-600/10 micro-btn"
                 >
                   Create Free Account
                   <ArrowRight className="w-5 h-5" />
@@ -658,7 +717,7 @@ const LandingPage: React.FC = () => {
                     const el = document.getElementById('faq');
                     el?.scrollIntoView({ behavior: 'smooth' });
                   }}
-                  className="inline-flex justify-center items-center gap-2 px-8 py-4 bg-white text-teal-700 font-bold rounded-xl hover:bg-slate-50 hover:text-teal-800 transition-all border border-slate-200 hover:border-teal-200 hover:shadow-sm text-base"
+                  className="inline-flex justify-center items-center gap-2 px-8 py-4 bg-white text-teal-700 font-bold rounded-xl hover:bg-slate-50 hover:text-teal-800 border border-slate-200 hover:border-teal-200 hover:shadow-sm text-base micro-btn"
                 >
                   Read the FAQs
                 </button>
@@ -666,7 +725,7 @@ const LandingPage: React.FC = () => {
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* ─── FOOTER ─── */}
       <footer className="bg-slate-50 border-t border-slate-200 text-slate-600 pt-12 pb-6 px-4 sm:px-6 lg:px-8">
@@ -701,30 +760,30 @@ const LandingPage: React.FC = () => {
           <div>
             <h4 className="text-xs font-bold tracking-widest text-slate-900 uppercase mb-4">For Patients</h4>
             <ul className="space-y-3 text-sm font-medium text-slate-500">
-              <li><Link to="/doctors" className="hover:text-teal-600 transition-colors">Find a Doctor</Link></li>
-              <li><button onClick={openAuth} className="hover:text-teal-600 transition-colors">Book Appointment</button></li>
-              <li><button onClick={openAuth} className="hover:text-teal-600 transition-colors">My Health Records</button></li>
-              <li><a href="#faq" className="hover:text-teal-600 transition-colors">Patient Help</a></li>
+              <li><Link to="/doctors" className="micro-link hover:text-teal-600">Find a Doctor</Link></li>
+              <li><button onClick={openAuth} className="micro-link hover:text-teal-600">Book Appointment</button></li>
+              <li><button onClick={openAuth} className="micro-link hover:text-teal-600">My Health Records</button></li>
+              <li><a href="#faq" className="micro-link hover:text-teal-600">Patient Help</a></li>
             </ul>
           </div>
           
           <div>
             <h4 className="text-xs font-bold tracking-widest text-slate-900 uppercase mb-4">For Doctors</h4>
             <ul className="space-y-3 text-sm font-medium text-slate-500">
-              <li><button onClick={openAuth} className="hover:text-teal-600 transition-colors">Join Network</button></li>
-              <li><button onClick={openAuth} className="hover:text-teal-600 transition-colors">Manage Appointments</button></li>
-              <li><a href="#about" className="hover:text-teal-600 transition-colors">Provider Resources</a></li>
-              <li><a href="#features" className="hover:text-teal-600 transition-colors">Platform Features</a></li>
+              <li><button onClick={openAuth} className="micro-link hover:text-teal-600">Join Network</button></li>
+              <li><button onClick={openAuth} className="micro-link hover:text-teal-600">Manage Appointments</button></li>
+              <li><a href="#about" className="micro-link hover:text-teal-600">Provider Resources</a></li>
+              <li><a href="#features" className="micro-link hover:text-teal-600">Platform Features</a></li>
             </ul>
           </div>
           
           <div>
             <h4 className="text-xs font-bold tracking-widest text-slate-900 uppercase mb-4">Company</h4>
             <ul className="space-y-3 text-sm font-medium text-slate-500">
-              <li><a href="#about" className="hover:text-teal-600 transition-colors">About Us</a></li>
-              <li><Link to="/contact" className="hover:text-teal-600 transition-colors">Contact Us</Link></li>
-              <li><Link to="/privacy" className="hover:text-teal-600 transition-colors">Privacy Policy</Link></li>
-              <li><Link to="/terms" className="hover:text-teal-600 transition-colors">Terms of Service</Link></li>
+              <li><a href="#about" className="micro-link hover:text-teal-600">About Us</a></li>
+              <li><Link to="/contact" className="micro-link hover:text-teal-600">Contact Us</Link></li>
+              <li><Link to="/privacy" className="micro-link hover:text-teal-600">Privacy Policy</Link></li>
+              <li><Link to="/terms" className="micro-link hover:text-teal-600">Terms of Service</Link></li>
             </ul>
           </div>
         </div>
@@ -732,9 +791,9 @@ const LandingPage: React.FC = () => {
         <div className="max-w-7xl mx-auto mt-12 pt-6 border-t border-slate-200 flex flex-col md:flex-row items-center justify-between gap-4 text-sm font-medium text-slate-500">
           <p>© {new Date().getFullYear()} Health Connect. All rights reserved.</p>
           <div className="flex gap-6">
-            <Link to="/terms" className="hover:text-teal-600 transition-colors">Terms of Service</Link>
-            <Link to="/privacy" className="hover:text-teal-600 transition-colors">Privacy Policy</Link>
-            <Link to="/privacy" className="hover:text-teal-600 transition-colors">Cookies</Link>
+            <Link to="/terms" className="micro-link hover:text-teal-600">Terms of Service</Link>
+            <Link to="/privacy" className="micro-link hover:text-teal-600">Privacy Policy</Link>
+            <Link to="/privacy" className="micro-link hover:text-teal-600">Cookies</Link>
           </div>
         </div>
       </footer>

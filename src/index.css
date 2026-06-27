@@ -4,24 +4,53 @@
 
 @layer base {
   body {
-    @apply bg-gray-50 text-gray-900;
+    @apply bg-slate-50 text-slate-900;
+  }
+  
+  /* Global Input Standardization */
+  input:not([type="checkbox"]):not([type="radio"]), textarea, select {
+    @apply transition-all duration-300 ease-out focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 hover:border-slate-300;
+  }
+  
+  /* Global Button Standardization (Click Effect & Focus) */
+  button {
+    @apply active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 transition-transform duration-300 ease-out;
+  }
+  
+  /* Global Table Row Hover */
+  tbody tr {
+    @apply transition-colors duration-200 hover:bg-teal-50/50;
   }
 }
 
 @layer components {
+  /* Global Micro-Interaction Utilities */
+  .micro-btn {
+    @apply active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 transition-all duration-300 ease-out !important;
+  }
+  
+  .micro-input {
+    @apply transition-all duration-300 ease-out focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 hover:border-slate-300 !important;
+  }
+
+  .micro-link {
+    @apply relative after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:w-0 after:bg-teal-600 after:transition-all after:duration-300 hover:after:w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 rounded-sm;
+  }
+
+  /* Legacy classes (kept for safety) */
   .btn-primary {
-    @apply bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 transition-colors font-medium;
+    @apply bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 font-medium micro-btn;
   }
   
   .btn-secondary {
-    @apply bg-gray-200 text-gray-900 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors font-medium;
+    @apply bg-slate-200 text-slate-900 px-4 py-2 rounded-lg hover:bg-slate-300 font-medium micro-btn;
   }
   
   .card {
-    @apply bg-white rounded-lg shadow-md p-6;
+    @apply bg-white rounded-lg shadow-md p-6 transition-all duration-300 hover:shadow-xl hover:-translate-y-1;
   }
   
   .input-field {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500;
+    @apply w-full px-3 py-2 border border-slate-300 rounded-lg micro-input;
   }
 }

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Phone, MapPin, Send, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const ContactUs: React.FC = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -142,15 +143,29 @@ const ContactUs: React.FC = () => {
           <div className="bg-white rounded-3xl p-8 md:p-10 border border-slate-200 shadow-xl lg:ml-8">
             <h3 className="text-2xl font-bold text-slate-900 mb-6">Send us a message</h3>
             
-            {isSubmitted ? (
-              <div className="bg-teal-50 border border-teal-200 rounded-2xl p-6 text-center animate-fade-in">
-                <CheckCircle2 className="w-12 h-12 text-teal-600 mx-auto mb-4" />
-                <h4 className="text-xl font-bold text-slate-900 mb-2">Message Sent!</h4>
-                <p className="text-slate-600">
-                  Thank you for reaching out to Health Connect. One of our team members will get back to you shortly.
-                </p>
-              </div>
-            ) : (
+            <AnimatePresence mode="wait">
+              {isSubmitted ? (
+                <motion.div 
+                  key="success"
+                  initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9, y: -10 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  className="bg-teal-50 border border-teal-200 rounded-2xl p-8 text-center"
+                >
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 15, delay: 0.1 }}
+                  >
+                    <CheckCircle2 className="w-16 h-16 text-teal-600 mx-auto mb-4" />
+                  </motion.div>
+                  <h4 className="text-2xl font-bold text-slate-900 mb-2">Message Sent!</h4>
+                  <p className="text-slate-600">
+                    Thank you for reaching out to Health Connect. One of our team members will get back to you shortly.
+                  </p>
+                </motion.div>
+              ) : (
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
@@ -161,7 +176,7 @@ const ContactUs: React.FC = () => {
                       name="firstName"
                       required
                       disabled={isLoading}
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-transparent transition-all disabled:bg-slate-50 disabled:text-slate-400"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 sm:text-lg text-slate-900 shadow-sm bg-white micro-input transition-all disabled:bg-slate-50 disabled:text-slate-400"
                       placeholder="Jane"
                     />
                   </div>
@@ -173,7 +188,7 @@ const ContactUs: React.FC = () => {
                       name="lastName"
                       required
                       disabled={isLoading}
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-transparent transition-all disabled:bg-slate-50 disabled:text-slate-400"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 sm:text-lg text-slate-900 shadow-sm bg-white micro-input transition-all disabled:bg-slate-50 disabled:text-slate-400"
                       placeholder="Doe"
                     />
                   </div>
@@ -187,7 +202,7 @@ const ContactUs: React.FC = () => {
                     name="email"
                     required
                     disabled={isLoading}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-transparent transition-all disabled:bg-slate-50 disabled:text-slate-400"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 sm:text-lg text-slate-900 shadow-sm bg-white micro-input transition-all disabled:bg-slate-50 disabled:text-slate-400"
                     placeholder="jane@example.com"
                   />
                 </div>
@@ -199,7 +214,7 @@ const ContactUs: React.FC = () => {
                     name="subject"
                     required
                     disabled={isLoading}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-transparent transition-all bg-white disabled:bg-slate-50 disabled:text-slate-400"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 sm:text-lg text-slate-900 shadow-sm bg-white micro-input transition-all disabled:bg-slate-50 disabled:text-slate-400"
                   >
                     <option value="">Select a topic...</option>
                     <option value="Patient Support">Patient Support</option>
@@ -217,7 +232,7 @@ const ContactUs: React.FC = () => {
                     rows={4}
                     required
                     disabled={isLoading}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-transparent transition-all resize-y disabled:bg-slate-50 disabled:text-slate-400"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 sm:text-lg text-slate-900 shadow-sm bg-white micro-input transition-all resize-y disabled:bg-slate-50 disabled:text-slate-400"
                     placeholder="How can we help you?"
                   ></textarea>
                 </div>
@@ -231,7 +246,7 @@ const ContactUs: React.FC = () => {
                 <button 
                   type="submit"
                   disabled={isLoading}
-                  className={`w-full py-4 px-6 bg-teal-600 text-white text-lg font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-teal-600/20 ${
+                  className={`w-full py-4 px-6 bg-teal-600 text-white text-lg font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-teal-600/20 micro-btn ${
                     isLoading 
                       ? 'opacity-70 cursor-not-allowed' 
                       : 'hover:bg-teal-700 hover:shadow-teal-600/40 hover:-translate-y-0.5'
@@ -251,6 +266,7 @@ const ContactUs: React.FC = () => {
                 </button>
               </form>
             )}
+            </AnimatePresence>
           </div>
 
 

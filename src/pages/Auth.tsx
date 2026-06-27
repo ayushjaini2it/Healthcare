@@ -3,6 +3,7 @@ import { Stethoscope } from 'lucide-react';
 import { LoginForm } from '../components/auth/LoginForm';
 import { PatientSignupForm } from '../components/auth/PatientSignupForm';
 import { DoctorSignupForm } from '../components/auth/DoctorSignupForm';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Auth: React.FC<{ onClose: () => void, onSuccessLogin?: () => void }> = ({ onClose, onSuccessLogin }) => {
   const [isLogin, setIsLogin] = useState(true);
@@ -97,24 +98,34 @@ const Auth: React.FC<{ onClose: () => void, onSuccessLogin?: () => void }> = ({ 
   }
 
   return (
-    <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
-      onMouseDown={handleBackdropMouseDown}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="auth-modal-title"
-    >
-      <div 
-        ref={modalRef}
-        className="max-w-md w-full bg-white rounded-3xl shadow-2xl p-5 sm:p-6 relative my-4 sm:my-8 border border-slate-100 max-h-[100dvh] sm:max-h-[95vh] overflow-y-auto animate-fade-in"
+    <AnimatePresence>
+      <motion.div 
+        key="backdrop"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.2 }}
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+        onMouseDown={handleBackdropMouseDown}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="auth-modal-title"
       >
-        <button 
-          onClick={onClose}
-          className="absolute top-4 sm:top-6 right-4 sm:right-6 p-2 border border-slate-200 rounded-xl text-slate-500 hover:bg-slate-50 transition-colors z-20"
-          aria-label="Close"
+        <motion.div 
+          ref={modalRef}
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          transition={{ type: "spring", stiffness: 300, damping: 25 }}
+          className="max-w-md w-full bg-white rounded-3xl shadow-2xl p-5 sm:p-6 relative my-4 sm:my-8 border border-slate-100 max-h-[100dvh] sm:max-h-[95vh] overflow-y-auto"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-        </button>
+          <button 
+            onClick={onClose}
+            className="absolute top-4 sm:top-6 right-4 sm:right-6 p-2 border border-slate-200 rounded-xl text-slate-500 hover:bg-slate-50 transition-colors z-20 micro-btn"
+            aria-label="Close"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
 
         {/* Header */}
         <div className="mb-4 sm:mb-6 pr-10">
@@ -190,8 +201,9 @@ const Auth: React.FC<{ onClose: () => void, onSuccessLogin?: () => void }> = ({ 
             {isLogin ? 'Sign up for free' : 'Sign in to your account'}
           </button>
         </p>
-      </div>
-    </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
   );
 };
 

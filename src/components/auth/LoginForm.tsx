@@ -116,13 +116,13 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, setError }) => 
               value={forgotEmail}
               onChange={(e) => setForgotEmail(e.target.value)}
               autoFocus
-              className="w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all placeholder:text-slate-400"
+              className="w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all placeholder:text-slate-400 micro-input"
               placeholder="Your email address" 
             />
           </div>
 
           <button type="submit" disabled={forgotLoading}
-            className="w-full flex items-center justify-center py-3 px-4 border border-transparent text-lg font-bold rounded-xl text-white bg-teal-600 hover:bg-teal-700 focus:outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+            className="w-full flex items-center justify-center py-3 px-4 border border-transparent text-lg font-bold rounded-xl text-white bg-teal-600 hover:bg-teal-700 focus:outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed micro-btn">
             {forgotLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <span>Send Reset Link</span>}
           </button>
           
@@ -150,7 +150,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, setError }) => 
           {...register('email')}
           type="email" 
           autoFocus
-          className={`w-full px-4 py-3 bg-white border rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all placeholder:text-slate-400 ${errors.email ? 'border-red-300' : 'border-slate-300'}`}
+          className={`w-full px-4 py-3 bg-white border rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all placeholder:text-slate-400 micro-input ${errors.email ? 'border-red-300' : 'border-slate-300'}`}
           placeholder="Your email address" 
         />
         {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email.message}</p>}
@@ -163,7 +163,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, setError }) => 
             id="login-password"
             {...register('password')}
             type={showPassword ? 'text' : 'password'}
-            className={`w-full px-4 py-3 pr-12 bg-white border rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all placeholder:text-slate-400 ${errors.password ? 'border-red-300' : 'border-slate-300'}`}
+            className={`w-full px-4 py-3 pr-12 bg-white border rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all placeholder:text-slate-400 micro-input ${errors.password ? 'border-red-300' : 'border-slate-300'}`}
             placeholder="Your password" 
           />
           <button 
@@ -179,7 +179,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, setError }) => 
       </div>
 
       <button type="submit" disabled={isLoading}
-        className="w-full mt-2 group relative flex items-center justify-center py-3.5 px-4 border border-transparent text-lg font-bold rounded-xl text-white bg-teal-600 hover:bg-teal-700 focus:outline-none transition-all shadow-sm shadow-teal-100 disabled:opacity-50 disabled:cursor-not-allowed">
+        className="w-full mt-2 group relative flex items-center justify-center py-3.5 px-4 border border-transparent text-lg font-bold rounded-xl text-white bg-teal-600 hover:bg-teal-700 focus:outline-none transition-all shadow-sm shadow-teal-100 disabled:opacity-50 disabled:cursor-not-allowed micro-btn">
         {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <span>Log In</span>}
       </button>
 
