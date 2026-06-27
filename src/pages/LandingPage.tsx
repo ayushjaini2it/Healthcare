@@ -197,14 +197,14 @@ const LandingPage: React.FC = () => {
       {/* ─── NAVBAR ─── */}
       <nav className="sticky top-0 w-full z-40 bg-white/80 backdrop-blur-xl border-b border-slate-200/80 transition-all">
         <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between transition-all duration-300 ${isScrolled ? 'py-3 lg:py-3.5' : 'py-4 lg:py-5'}`}>
-          <Link to="/" className="flex items-center gap-2">
-            <img src="/logo.png" alt="Health Connect Logo" className={`w-auto transition-all duration-300 ${isScrolled ? 'h-8' : 'h-10'}`} />
-            <span className="text-xl font-bold text-teal-800 tracking-tight">Health Connect</span>
+          <Link to="/" className="flex items-center gap-2 shrink-0">
+            <img src="/logo.png" alt="Health Connect Logo" className={`w-auto transition-all duration-300 ${isScrolled ? 'h-7 md:h-8' : 'h-8 md:h-10'}`} />
+            <span className="hidden min-[940px]:inline-block text-lg md:text-xl font-bold text-teal-800 tracking-tight whitespace-nowrap">Health Connect</span>
           </Link>
           
           <div className="hidden md:flex items-center gap-8 font-medium text-slate-600">
-            <a href="#features" className={`micro-link hover:text-teal-600 transition-colors ${activeSection === 'features' ? 'text-teal-600 font-bold after:w-full' : ''}`}>Features</a>
             <a href="#how-it-works" className={`micro-link hover:text-teal-600 transition-colors ${activeSection === 'how-it-works' ? 'text-teal-600 font-bold after:w-full' : ''}`}>How It Works</a>
+            <a href="#features" className={`micro-link hover:text-teal-600 transition-colors ${activeSection === 'features' ? 'text-teal-600 font-bold after:w-full' : ''}`}>Features</a>
             <a href="#about" className={`micro-link hover:text-teal-600 transition-colors ${activeSection === 'about' ? 'text-teal-600 font-bold after:w-full' : ''}`}>About Us</a>
             <Link to="/contact" className="micro-link hover:text-teal-600 transition-colors">Contact Us</Link>
           </div>
@@ -258,8 +258,8 @@ const LandingPage: React.FC = () => {
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <div className="md:hidden absolute top-full left-0 w-full bg-white border-b border-slate-200 shadow-xl py-4 px-4 flex flex-col gap-4 animate-fade-in">
-            <a href="#features" onClick={() => setIsMobileMenuOpen(false)} className={`block py-2 font-medium ${activeSection === 'features' ? 'text-teal-600' : 'text-slate-600'}`}>Features</a>
             <a href="#how-it-works" onClick={() => setIsMobileMenuOpen(false)} className={`block py-2 font-medium ${activeSection === 'how-it-works' ? 'text-teal-600' : 'text-slate-600'}`}>How It Works</a>
+            <a href="#features" onClick={() => setIsMobileMenuOpen(false)} className={`block py-2 font-medium ${activeSection === 'features' ? 'text-teal-600' : 'text-slate-600'}`}>Features</a>
             <a href="#about" onClick={() => setIsMobileMenuOpen(false)} className={`block py-2 font-medium ${activeSection === 'about' ? 'text-teal-600' : 'text-slate-600'}`}>About Us</a>
             <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-slate-600 font-medium hover:text-teal-600">Contact Us</Link>
             <hr className="border-slate-100" />
@@ -373,46 +373,36 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* ─── ABOUT SECTION ─── */}
+      {/* ─── HOW IT WORKS ─── */}
       <motion.section 
-        id="about" 
+        id="how-it-works" 
         className="scroll-mt-20 py-12 md:py-16 bg-white border-t border-slate-100"
         initial={{ opacity: 0, y: 30 }} 
         whileInView={{ opacity: 1, y: 0 }} 
         viewport={{ once: true, amount: 0.1 }} 
         transition={{ duration: 0.6, ease: "easeOut" }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col lg:flex-row items-center gap-12">
-            <div className="flex-1 relative">
-              <div className="absolute -inset-4 bg-teal-100 rounded-[3rem] blur-xl opacity-50 -z-10 animate-pulse-soft"></div>
-              <img 
-                src="/about_us.png" 
-                alt="Healthcare professionals collaborating" 
-                className="relative w-full h-auto rounded-3xl shadow-2xl bg-white/80 backdrop-blur-sm border border-white"
-              />
-            </div>
-            <div className="flex-1 space-y-6">
-              <h2 className="text-sm font-bold tracking-widest text-teal-600 uppercase">About Us</h2>
-              <h3 className="text-3xl md:text-4xl font-bold text-slate-900 leading-tight">
-                Empowering your health journey with technology and empathy.
-              </h3>
-              <p className="text-lg text-slate-600 leading-relaxed">
-                At Health Connect, we believe that accessing quality healthcare should be seamless, transparent, and patient-centric. We've built a platform that bridges the gap between expert medical professionals and those who need them most.
-              </p>
-              <ul className="space-y-4 pt-4">
-                {[
-                  { text: "Verified, top-tier medical professionals.", delay: "100" },
-                  { text: "Bank-level security for your health records.", delay: "300" },
-                  { text: "24/7 access to your health timeline.", delay: "500" }
-                ].map((item, idx) => (
-                  <li key={idx} className={`flex items-center gap-3 text-slate-700 font-medium animate-fade-in animate-delay-${item.delay}`}>
-                    <CheckCircle2 className="w-6 h-6 text-teal-500 flex-shrink-0" />
-                    {item.text}
-                  </li>
-                ))}
-              </ul>
-            </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-sm font-bold tracking-widest text-teal-600 uppercase mb-3">Simple Process</h2>
+          <h3 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">Get started in three simple steps</h3>
+          <p className="text-lg text-slate-600 mb-10 max-w-2xl mx-auto">We've eliminated the friction of traditional healthcare access.</p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative z-0">
+            <div className="hidden md:block absolute top-10 left-[15%] right-[15%] h-1 bg-gradient-to-r from-teal-50 via-teal-300 to-teal-50 bg-[length:200%_auto] animate-gradient-x -z-10 rounded-full"></div>
+            
+            {[
+              { step: "1", title: "Create Your Profile", desc: "Sign up and add your basic health information securely in less than 2 minutes." },
+              { step: "2", title: "Find Your Doctor", desc: "Browse our curated network of top-rated healthcare professionals matching your needs." },
+              { step: "3", title: "Book & Connect", desc: "Schedule your appointment instantly and receive digital reminders before your visit." },
+            ].map((item, idx) => (
+              <div key={idx} className="flex flex-col items-center bg-white">
+                <div className="w-16 h-16 bg-teal-600 text-white rounded-2xl flex items-center justify-center text-xl font-bold mb-5 shadow-xl shadow-teal-600/20 ring-8 ring-white transform rotate-3 hover:rotate-0 transition-transform">
+                  {item.step}
+                </div>
+                <h4 className="text-xl font-bold text-slate-900 mb-3">{item.title}</h4>
+                <p className="text-slate-600 leading-relaxed max-w-xs">{item.desc}</p>
+              </div>
+            ))}
           </div>
         </div>
       </motion.section>
@@ -452,40 +442,6 @@ const LandingPage: React.FC = () => {
                 <h4 className="text-xl font-bold text-slate-900 mb-3">{feature.title}</h4>
                 <p className="text-slate-600 leading-relaxed group-hover:text-slate-700 transition-colors">{feature.desc}</p>
               </motion.div>
-            ))}
-          </div>
-        </div>
-      </motion.section>
-
-      {/* ─── HOW IT WORKS ─── */}
-      <motion.section 
-        id="how-it-works" 
-        className="scroll-mt-20 py-12 md:py-16 bg-white border-t border-slate-100"
-        initial={{ opacity: 0, y: 30 }} 
-        whileInView={{ opacity: 1, y: 0 }} 
-        viewport={{ once: true, amount: 0.1 }} 
-        transition={{ duration: 0.6, ease: "easeOut" }}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-sm font-bold tracking-widest text-teal-600 uppercase mb-3">Simple Process</h2>
-          <h3 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">Get started in three simple steps</h3>
-          <p className="text-lg text-slate-600 mb-10 max-w-2xl mx-auto">We've eliminated the friction of traditional healthcare access.</p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative z-0">
-            <div className="hidden md:block absolute top-10 left-[15%] right-[15%] h-1 bg-gradient-to-r from-teal-50 via-teal-300 to-teal-50 bg-[length:200%_auto] animate-gradient-x -z-10 rounded-full"></div>
-            
-            {[
-              { step: "1", title: "Create Your Profile", desc: "Sign up and add your basic health information securely in less than 2 minutes." },
-              { step: "2", title: "Find Your Doctor", desc: "Browse our curated network of top-rated healthcare professionals matching your needs." },
-              { step: "3", title: "Book & Connect", desc: "Schedule your appointment instantly and receive digital reminders before your visit." },
-            ].map((item, idx) => (
-              <div key={idx} className="flex flex-col items-center bg-white">
-                <div className="w-16 h-16 bg-teal-600 text-white rounded-2xl flex items-center justify-center text-xl font-bold mb-5 shadow-xl shadow-teal-600/20 ring-8 ring-white transform rotate-3 hover:rotate-0 transition-transform">
-                  {item.step}
-                </div>
-                <h4 className="text-xl font-bold text-slate-900 mb-3">{item.title}</h4>
-                <p className="text-slate-600 leading-relaxed max-w-xs">{item.desc}</p>
-              </div>
             ))}
           </div>
         </div>
@@ -584,6 +540,50 @@ const LandingPage: React.FC = () => {
                   aria-label={`Go to slide ${idx + 1}`}
                 />
               ))}
+            </div>
+          </div>
+        </div>
+      </motion.section>
+
+      {/* ─── ABOUT SECTION ─── */}
+      <motion.section 
+        id="about" 
+        className="scroll-mt-20 py-12 md:py-16 bg-white border-t border-slate-100"
+        initial={{ opacity: 0, y: 30 }} 
+        whileInView={{ opacity: 1, y: 0 }} 
+        viewport={{ once: true, amount: 0.1 }} 
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col lg:flex-row items-center gap-12">
+            <div className="flex-1 relative">
+              <div className="absolute -inset-4 bg-teal-100 rounded-[3rem] blur-xl opacity-50 -z-10 animate-pulse-soft"></div>
+              <img 
+                src="/about_us.png" 
+                alt="Healthcare professionals collaborating" 
+                className="relative w-full h-auto rounded-3xl shadow-2xl bg-white/80 backdrop-blur-sm border border-white"
+              />
+            </div>
+            <div className="flex-1 space-y-6">
+              <h2 className="text-sm font-bold tracking-widest text-teal-600 uppercase">About Us</h2>
+              <h3 className="text-3xl md:text-4xl font-bold text-slate-900 leading-tight">
+                Empowering your health journey with technology and empathy.
+              </h3>
+              <p className="text-lg text-slate-600 leading-relaxed">
+                At Health Connect, we believe that accessing quality healthcare should be seamless, transparent, and patient-centric. We've built a platform that bridges the gap between expert medical professionals and those who need them most.
+              </p>
+              <ul className="space-y-4 pt-4">
+                {[
+                  { text: "Verified, top-tier medical professionals.", delay: "100" },
+                  { text: "Bank-level security for your health records.", delay: "300" },
+                  { text: "24/7 access to your health timeline.", delay: "500" }
+                ].map((item, idx) => (
+                  <li key={idx} className={`flex items-center gap-3 text-slate-700 font-medium animate-fade-in animate-delay-${item.delay}`}>
+                    <CheckCircle2 className="w-6 h-6 text-teal-500 flex-shrink-0" />
+                    {item.text}
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
         </div>
@@ -705,13 +705,23 @@ const LandingPage: React.FC = () => {
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                <button 
-                  onClick={openAuth}
-                  className="inline-flex justify-center items-center gap-2 px-8 py-4 bg-teal-600 text-white font-bold rounded-xl hover:bg-teal-700 hover:shadow-lg hover:shadow-teal-600/20 hover:-translate-y-0.5 text-base shadow-md shadow-teal-600/10 micro-btn"
-                >
-                  Create Free Account
-                  <ArrowRight className="w-5 h-5" />
-                </button>
+                {currentUser ? (
+                  <Link 
+                    to="/dashboard"
+                    className="inline-flex justify-center items-center gap-2 px-8 py-4 bg-teal-600 text-white font-bold rounded-xl hover:bg-teal-700 hover:shadow-lg hover:shadow-teal-600/20 hover:-translate-y-0.5 text-base shadow-md shadow-teal-600/10 micro-btn"
+                  >
+                    Go to Dashboard
+                    <ArrowRight className="w-5 h-5" />
+                  </Link>
+                ) : (
+                  <button 
+                    onClick={openAuth}
+                    className="inline-flex justify-center items-center gap-2 px-8 py-4 bg-teal-600 text-white font-bold rounded-xl hover:bg-teal-700 hover:shadow-lg hover:shadow-teal-600/20 hover:-translate-y-0.5 text-base shadow-md shadow-teal-600/10 micro-btn"
+                  >
+                    Create Free Account
+                    <ArrowRight className="w-5 h-5" />
+                  </button>
+                )}
                 <button 
                   onClick={() => {
                     const el = document.getElementById('faq');
@@ -740,14 +750,16 @@ const LandingPage: React.FC = () => {
             </p>
             <div className="flex gap-4">
               {[
-                { icon: Twitter, label: 'Twitter' },
-                { icon: Facebook, label: 'Facebook' },
-                { icon: Linkedin, label: 'LinkedIn' },
-                { icon: Github, label: 'GitHub' },
+                { icon: Twitter, label: 'Twitter', url: 'https://twitter.com' },
+                { icon: Facebook, label: 'Facebook', url: 'https://facebook.com' },
+                { icon: Linkedin, label: 'LinkedIn', url: 'https://linkedin.com' },
+                { icon: Github, label: 'GitHub', url: 'https://github.com' },
               ].map((social, idx) => (
                 <a 
                   key={idx}
-                  href="#" 
+                  href={social.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   aria-label={social.label}
                   className="p-2.5 bg-white border border-slate-200 rounded-full text-slate-400 hover:text-teal-600 hover:border-teal-200 hover:bg-teal-50 hover:shadow-sm hover:-translate-y-0.5 transition-all" 
                 >
@@ -761,8 +773,20 @@ const LandingPage: React.FC = () => {
             <h4 className="text-xs font-bold tracking-widest text-slate-900 uppercase mb-4">For Patients</h4>
             <ul className="space-y-3 text-sm font-medium text-slate-500">
               <li><Link to="/doctors" className="micro-link hover:text-teal-600">Find a Doctor</Link></li>
-              <li><button onClick={openAuth} className="micro-link hover:text-teal-600">Book Appointment</button></li>
-              <li><button onClick={openAuth} className="micro-link hover:text-teal-600">My Health Records</button></li>
+              <li>
+                {currentUser ? (
+                  <Link to={currentUser.role === 'patient' ? "/appointments" : "/dashboard"} className="micro-link hover:text-teal-600">Book Appointment</Link>
+                ) : (
+                  <button onClick={openAuth} className="micro-link hover:text-teal-600">Book Appointment</button>
+                )}
+              </li>
+              <li>
+                {currentUser ? (
+                  <Link to={currentUser.role === 'patient' ? "/my-records" : "/dashboard"} className="micro-link hover:text-teal-600">My Health Records</Link>
+                ) : (
+                  <button onClick={openAuth} className="micro-link hover:text-teal-600">My Health Records</button>
+                )}
+              </li>
               <li><a href="#faq" className="micro-link hover:text-teal-600">Patient Help</a></li>
             </ul>
           </div>
@@ -770,8 +794,20 @@ const LandingPage: React.FC = () => {
           <div>
             <h4 className="text-xs font-bold tracking-widest text-slate-900 uppercase mb-4">For Doctors</h4>
             <ul className="space-y-3 text-sm font-medium text-slate-500">
-              <li><button onClick={openAuth} className="micro-link hover:text-teal-600">Join Network</button></li>
-              <li><button onClick={openAuth} className="micro-link hover:text-teal-600">Manage Appointments</button></li>
+              <li>
+                {currentUser ? (
+                  <Link to="/dashboard" className="micro-link hover:text-teal-600">Dashboard</Link>
+                ) : (
+                  <button onClick={openAuth} className="micro-link hover:text-teal-600">Join Network</button>
+                )}
+              </li>
+              <li>
+                {currentUser ? (
+                  <Link to={currentUser.role === 'doctor' ? "/doctor-appointments" : "/dashboard"} className="micro-link hover:text-teal-600">Manage Appointments</Link>
+                ) : (
+                  <button onClick={openAuth} className="micro-link hover:text-teal-600">Manage Appointments</button>
+                )}
+              </li>
               <li><a href="#about" className="micro-link hover:text-teal-600">Provider Resources</a></li>
               <li><a href="#features" className="micro-link hover:text-teal-600">Platform Features</a></li>
             </ul>
@@ -793,7 +829,7 @@ const LandingPage: React.FC = () => {
           <div className="flex gap-6">
             <Link to="/terms" className="micro-link hover:text-teal-600">Terms of Service</Link>
             <Link to="/privacy" className="micro-link hover:text-teal-600">Privacy Policy</Link>
-            <Link to="/privacy" className="micro-link hover:text-teal-600">Cookies</Link>
+            <Link to="/privacy#cookies" className="micro-link hover:text-teal-600">Cookies</Link>
           </div>
         </div>
       </footer>
