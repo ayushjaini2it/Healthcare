@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { supabaseServices } from '../../services/supabaseServices';
-import { Loader2, Stethoscope, Phone, Building2, MapPin, ShieldCheck, KeyRound, Eye, EyeOff, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Loader2, Stethoscope, Phone, Building2, MapPin, ShieldCheck, Eye, EyeOff, ArrowRight, ArrowLeft } from 'lucide-react';
 import { PasswordStrengthMeter, getPasswordStrength } from './PasswordStrengthMeter';
 import { supabase } from '../../lib/supabase';
 
@@ -16,7 +16,6 @@ const doctorSignupSchema = z.object({
   phone: z.string().min(5, 'Valid phone number required'),
   hospitalName: z.string().min(2, 'Hospital name is required'),
   hospitalAddress: z.string().min(5, 'Hospital address is required'),
-  inviteCode: z.string().min(1, 'Invite code is required to register as a doctor'),
   tos: z.literal(true, {
     errorMap: () => ({ message: 'You must agree to the Terms of Service' })
   }),
@@ -42,19 +41,9 @@ export const DoctorSignupForm: React.FC<DoctorSignupFormProps> = ({ onSuccess, s
   // Wizard steps: 1 = Account, 2 = Professional, 3 = Workplace & ToS
   const [step, setStep] = useState(1);
 
-  const { register, handleSubmit, watch, trigger, setValue, formState: { errors } } = useForm<DoctorSignupData>({
+  const { register, handleSubmit, watch, trigger, formState: { errors } } = useForm<DoctorSignupData>({
     resolver: zodResolver(doctorSignupSchema),
   });
-
-  // Extract invite code from URL if present
-  React.useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const inviteParam = params.get('invite');
-    if (inviteParam) {
-      setValue('inviteCode', inviteParam);
-      // We could optionally pre-fetch hospital name here, but the backend overrides it securely anyway.
-    }
-  }, [setValue]);
 
   const passwordValue = watch('password');
 
@@ -68,7 +57,7 @@ export const DoctorSignupForm: React.FC<DoctorSignupFormProps> = ({ onSuccess, s
         setError('Please strengthen your password before continuing.');
       }
     } else if (step === 2) {
-      const isStep2Valid = await trigger(['specialization', 'phone', 'inviteCode']);
+      const isStep2Valid = await trigger(['specialization', 'phone']);
       if (isStep2Valid) {
         setStep(3);
         setError('');
@@ -83,7 +72,7 @@ export const DoctorSignupForm: React.FC<DoctorSignupFormProps> = ({ onSuccess, s
     setError('');
     try {
       await supabaseServices.authServices.signupDoctor(
-        data.email, data.password, data.fullName, data.specialization, data.phone, data.hospitalName, data.hospitalAddress, data.inviteCode
+        data.email, data.password, data.fullName, data.specialization, data.phone, data.hospitalName, data.hospitalAddress
       );
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
@@ -95,8 +84,6 @@ export const DoctorSignupForm: React.FC<DoctorSignupFormProps> = ({ onSuccess, s
       const msg = err?.message || '';
       if (msg.toLowerCase().includes('already registered') || msg.toLowerCase().includes('already been registered')) {
         setError('An account with this email already exists.');
-      } else if (msg.toLowerCase().includes('invite code')) {
-        setError(msg);
       } else {
         setError(msg || 'Something went wrong. Please try again or contact support.');
       }
@@ -248,17 +235,8 @@ export const DoctorSignupForm: React.FC<DoctorSignupFormProps> = ({ onSuccess, s
             {errors.phone && <p className="mt-1 text-xs text-red-500">{errors.phone.message}</p>}
           </div>
 
-          <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 ml-1">Doctor Invite Code</label>
-            <div className="relative group">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-teal-500 transition-colors">
-                <KeyRound className="h-5 w-5" />
-              </div>
-              <input {...register('inviteCode')} type="text" autoComplete="off"
-                className={`w-full pl-11 pr-4 py-3 bg-white border rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all placeholder:text-slate-400 tracking-widest font-mono ${errors.inviteCode ? 'border-red-300' : 'border-slate-300'}`}
-                placeholder="e.g. HC-2026-DOC" />
-            </div>
-            {errors.inviteCode && <p className="mt-1 text-xs text-red-500">{errors.inviteCode.message}</p>}
+          <div className="rounded-xl border border-teal-200 bg-white/70 p-3 text-sm text-slate-600">
+            No invitation code is required. You can create your doctor account immediately.
           </div>
 
           <div className="flex gap-3 pt-2">

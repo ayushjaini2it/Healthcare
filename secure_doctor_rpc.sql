@@ -15,8 +15,8 @@ INSERT INTO doctor_invite_codes (code) VALUES ('HC-2026-DOC') ON CONFLICT DO NOT
 -- Revoke public access to ensure nobody can read the codes
 REVOKE ALL ON doctor_invite_codes FROM PUBLIC;
 
--- 2. Create/Replace the RPC function that validates the invite code
---    and runs with elevated privileges (SECURITY DEFINER)
+-- 2. Create/Replace the RPC function that creates the doctor profile
+--    without requiring an invite code, and runs with elevated privileges (SECURITY DEFINER)
 CREATE OR REPLACE FUNCTION register_doctor_profile(
     p_user_id UUID,
     p_full_name TEXT,
@@ -31,18 +31,7 @@ RETURNS boolean
 LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
-DECLARE
-    v_code_valid BOOLEAN;
 BEGIN
-    -- Validate the invite code
-    SELECT is_active INTO v_code_valid
-    FROM doctor_invite_codes
-    WHERE code = p_invite_code;
-
-    IF v_code_valid IS NULL OR v_code_valid = false THEN
-        RAISE EXCEPTION 'Invalid invite code. Please contact your administrator.';
-    END IF;
-
     -- Insert into doctors table securely
     INSERT INTO doctors (id, full_name, email, specialization, phone, hospital_name, hospital_address)
     VALUES (p_user_id, p_full_name, p_email, p_specialization, p_phone, p_hospital_name, p_hospital_address);

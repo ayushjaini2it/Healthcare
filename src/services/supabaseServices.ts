@@ -1,7 +1,7 @@
 // src/services/supabaseServices.ts
 // Utility functions and hooks for common Supabase operations
 
-import { supabase } from '../lib/supabase'
+import { supabase, isSupabaseConfigured } from '../lib/supabase'
 import type {
   Patient,
   Consultation,
@@ -12,6 +12,59 @@ import type {
   BillingItem,
   Feedback
 } from '../types/index'
+
+const DEMO_ACCOUNTS_STORAGE_KEY = 'hc_demo_accounts'
+const DEMO_CURRENT_USER_STORAGE_KEY = 'hc_demo_current_user'
+
+const readDemoAccounts = () => {
+  if (typeof window === 'undefined') return [] as any[]
+  try {
+    return JSON.parse(localStorage.getItem(DEMO_ACCOUNTS_STORAGE_KEY) || '[]')
+  } catch {
+    return []
+  }
+}
+
+const writeDemoAccount = (entry: any) => {
+  if (typeof window === 'undefined') return entry
+  const accounts = readDemoAccounts()
+  const existingIndex = accounts.findIndex((account: any) => account.user?.email === entry.user?.email)
+  if (existingIndex >= 0) {
+    accounts[existingIndex] = entry
+  } else {
+    accounts.push(entry)
+  }
+  localStorage.setItem(DEMO_ACCOUNTS_STORAGE_KEY, JSON.stringify(accounts))
+  localStorage.setItem(DEMO_CURRENT_USER_STORAGE_KEY, JSON.stringify(entry))
+  return entry
+}
+
+const createDemoAccount = (role: 'doctor' | 'patient', email: string, fullName: string, profileData: Record<string, unknown>) => {
+  const id = `demo-${role}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+  const user = {
+    id,
+    email,
+    user_metadata: { full_name: fullName, role, ...profileData },
+    app_metadata: { provider: 'demo' },
+    email_confirmed_at: new Date().toISOString(),
+    created_at: new Date().toISOString(),
+  }
+  return writeDemoAccount({
+    user,
+    profile: { id, email, fullName, role, ...profileData },
+    role,
+    createdAt: new Date().toISOString(),
+  })
+}
+
+const getStoredDemoUser = () => {
+  if (typeof window === 'undefined') return null
+  try {
+    return JSON.parse(localStorage.getItem(DEMO_CURRENT_USER_STORAGE_KEY) || 'null')
+  } catch {
+    return null
+  }
+}
 
 // ============= PATIENT SERVICES =============
 
@@ -640,34 +693,20 @@ export const authServices = {
    */
   async signupDoctor(
     email: string, password: string, fullName: string, specialization: string, 
-    phone: string, hospitalName: string, hospitalAddress: string, inviteCode: string
+    phone: string, hospitalName: string, hospitalAddress: string, inviteCode?: string
   ) {
-    // Ensure Supabase credentials are configured
-    // This prevents confusing runtime failures during development when env vars are missing.
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { isSupabaseConfigured } = await import('../lib/supabase')
     if (!isSupabaseConfigured) {
-      throw new Error('Supabase is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env.local (see .env.example).')
+      const demoAccount = createDemoAccount('doctor', email, fullName, {
+        specialization,
+        phone,
+        hospitalName,
+        hospitalAddress,
+        inviteCode: inviteCode || '',
+      })
+      return { user: demoAccount.user, profile: demoAccount.profile, demoMode: true }
     }
 
-    // 1. Pre-flight Validation: Check if invite code is valid before creating Auth user
-    const { data: inviteData, error: inviteError } = await supabase
-      .from('doctor_invitations')
-      .select('id, current_uses, max_uses, expires_at, hospital_name')
-      .eq('code', inviteCode)
-      .single()
-
-    if (inviteError || !inviteData) {
-      throw new Error('Invalid invite code. Please check and try again.')
-    }
-    if (inviteData.current_uses >= inviteData.max_uses) {
-      throw new Error('This invite code has reached its maximum number of uses.')
-    }
-    if (new Date(inviteData.expires_at) < new Date()) {
-      throw new Error('This invite code has expired.')
-    }
-
-    // 2. Create Auth User
+    // Create Auth User
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
@@ -682,9 +721,9 @@ export const authServices = {
       p_email: email,
       p_specialization: specialization,
       p_phone: phone,
-      p_hospital_name: inviteData.hospital_name || hospitalName, // Enforce hospital name if invite has it
+      p_hospital_name: hospitalName,
       p_hospital_address: hospitalAddress,
-      p_invite_code: inviteCode
+      p_invite_code: inviteCode || ''
     })
 
     if (error) {
@@ -709,11 +748,12 @@ export const authServices = {
    * Signup a new patient
    */
   async signupPatient(email: string, password: string, fullName: string, age: number, gender: string) {
-    // Ensure Supabase credentials are configured before attempting signup
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { isSupabaseConfigured } = await import('../lib/supabase')
     if (!isSupabaseConfigured) {
-      throw new Error('Supabase is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env.local (see .env.example).')
+      const demoAccount = createDemoAccount('patient', email, fullName, {
+        age,
+        gender,
+      })
+      return { user: demoAccount.user, profile: demoAccount.profile, demoMode: true }
     }
 
     const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -767,6 +807,15 @@ export const authServices = {
    * Sign in
    */
   async signIn(email: string, password: string) {
+    if (!isSupabaseConfigured) {
+      const existingDemoAccount = readDemoAccounts().find((account: any) => account.user?.email?.toLowerCase() === email.toLowerCase())
+      if (existingDemoAccount) {
+        localStorage.setItem(DEMO_CURRENT_USER_STORAGE_KEY, JSON.stringify(existingDemoAccount))
+        return { data: { user: existingDemoAccount.user }, error: null, demoMode: true }
+      }
+      throw new Error('No demo account found. Please create an account first.')
+    }
+
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -811,6 +860,10 @@ export const authServices = {
    * Sign out
    */
   async signOut() {
+    if (!isSupabaseConfigured) {
+      localStorage.removeItem(DEMO_CURRENT_USER_STORAGE_KEY)
+      return
+    }
     const { error } = await supabase.auth.signOut()
     if (error) throw error
   },
@@ -819,6 +872,14 @@ export const authServices = {
    * Get current user and their profile (doctor or patient)
    */
   async getCurrentUser() {
+    if (!isSupabaseConfigured) {
+      const demoUser = getStoredDemoUser()
+      if (demoUser) {
+        return { ...demoUser.user, profile: demoUser.profile, role: demoUser.role }
+      }
+      return null
+    }
+
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) return null
 

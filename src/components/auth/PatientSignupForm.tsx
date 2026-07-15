@@ -265,3 +265,5 @@ export const PatientSignupForm: React.FC<PatientSignupFormProps> = ({ onSuccess,
     </form>
   );
 };
+
+

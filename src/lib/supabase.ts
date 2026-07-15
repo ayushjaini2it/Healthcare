@@ -1,13 +1,19 @@
 import { createClient, SupportedStorage } from '@supabase/supabase-js'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co'
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'placeholder-anon-key'
+const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL || '').trim() || 'https://placeholder.supabase.co'
+const supabaseAnonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim() || 'placeholder-anon-key'
+const isPlaceholderUrl =
+  supabaseUrl.includes('placeholder.supabase.co') ||
+  supabaseUrl.includes('your-project-id') ||
+  supabaseUrl.includes('your-supabase')
+const isPlaceholderKey =
+  supabaseAnonKey.includes('placeholder-anon-key') ||
+  supabaseAnonKey.includes('your-supabase')
 
-// Helper used by services/components to know if real Supabase credentials are present
-export const isSupabaseConfigured = (
-  !!import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_URL !== 'https://placeholder.supabase.co' &&
-  !!import.meta.env.VITE_SUPABASE_ANON_KEY && import.meta.env.VITE_SUPABASE_ANON_KEY !== 'placeholder-anon-key'
-)
+// Helper used by services/components to know whether the app has any Supabase env values configured.
+// Placeholder values are treated as a local starter configuration so the app can boot.
+export const isSupabaseUsingPlaceholderValues = isPlaceholderUrl || isPlaceholderKey
+export const isSupabaseConfigured = !!supabaseUrl && !!supabaseAnonKey && !isSupabaseUsingPlaceholderValues
 
 // Custom storage to support Remember Me functionality
 // Defaults to localStorage (remember me = true). 
