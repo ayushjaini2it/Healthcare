@@ -5,7 +5,7 @@ import Auth from './Auth';
 import { 
   Search, Calendar, UserCircle, Clock, Shield, Heart, 
   Menu, X, Star, ChevronDown, CheckCircle2, ArrowRight,
-  Twitter, Linkedin, Facebook, Instagram, Sun, Moon
+  Twitter, Linkedin, Facebook, Instagram
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -55,7 +55,6 @@ const LandingPage: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [heroSearch, setHeroSearch] = useState('');
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
-  const [isDarkMode, setIsDarkMode] = useState(() => localStorage.getItem('health-connect-theme') === 'dark');
   const carouselRef = useRef<HTMLDivElement>(null);
 
   const isAuthOpen = searchParams.get('login') === 'true';
@@ -71,14 +70,6 @@ const LandingPage: React.FC = () => {
     newParams.set('login', 'true');
     setSearchParams(newParams);
     setIsMobileMenuOpen(false);
-  };
-
-  const toggleTheme = () => {
-    setIsDarkMode((current) => {
-      const next = !current;
-      localStorage.setItem('health-connect-theme', next ? 'dark' : 'light');
-      return next;
-    });
   };
 
   const toggleFaq = (index: number) => {
@@ -157,10 +148,6 @@ const LandingPage: React.FC = () => {
   }, [currentTestimonial]);
 
   useEffect(() => {
-    document.documentElement.classList.toggle('dark', isDarkMode);
-  }, [isDarkMode]);
-
-  useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -223,14 +210,6 @@ const LandingPage: React.FC = () => {
           </div>
           
           <div className="hidden md:flex items-center gap-4">
-            <button
-              onClick={toggleTheme}
-              className="p-2.5 text-slate-600 hover:text-teal-600 hover:bg-teal-50 rounded-xl transition-colors"
-              aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-              title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-            >
-              {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </button>
             {currentUser ? (
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-3 bg-slate-50 p-1.5 pr-4 rounded-full border border-slate-100">
@@ -284,14 +263,6 @@ const LandingPage: React.FC = () => {
             <a href="#about" onClick={() => setIsMobileMenuOpen(false)} className={`block py-2 font-medium ${activeSection === 'about' ? 'text-teal-600' : 'text-slate-600'}`}>About Us</a>
             <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-slate-600 font-medium hover:text-teal-600">Contact Us</Link>
             <hr className="border-slate-100" />
-            <button
-              onClick={toggleTheme}
-              className="flex items-center justify-center gap-2 w-full px-5 py-3 text-slate-700 font-semibold bg-slate-50 rounded-xl transition-all"
-              aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-            >
-              {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-              {isDarkMode ? 'Light Mode' : 'Dark Mode'}
-            </button>
             <div className="flex flex-col gap-3 pt-2">
               {currentUser ? (
                 <>
