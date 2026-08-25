@@ -2,6 +2,38 @@
 @tailwind components;
 @tailwind utilities;
 
+html.dark {
+  color-scheme: dark;
+}
+
+html.dark body,
+html.dark [class~="bg-slate-50"] {
+  background-color: #0f172a !important;
+}
+
+html.dark [class~="bg-white"] {
+  background-color: #1e293b !important;
+}
+
+html.dark [class~="text-slate-900"] {
+  color: #f8fafc !important;
+}
+
+html.dark [class~="text-slate-700"],
+html.dark [class~="text-slate-600"] {
+  color: #cbd5e1 !important;
+}
+
+html.dark [class~="text-slate-500"],
+html.dark [class~="text-slate-400"] {
+  color: #94a3b8 !important;
+}
+
+html.dark [class~="border-slate-200"],
+html.dark [class~="border-slate-100"] {
+  border-color: #334155 !important;
+}
+
 @layer base {
   body {
     @apply bg-slate-50 text-slate-900;
