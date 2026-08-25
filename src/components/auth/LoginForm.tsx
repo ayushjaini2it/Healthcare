@@ -50,7 +50,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, setError }) => 
       const msg = err?.message || '';
       if (msg.toLowerCase().includes('invalid login credentials')) {
         setError('Incorrect email or password. Please try again.');
-      } else if (msg.includes('Account data missing')) {
+      } else if (msg.includes('account profile')) {
         setError(msg);
       } else if (msg.toLowerCase().includes('email not confirmed')) {
         setError('Please confirm your email address before signing in.');

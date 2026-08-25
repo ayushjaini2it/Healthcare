@@ -824,11 +824,18 @@ export const authServices = {
 
     // Check if the user exists in our app tables
     if (data.user) {
-      const { data: doctor } = await supabase.from('doctors').select('id').eq('id', data.user.id).single()
-      const { data: patient } = await supabase.from('patients').select('auth_user_id').eq('auth_user_id', data.user.id).single()
+      const [{ data: doctor, error: doctorError }, { data: patient, error: patientError }] = await Promise.all([
+        supabase.from('doctors').select('id').eq('id', data.user.id).maybeSingle(),
+        supabase.from('patients').select('auth_user_id').eq('auth_user_id', data.user.id).maybeSingle(),
+      ])
+
+      if (doctorError || patientError) {
+        console.error('Account profile lookup failed:', doctorError || patientError)
+        throw new Error('Unable to load your account data. Please try again or contact support.')
+      }
 
       if (!doctor && !patient) {
-        const errorMsg = 'Account data missing. Your database record was likely cleared during testing. Please sign up again.'
+        const errorMsg = 'Your account profile is missing. Please contact support to restore access.'
         sessionStorage.setItem('auth_error', errorMsg)
         await supabase.auth.signOut()
         throw new Error(errorMsg)
@@ -884,11 +891,16 @@ export const authServices = {
     if (authError || !user) return null
 
     // Check if doctor
-    const { data: doctor } = await supabase
+    const { data: doctor, error: doctorError } = await supabase
       .from('doctors')
       .select('*')
       .eq('id', user.id)
-      .single()
+      .maybeSingle()
+
+    if (doctorError) {
+      console.error('Doctor profile lookup failed:', doctorError)
+      throw new Error('Unable to load your account data. Please try again or contact support.')
+    }
 
     if (doctor) {
       const spec = doctor.specialization?.toLowerCase() || ''
@@ -898,17 +910,22 @@ export const authServices = {
     }
 
     // Check if patient
-    const { data: patient } = await supabase
+    const { data: patient, error: patientError } = await supabase
       .from('patients')
       .select('*')
       .eq('auth_user_id', user.id)
-      .single()
+      .maybeSingle()
+
+    if (patientError) {
+      console.error('Patient profile lookup failed:', patientError)
+      throw new Error('Unable to load your account data. Please try again or contact support.')
+    }
 
     if (patient) return { ...user, profile: patient, role: 'patient' }
 
-    // User exists in Auth but not in our tables (e.g. database cleared)
-    // Sign them out automatically to prevent undefined state
-    const errorMsg = 'Account data missing. Your database record was likely cleared during testing. Please sign up again.'
+    // User exists in Auth but not in our application tables.
+    // Sign them out automatically to prevent an undefined application state.
+    const errorMsg = 'Your account profile is missing. Please contact support to restore access.'
     sessionStorage.setItem('auth_error', errorMsg)
     await supabase.auth.signOut()
     return null
