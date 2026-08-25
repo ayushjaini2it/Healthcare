@@ -5,7 +5,7 @@ import Auth from './Auth';
 import { 
   Search, Calendar, UserCircle, Clock, Shield, Heart, 
   Menu, X, Star, ChevronDown, CheckCircle2, ArrowRight,
-  Twitter, Linkedin, Facebook
+  Twitter, Linkedin, Facebook, Instagram
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -753,6 +753,7 @@ const LandingPage: React.FC = () => {
                 { icon: Twitter, label: 'Twitter', url: 'https://twitter.com' },
                 { icon: Facebook, label: 'Facebook', url: 'https://facebook.com' },
                 { icon: Linkedin, label: 'LinkedIn', url: 'https://www.linkedin.com/in/lokesh-jhuria-7256b0384/' },
+                { icon: Instagram, label: 'Instagram', url: 'https://www.instagram.com/lokesh_j11/' },
               ].map((social, idx) => (
                 <a 
                   key={idx}
