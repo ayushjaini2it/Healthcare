@@ -752,7 +752,7 @@ const LandingPage: React.FC = () => {
               {[
                 { icon: Twitter, label: 'Twitter', url: 'https://twitter.com' },
                 { icon: Facebook, label: 'Facebook', url: 'https://facebook.com' },
-                { icon: Linkedin, label: 'LinkedIn', url: 'https://linkedin.com' },
+                { icon: Linkedin, label: 'LinkedIn', url: 'https://www.linkedin.com/in/lokesh-jhuria-7256b0384/' },
                 { icon: Github, label: 'GitHub', url: 'https://github.com' },
               ].map((social, idx) => (
                 <a 
