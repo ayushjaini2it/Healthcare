@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { supabaseServices } from '../services/supabaseServices'
-import { CreditCard, CheckCircle, AlertCircle, FileText, Loader2, Plus, DollarSign } from 'lucide-react'
+import { CreditCard, CheckCircle, AlertCircle, FileText, Loader2, Plus, DollarSign, Clock } from 'lucide-react'
 
 const Billing: React.FC = () => {
   const [searchParams] = useSearchParams()

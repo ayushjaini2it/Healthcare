@@ -16,10 +16,7 @@ const doctorSignupSchema = z.object({
   phone: z.string().min(5, 'Valid phone number required'),
   hospitalName: z.string().min(2, 'Hospital name is required'),
   hospitalAddress: z.string().min(5, 'Hospital address is required'),
-<<<<<<< Updated upstream
-=======
   inviteCode: z.string().optional(),
->>>>>>> Stashed changes
   tos: z.literal(true, {
     errorMap: () => ({ message: 'You must agree to the Terms of Service' })
   }),
@@ -239,12 +236,9 @@ export const DoctorSignupForm: React.FC<DoctorSignupFormProps> = ({ onSuccess, s
             {errors.phone && <p className="mt-1 text-xs text-red-500">{errors.phone.message}</p>}
           </div>
 
-<<<<<<< Updated upstream
-          <div className="rounded-xl border border-teal-200 bg-white/70 p-3 text-sm text-slate-600">
+          <div className="rounded-xl border border-teal-200 bg-teal-50/70 p-3 text-sm text-teal-800">
             No invitation code is required. You can create your doctor account immediately.
           </div>
-=======
->>>>>>> Stashed changes
 
           <div className="flex gap-3 pt-2">
             <button 

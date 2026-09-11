@@ -706,9 +706,6 @@ export const authServices = {
       return { user: demoAccount.user, profile: demoAccount.profile, demoMode: true }
     }
 
-<<<<<<< Updated upstream
-    // Create Auth User
-=======
     // 1. Optional Invite Code check (preserved if an invite code is ever supplied)
     let assignedHospital = hospitalName
     if (inviteCode && inviteCode.trim()) {
@@ -724,7 +721,6 @@ export const authServices = {
     }
 
     // 2. Create Auth User
->>>>>>> Stashed changes
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
@@ -733,23 +729,10 @@ export const authServices = {
     if (authError) throw authError
     if (!authData.user) throw new Error('Signup failed')
 
-<<<<<<< Updated upstream
-    const { error } = await supabase.rpc('register_doctor_profile', {
-      p_user_id: authData.user.id,
-      p_full_name: fullName,
-      p_email: email,
-      p_specialization: specialization,
-      p_phone: phone,
-      p_hospital_name: hospitalName,
-      p_hospital_address: hospitalAddress,
-      p_invite_code: inviteCode || ''
-    })
-=======
     // 3. Create Doctor Profile
     // If an invite code was supplied, attempt the RPC first if configured.
     // Otherwise (or if RPC fails), directly insert into doctors table.
     let profileCreated = false
->>>>>>> Stashed changes
 
     if (inviteCode && inviteCode.trim()) {
       try {

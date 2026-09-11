@@ -5,7 +5,7 @@ import { useSearchParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Microscope, TestTube, Image, FileText, CheckCircle, Clock, AlertCircle, Edit } from 'lucide-react'
+import { Microscope, TestTube, Image, CheckCircle, Clock, AlertCircle, Edit } from 'lucide-react'
 
 const diagnosisSchema = z.object({
   mode: z.enum(['order', 'result']),
@@ -299,7 +299,7 @@ const Diagnosis: React.FC = () => {
                   Patient *
                 </label>
                 {formMode === 'result' ? (
-                  <select {...register('patientId')} className="input-field bg-slate-100 text-slate-500 pointer-events-none" readOnly>
+                  <select {...register('patientId')} className="input-field bg-slate-100 text-slate-500 pointer-events-none">
                     {patients.map(patient => (
                       <option key={patient.id} value={patient.id}>
                         {patient.name}

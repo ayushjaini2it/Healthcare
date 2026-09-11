@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { supabaseServices } from '../services/supabaseServices'
-import { CreditCard, CheckCircle, AlertCircle, FileText, Loader2, Clock } from 'lucide-react'
+import { CheckCircle, AlertCircle, FileText, Loader2, Clock } from 'lucide-react'
 
 const PatientInvoices: React.FC = () => {
   const { currentUser } = useAuth()

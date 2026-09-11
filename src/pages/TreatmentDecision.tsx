@@ -5,7 +5,7 @@ import { useSearchParams } from 'react-router-dom'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Activity, Pill, Calendar, FileText, Clock, CheckCircle, AlertTriangle, AlertCircle, Stethoscope, Microscope, Plus, Trash2 } from 'lucide-react'
+import { Activity, Pill, Calendar, FileText, CheckCircle, AlertTriangle, AlertCircle, Stethoscope, Microscope, Plus, Trash2 } from 'lucide-react'
 
 const treatmentSchema = z.object({
   patientId: z.string().min(1, 'Please select a patient'),
