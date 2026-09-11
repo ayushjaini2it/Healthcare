@@ -16,6 +16,10 @@ const doctorSignupSchema = z.object({
   phone: z.string().min(5, 'Valid phone number required'),
   hospitalName: z.string().min(2, 'Hospital name is required'),
   hospitalAddress: z.string().min(5, 'Hospital address is required'),
+<<<<<<< Updated upstream
+=======
+  inviteCode: z.string().optional(),
+>>>>>>> Stashed changes
   tos: z.literal(true, {
     errorMap: () => ({ message: 'You must agree to the Terms of Service' })
   }),
@@ -235,9 +239,12 @@ export const DoctorSignupForm: React.FC<DoctorSignupFormProps> = ({ onSuccess, s
             {errors.phone && <p className="mt-1 text-xs text-red-500">{errors.phone.message}</p>}
           </div>
 
+<<<<<<< Updated upstream
           <div className="rounded-xl border border-teal-200 bg-white/70 p-3 text-sm text-slate-600">
             No invitation code is required. You can create your doctor account immediately.
           </div>
+=======
+>>>>>>> Stashed changes
 
           <div className="flex gap-3 pt-2">
             <button 
@@ -269,7 +276,6 @@ export const DoctorSignupForm: React.FC<DoctorSignupFormProps> = ({ onSuccess, s
                 className={`w-full pl-11 pr-4 py-3 bg-white border rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all ${errors.hospitalName ? 'border-red-300' : 'border-slate-300'}`}
                 placeholder="e.g. City General Hospital" />
             </div>
-            <p className="text-xs text-slate-500 mt-1 mb-1">If your invite code is locked to a hospital, it will automatically override this field.</p>
             {errors.hospitalName && <p className="mt-1 text-xs text-red-500">{errors.hospitalName.message}</p>}
           </div>
 

@@ -706,7 +706,25 @@ export const authServices = {
       return { user: demoAccount.user, profile: demoAccount.profile, demoMode: true }
     }
 
+<<<<<<< Updated upstream
     // Create Auth User
+=======
+    // 1. Optional Invite Code check (preserved if an invite code is ever supplied)
+    let assignedHospital = hospitalName
+    if (inviteCode && inviteCode.trim()) {
+      const { data: inviteData } = await supabase
+        .from('doctor_invitations')
+        .select('id, current_uses, max_uses, expires_at, hospital_name')
+        .eq('code', inviteCode.trim())
+        .single()
+
+      if (inviteData?.hospital_name) {
+        assignedHospital = inviteData.hospital_name
+      }
+    }
+
+    // 2. Create Auth User
+>>>>>>> Stashed changes
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
@@ -715,6 +733,7 @@ export const authServices = {
     if (authError) throw authError
     if (!authData.user) throw new Error('Signup failed')
 
+<<<<<<< Updated upstream
     const { error } = await supabase.rpc('register_doctor_profile', {
       p_user_id: authData.user.id,
       p_full_name: fullName,
@@ -725,14 +744,55 @@ export const authServices = {
       p_hospital_address: hospitalAddress,
       p_invite_code: inviteCode || ''
     })
+=======
+    // 3. Create Doctor Profile
+    // If an invite code was supplied, attempt the RPC first if configured.
+    // Otherwise (or if RPC fails), directly insert into doctors table.
+    let profileCreated = false
+>>>>>>> Stashed changes
 
-    if (error) {
-      // Best-effort message if RPC fails after auth creates the user
-      console.error('Doctor profile creation failed:', error)
-      throw new Error(error.message || 'Failed to create doctor profile.')
+    if (inviteCode && inviteCode.trim()) {
+      try {
+        const { error: rpcError } = await supabase.rpc('register_doctor_profile', {
+          p_user_id: authData.user.id,
+          p_full_name: fullName,
+          p_email: email,
+          p_specialization: specialization,
+          p_phone: phone,
+          p_hospital_name: assignedHospital,
+          p_hospital_address: hospitalAddress,
+          p_invite_code: inviteCode.trim()
+        })
+        if (!rpcError) {
+          profileCreated = true
+        }
+      } catch {
+        // Fall back to direct insert
+      }
     }
 
-    // If user is confirmed, sign them in automatically
+    if (!profileCreated) {
+      const { error: insertError } = await supabase
+        .from('doctors')
+        .insert([
+          {
+            id: authData.user.id,
+            full_name: fullName,
+            email: email,
+            specialization: specialization,
+            phone: phone,
+            hospital_name: assignedHospital,
+            hospital_address: hospitalAddress,
+          }
+        ])
+
+      if (insertError) {
+        console.error('Doctor profile creation failed:', insertError)
+        throw new Error(insertError.message || 'Failed to create doctor profile.')
+      }
+    }
+
+    // 4. If user is confirmed, sign them in automatically
     if (authData.user && authData.user.email_confirmed_at) {
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email,
