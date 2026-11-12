@@ -328,11 +328,14 @@ BEGIN
     VALUES (
       NEW.id,
       COALESCE(NULLIF(split_part(full_name, ' ', 1), ''), 'Unknown'),
-      CASE
-        WHEN POSITION(' ' IN full_name) > 0
-          THEN NULLIF(BTRIM(SUBSTRING(full_name FROM POSITION(' ' IN full_name) + 1)), '')
-        ELSE NULL
-      END,
+      COALESCE(
+        CASE
+          WHEN POSITION(' ' IN full_name) > 0
+            THEN NULLIF(BTRIM(SUBSTRING(full_name FROM POSITION(' ' IN full_name) + 1)), '')
+          ELSE NULL
+        END,
+        ''
+      ),
       NEW.email,
       NULLIF(NEW.raw_user_meta_data ->> 'age', '')::INTEGER,
       COALESCE(NEW.raw_user_meta_data ->> 'gender', 'other'),

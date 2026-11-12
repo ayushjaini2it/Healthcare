@@ -82,7 +82,8 @@ export const PatientSignupForm: React.FC<PatientSignupFormProps> = ({ onSuccess,
       if (msg.toLowerCase().includes('already registered') || msg.toLowerCase().includes('already been registered')) {
         setError('An account with this email already exists.');
       } else if (msg.toLowerCase().includes('database error saving new user')) {
-        setError('Supabase account setup is incomplete. Run supabase_rls_policies.sql in the Supabase SQL Editor, then try again.');
+        console.error('Patient signup failed:', err);
+        setError('Supabase could not save your profile. Check the latest Postgres log for the handle_new_auth_user trigger.');
       } else if (msg.toLowerCase().includes('failed to fetch') || msg.toLowerCase().includes('network')) {
         setError('Unable to connect right now. Check your internet connection and try again.');
       } else {
