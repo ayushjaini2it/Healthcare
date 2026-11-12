@@ -281,7 +281,7 @@ SET search_path = public
 AS $$
 DECLARE
   user_role TEXT := NEW.raw_user_meta_data ->> 'role';
-  full_name TEXT := COALESCE(NEW.raw_user_meta_data ->> 'full_name', '');
+  full_name TEXT := BTRIM(COALESCE(NEW.raw_user_meta_data ->> 'full_name', ''));
 BEGIN
   IF user_role = 'patient' THEN
     INSERT INTO public.patients (
@@ -290,7 +290,11 @@ BEGIN
     VALUES (
       NEW.id,
       COALESCE(NULLIF(split_part(full_name, ' ', 1), ''), 'Unknown'),
-      NULLIF(regexp_replace(full_name, '^\S+\s*', ''), ''),
+      CASE
+        WHEN POSITION(' ' IN full_name) > 0
+          THEN NULLIF(BTRIM(SUBSTRING(full_name FROM POSITION(' ' IN full_name) + 1)), '')
+        ELSE NULL
+      END,
       NEW.email,
       NULLIF(NEW.raw_user_meta_data ->> 'age', '')::INTEGER,
       COALESCE(NEW.raw_user_meta_data ->> 'gender', 'other'),
