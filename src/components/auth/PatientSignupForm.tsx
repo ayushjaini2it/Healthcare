@@ -81,6 +81,10 @@ export const PatientSignupForm: React.FC<PatientSignupFormProps> = ({ onSuccess,
       const msg = err?.message || '';
       if (msg.toLowerCase().includes('already registered') || msg.toLowerCase().includes('already been registered')) {
         setError('An account with this email already exists.');
+      } else if (msg.toLowerCase().includes('database error saving new user')) {
+        setError('Supabase account setup is incomplete. Run supabase_rls_policies.sql in the Supabase SQL Editor, then try again.');
+      } else if (msg.toLowerCase().includes('failed to fetch') || msg.toLowerCase().includes('network')) {
+        setError('Unable to connect right now. Check your internet connection and try again.');
       } else {
         setError('Something went wrong. Please try again or contact support.');
       }

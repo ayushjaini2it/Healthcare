@@ -40,22 +40,27 @@ $$;
 -- ============================================================
 
 -- A patient can only read their own record
+DROP POLICY IF EXISTS "patients: patient can read own" ON patients;
 CREATE POLICY "patients: patient can read own" ON patients
   FOR SELECT USING (auth.uid() = auth_user_id);
 
 -- A patient can only update their own record
+DROP POLICY IF EXISTS "patients: patient can update own" ON patients;
 CREATE POLICY "patients: patient can update own" ON patients
   FOR UPDATE USING (auth.uid() = auth_user_id);
 
 -- A patient can only insert their own record
+DROP POLICY IF EXISTS "patients: patient can insert own" ON patients;
 CREATE POLICY "patients: patient can insert own" ON patients
   FOR INSERT WITH CHECK (auth.uid() = auth_user_id);
 
 -- A doctor can read ALL patients
+DROP POLICY IF EXISTS "patients: doctor can read all" ON patients;
 CREATE POLICY "patients: doctor can read all" ON patients
   FOR SELECT USING (is_doctor());
 
 -- A doctor can update any patient's record (status changes, etc.)
+DROP POLICY IF EXISTS "patients: doctor can update any" ON patients;
 CREATE POLICY "patients: doctor can update any" ON patients
   FOR UPDATE USING (is_doctor());
 
@@ -65,14 +70,17 @@ CREATE POLICY "patients: doctor can update any" ON patients
 -- ============================================================
 
 -- Any authenticated user can read doctor profiles (for appointment booking)
+DROP POLICY IF EXISTS "doctors: any authenticated can read" ON doctors;
 CREATE POLICY "doctors: any authenticated can read" ON doctors
   FOR SELECT USING (auth.role() = 'authenticated');
 
 -- A doctor can only update their own profile
+DROP POLICY IF EXISTS "doctors: doctor can update own" ON doctors;
 CREATE POLICY "doctors: doctor can update own" ON doctors
   FOR UPDATE USING (auth.uid() = id);
 
 -- A doctor can insert their own record (during signup)
+DROP POLICY IF EXISTS "doctors: doctor can insert own" ON doctors;
 CREATE POLICY "doctors: doctor can insert own" ON doctors
   FOR INSERT WITH CHECK (auth.uid() = id);
 
@@ -82,20 +90,24 @@ CREATE POLICY "doctors: doctor can insert own" ON doctors
 -- ============================================================
 
 -- A patient can only see consultations for their own patient record
+DROP POLICY IF EXISTS "consultations: patient can read own" ON consultations;
 CREATE POLICY "consultations: patient can read own" ON consultations
   FOR SELECT USING (
     patient_id IN (SELECT id FROM patients WHERE auth_user_id = auth.uid())
   );
 
 -- A doctor can read all consultations
+DROP POLICY IF EXISTS "consultations: doctor can read all" ON consultations;
 CREATE POLICY "consultations: doctor can read all" ON consultations
   FOR SELECT USING (is_doctor());
 
 -- Only a doctor can create a consultation
+DROP POLICY IF EXISTS "consultations: doctor can insert" ON consultations;
 CREATE POLICY "consultations: doctor can insert" ON consultations
   FOR INSERT WITH CHECK (is_doctor());
 
 -- Only a doctor can update consultations
+DROP POLICY IF EXISTS "consultations: doctor can update" ON consultations;
 CREATE POLICY "consultations: doctor can update" ON consultations
   FOR UPDATE USING (is_doctor());
 
@@ -105,19 +117,23 @@ CREATE POLICY "consultations: doctor can update" ON consultations
 -- ============================================================
 
 -- A patient can only see their own diagnoses
+DROP POLICY IF EXISTS "diagnoses: patient can read own" ON diagnoses;
 CREATE POLICY "diagnoses: patient can read own" ON diagnoses
   FOR SELECT USING (
     patient_id IN (SELECT id FROM patients WHERE auth_user_id = auth.uid())
   );
 
 -- A doctor can read all diagnoses
+DROP POLICY IF EXISTS "diagnoses: doctor can read all" ON diagnoses;
 CREATE POLICY "diagnoses: doctor can read all" ON diagnoses
   FOR SELECT USING (is_doctor());
 
 -- Only a doctor can create or update diagnoses
+DROP POLICY IF EXISTS "diagnoses: doctor can insert" ON diagnoses;
 CREATE POLICY "diagnoses: doctor can insert" ON diagnoses
   FOR INSERT WITH CHECK (is_doctor());
 
+DROP POLICY IF EXISTS "diagnoses: doctor can update" ON diagnoses;
 CREATE POLICY "diagnoses: doctor can update" ON diagnoses
   FOR UPDATE USING (is_doctor());
 
@@ -126,17 +142,21 @@ CREATE POLICY "diagnoses: doctor can update" ON diagnoses
 -- TREATMENTS TABLE
 -- ============================================================
 
+DROP POLICY IF EXISTS "treatments: patient can read own" ON treatments;
 CREATE POLICY "treatments: patient can read own" ON treatments
   FOR SELECT USING (
     patient_id IN (SELECT id FROM patients WHERE auth_user_id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "treatments: doctor can read all" ON treatments;
 CREATE POLICY "treatments: doctor can read all" ON treatments
   FOR SELECT USING (is_doctor());
 
+DROP POLICY IF EXISTS "treatments: doctor can insert" ON treatments;
 CREATE POLICY "treatments: doctor can insert" ON treatments
   FOR INSERT WITH CHECK (is_doctor());
 
+DROP POLICY IF EXISTS "treatments: doctor can update" ON treatments;
 CREATE POLICY "treatments: doctor can update" ON treatments
   FOR UPDATE USING (is_doctor());
 
@@ -146,6 +166,7 @@ CREATE POLICY "treatments: doctor can update" ON treatments
 -- ============================================================
 
 -- A patient can read medications linked to their treatments
+DROP POLICY IF EXISTS "medications: patient can read own" ON medications;
 CREATE POLICY "medications: patient can read own" ON medications
   FOR SELECT USING (
     treatment_id IN (
@@ -154,12 +175,15 @@ CREATE POLICY "medications: patient can read own" ON medications
     )
   );
 
+DROP POLICY IF EXISTS "medications: doctor can read all" ON medications;
 CREATE POLICY "medications: doctor can read all" ON medications
   FOR SELECT USING (is_doctor());
 
+DROP POLICY IF EXISTS "medications: doctor can insert" ON medications;
 CREATE POLICY "medications: doctor can insert" ON medications
   FOR INSERT WITH CHECK (is_doctor());
 
+DROP POLICY IF EXISTS "medications: doctor can update" ON medications;
 CREATE POLICY "medications: doctor can update" ON medications
   FOR UPDATE USING (is_doctor());
 
@@ -168,17 +192,21 @@ CREATE POLICY "medications: doctor can update" ON medications
 -- BILLS TABLE
 -- ============================================================
 
+DROP POLICY IF EXISTS "bills: patient can read own" ON bills;
 CREATE POLICY "bills: patient can read own" ON bills
   FOR SELECT USING (
     patient_id IN (SELECT id FROM patients WHERE auth_user_id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "bills: doctor can read all" ON bills;
 CREATE POLICY "bills: doctor can read all" ON bills
   FOR SELECT USING (is_doctor());
 
+DROP POLICY IF EXISTS "bills: doctor can insert" ON bills;
 CREATE POLICY "bills: doctor can insert" ON bills
   FOR INSERT WITH CHECK (is_doctor());
 
+DROP POLICY IF EXISTS "bills: doctor can update" ON bills;
 CREATE POLICY "bills: doctor can update" ON bills
   FOR UPDATE USING (is_doctor());
 
@@ -188,6 +216,7 @@ CREATE POLICY "bills: doctor can update" ON bills
 -- ============================================================
 
 -- A patient can read their own billing items (via bill_id)
+DROP POLICY IF EXISTS "billing_items: patient can read own" ON billing_items;
 CREATE POLICY "billing_items: patient can read own" ON billing_items
   FOR SELECT USING (
     bill_id IN (
@@ -196,9 +225,11 @@ CREATE POLICY "billing_items: patient can read own" ON billing_items
     )
   );
 
+DROP POLICY IF EXISTS "billing_items: doctor can read all" ON billing_items;
 CREATE POLICY "billing_items: doctor can read all" ON billing_items
   FOR SELECT USING (is_doctor());
 
+DROP POLICY IF EXISTS "billing_items: doctor can insert" ON billing_items;
 CREATE POLICY "billing_items: doctor can insert" ON billing_items
   FOR INSERT WITH CHECK (is_doctor());
 
@@ -208,18 +239,21 @@ CREATE POLICY "billing_items: doctor can insert" ON billing_items
 -- ============================================================
 
 -- A patient can read their own feedback
+DROP POLICY IF EXISTS "feedback: patient can read own" ON feedback;
 CREATE POLICY "feedback: patient can read own" ON feedback
   FOR SELECT USING (
     patient_id IN (SELECT id FROM patients WHERE auth_user_id = auth.uid())
   );
 
 -- A patient can submit feedback for their own patient record
+DROP POLICY IF EXISTS "feedback: patient can insert own" ON feedback;
 CREATE POLICY "feedback: patient can insert own" ON feedback
   FOR INSERT WITH CHECK (
     patient_id IN (SELECT id FROM patients WHERE auth_user_id = auth.uid())
   );
 
 -- A doctor can read all feedback
+DROP POLICY IF EXISTS "feedback: doctor can read all" ON feedback;
 CREATE POLICY "feedback: doctor can read all" ON feedback
   FOR SELECT USING (is_doctor());
 
@@ -229,22 +263,26 @@ CREATE POLICY "feedback: doctor can read all" ON feedback
 -- ============================================================
 
 -- A patient can see their own appointments
+DROP POLICY IF EXISTS "appointments: patient can read own" ON appointments;
 CREATE POLICY "appointments: patient can read own" ON appointments
   FOR SELECT USING (
     patient_id IN (SELECT id FROM patients WHERE auth_user_id = auth.uid())
   );
 
 -- A patient can book an appointment (INSERT) for their own patient record
+DROP POLICY IF EXISTS "appointments: patient can insert" ON appointments;
 CREATE POLICY "appointments: patient can insert" ON appointments
   FOR INSERT WITH CHECK (
     patient_id IN (SELECT id FROM patients WHERE auth_user_id = auth.uid())
   );
 
 -- A doctor can see appointments assigned to them
+DROP POLICY IF EXISTS "appointments: doctor can read own" ON appointments;
 CREATE POLICY "appointments: doctor can read own" ON appointments
   FOR SELECT USING (doctor_id = auth.uid());
 
 -- A doctor can only update appointments assigned to them (accept/reject)
+DROP POLICY IF EXISTS "appointments: doctor can update own" ON appointments;
 CREATE POLICY "appointments: doctor can update own" ON appointments
   FOR UPDATE USING (doctor_id = auth.uid());
 
