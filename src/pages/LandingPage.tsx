@@ -44,7 +44,7 @@ const faqCategories = [
 ];
 
 const LandingPage: React.FC = () => {
-  const { currentUser } = useAuth();
+  const { currentUser, refreshUser } = useAuth();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -175,7 +175,10 @@ const LandingPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 scroll-smooth">
-      {isAuthOpen && <Auth onClose={closeAuth} onSuccessLogin={() => navigate('/dashboard', { replace: true })} />}
+      {isAuthOpen && <Auth onClose={closeAuth} onSuccessLogin={async () => {
+        await refreshUser();
+        navigate('/dashboard', { replace: true });
+      }} />}
       
       {/* ─── EMERGENCY BANNER ─── */}
       {showEmergencyBanner && (
