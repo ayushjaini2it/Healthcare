@@ -724,54 +724,52 @@ export const authServices = {
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        data: {
+          role: 'doctor',
+          full_name: fullName,
+          specialization,
+          phone,
+          hospital_name: assignedHospital,
+          hospital_address: hospitalAddress,
+        },
+      },
     })
 
     if (authError) throw authError
     if (!authData.user) throw new Error('Signup failed')
 
-    // 3. Create Doctor Profile
-    // If an invite code was supplied, attempt the RPC first if configured.
-    // Otherwise (or if RPC fails), directly insert into doctors table.
-    let profileCreated = false
-
-    if (inviteCode && inviteCode.trim()) {
-      try {
-        const { error: rpcError } = await supabase.rpc('register_doctor_profile', {
-          p_user_id: authData.user.id,
-          p_full_name: fullName,
-          p_email: email,
-          p_specialization: specialization,
-          p_phone: phone,
-          p_hospital_name: assignedHospital,
-          p_hospital_address: hospitalAddress,
-          p_invite_code: inviteCode.trim()
-        })
-        if (!rpcError) {
-          profileCreated = true
-        }
-      } catch {
-        // Fall back to direct insert
-      }
-    }
-
-    if (!profileCreated) {
-      const { error: insertError } = await supabase
+    // Auth triggers create the profile for signups awaiting email confirmation.
+    // Keep the client-side path for projects that return a session but have not
+    // installed the trigger yet.
+    if (authData.session) {
+      const { data: existingDoctor, error: lookupError } = await supabase
         .from('doctors')
-        .insert([
-          {
-            id: authData.user.id,
-            full_name: fullName,
-            email: email,
-            specialization: specialization,
-            phone: phone,
-            hospital_name: assignedHospital,
-            hospital_address: hospitalAddress,
-          }
-        ])
+        .select('id')
+        .eq('id', authData.user.id)
+        .maybeSingle()
 
-      if (insertError) {
-        console.error('Doctor profile creation failed:', insertError)
-        throw new Error(insertError.message || 'Failed to create doctor profile.')
+      if (lookupError) throw lookupError
+
+      if (!existingDoctor) {
+        const { error: insertError } = await supabase
+          .from('doctors')
+          .insert([
+            {
+              id: authData.user.id,
+              full_name: fullName,
+              email,
+              specialization,
+              phone,
+              hospital_name: assignedHospital,
+              hospital_address: hospitalAddress,
+            },
+          ])
+
+        if (insertError) {
+          console.error('Doctor profile creation failed:', insertError)
+          throw new Error(insertError.message || 'Failed to create doctor profile.')
+        }
       }
     }
 
@@ -799,39 +797,60 @@ export const authServices = {
       return { user: demoAccount.user, profile: demoAccount.profile, demoMode: true }
     }
 
+    const nameParts = fullName.trim().split(/\s+/)
+    const firstName = nameParts[0] || 'Unknown'
+    const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : ''
+
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        data: {
+          role: 'patient',
+          full_name: fullName,
+          age,
+          gender,
+        },
+      },
     })
 
     if (authError) throw authError
     if (!authData.user) throw new Error('Signup failed')
 
-    // Improved name parsing to handle mononyms and multiple words
-    const nameParts = fullName.trim().split(/\s+/);
-    const firstName = nameParts[0] || 'Unknown';
-    const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+    // Auth triggers create the profile for signups awaiting email confirmation.
+    // Keep the client-side path for projects that return a session but have not
+    // installed the trigger yet.
+    if (authData.session) {
+      const { data: existingPatient, error: lookupError } = await supabase
+        .from('patients')
+        .select('auth_user_id')
+        .eq('auth_user_id', authData.user.id)
+        .maybeSingle()
 
-    const { data, error } = await supabase
-      .from('patients')
-      .insert([
-        {
-          auth_user_id: authData.user.id,
-          first_name: firstName,
-          last_name: lastName,
-          email: email,
-          age: age,
-          gender: gender,
-          phone: '',
-          address: '',
-          status: 'registered'
+      if (lookupError) throw lookupError
+
+      if (!existingPatient) {
+        const { error: insertError } = await supabase
+          .from('patients')
+          .insert([
+            {
+              auth_user_id: authData.user.id,
+              first_name: firstName,
+              last_name: lastName,
+              email,
+              age,
+              gender,
+              phone: '',
+              address: '',
+              status: 'registered',
+            },
+          ])
+
+        if (insertError) {
+          console.error('Patient profile creation failed:', insertError)
+          throw new Error(insertError.message || 'Failed to create patient profile.')
         }
-      ])
-      .select()
-
-    if (error) {
-      console.error('Patient profile creation failed:', error)
-      throw new Error(error.message || 'Failed to create patient profile.')
+      }
     }
 
     // If user is confirmed, sign them in automatically
@@ -843,7 +862,7 @@ export const authServices = {
       if (signInError) throw signInError
     }
 
-    return { user: authData.user, profile: data?.[0] }
+    return { user: authData.user }
   },
 
   /**

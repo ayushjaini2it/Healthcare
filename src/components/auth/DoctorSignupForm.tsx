@@ -72,9 +72,14 @@ export const DoctorSignupForm: React.FC<DoctorSignupFormProps> = ({ onSuccess, s
     setIsLoading(true);
     setError('');
     try {
-      await supabaseServices.authServices.signupDoctor(
+      const signupResult = await supabaseServices.authServices.signupDoctor(
         data.email, data.password, data.fullName, data.specialization, data.phone, data.hospitalName, data.hospitalAddress
       );
+      if (signupResult.demoMode) {
+        onSuccess('');
+        return;
+      }
+
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         onSuccess('Doctor account created! Please check your email to confirm your account before signing in.');

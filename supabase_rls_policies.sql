@@ -269,5 +269,60 @@ END $$;
 
 
 -- ============================================================
--- Done! All RLS policies are now active.
+-- STEP 4: Create account profiles at signup
+-- Authenticated users may not have a session until email confirmation, so
+-- profile creation must run inside the trusted auth.users insert trigger.
+-- ============================================================
+CREATE OR REPLACE FUNCTION public.handle_new_auth_user()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  user_role TEXT := NEW.raw_user_meta_data ->> 'role';
+  full_name TEXT := COALESCE(NEW.raw_user_meta_data ->> 'full_name', '');
+BEGIN
+  IF user_role = 'patient' THEN
+    INSERT INTO public.patients (
+      auth_user_id, first_name, last_name, email, age, gender, phone, address, status
+    )
+    VALUES (
+      NEW.id,
+      COALESCE(NULLIF(split_part(full_name, ' ', 1), ''), 'Unknown'),
+      NULLIF(regexp_replace(full_name, '^\S+\s*', ''), ''),
+      NEW.email,
+      NULLIF(NEW.raw_user_meta_data ->> 'age', '')::INTEGER,
+      COALESCE(NEW.raw_user_meta_data ->> 'gender', 'other'),
+      '',
+      '',
+      'registered'
+    );
+  ELSIF user_role = 'doctor' THEN
+    INSERT INTO public.doctors (
+      id, full_name, email, specialization, phone, hospital_name, hospital_address
+    )
+    VALUES (
+      NEW.id,
+      full_name,
+      NEW.email,
+      COALESCE(NEW.raw_user_meta_data ->> 'specialization', ''),
+      COALESCE(NEW.raw_user_meta_data ->> 'phone', ''),
+      COALESCE(NEW.raw_user_meta_data ->> 'hospital_name', ''),
+      COALESCE(NEW.raw_user_meta_data ->> 'hospital_address', '')
+    );
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_new_auth_user();
+
+-- ============================================================
+-- Done! RLS policies and account profile signup trigger are active.
 -- ============================================================

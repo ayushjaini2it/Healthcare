@@ -52,13 +52,16 @@ A modern, comprehensive healthcare supply chain and patient management system bu
    ```
 
 3. **Environment Setup**
-   Create a `.env.local` file in the root directory and add your Supabase credentials:
+   Copy `.env.example` to `.env.local` in the root directory and add your Supabase project URL and anon key:
    ```env
    VITE_SUPABASE_URL=your_supabase_url
    VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
    ```
 
-4. **Start the development server**
+4. **Configure Supabase**
+   Run `supabase_rls_policies.sql` in the Supabase SQL Editor. It enables the required row-level security policies and creates patient/doctor profiles during signup, including when email confirmation is enabled.
+
+5. **Start the development server**
    ```bash
    npm run dev
    ```
