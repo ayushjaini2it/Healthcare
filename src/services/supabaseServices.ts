@@ -702,7 +702,12 @@ export const feedbackServices = {
       ])
       .select()
 
-    if (error) throw error
+    if (error) {
+      if (error.code === 'PGRST204' && error.message.includes('doctor_id')) {
+        throw new Error('Feedback is not configured in Supabase yet. Run feedback_doctor_id_migration.sql in the Supabase SQL Editor, then try again.')
+      }
+      throw error
+    }
     return data?.[0]
   },
 

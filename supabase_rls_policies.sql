@@ -239,6 +239,10 @@ CREATE POLICY "billing_items: doctor can insert" ON billing_items
 -- ============================================================
 
 ALTER TABLE feedback
+  ADD COLUMN IF NOT EXISTS doctor_id UUID
+  REFERENCES doctors(id) ON DELETE SET NULL;
+
+ALTER TABLE feedback
   ADD COLUMN IF NOT EXISTS would_recommend BOOLEAN;
 
 UPDATE feedback
@@ -256,17 +260,26 @@ CREATE POLICY "feedback: patient can read own" ON feedback
     patient_id IN (SELECT id FROM patients WHERE auth_user_id = auth.uid())
   );
 
--- A patient can submit feedback for their own patient record
+-- A patient can submit feedback for a doctor they booked
 DROP POLICY IF EXISTS "feedback: patient can insert own" ON feedback;
 CREATE POLICY "feedback: patient can insert own" ON feedback
   FOR INSERT WITH CHECK (
     patient_id IN (SELECT id FROM patients WHERE auth_user_id = auth.uid())
+    AND doctor_id IS NOT NULL
+    AND EXISTS (
+      SELECT 1
+      FROM appointments
+      WHERE appointments.patient_id = feedback.patient_id
+        AND appointments.doctor_id = feedback.doctor_id
+        AND appointments.status IN ('pending', 'accepted', 'completed')
+    )
   );
 
--- A doctor can read all feedback
+-- A doctor can read only feedback addressed to them
 DROP POLICY IF EXISTS "feedback: doctor can read all" ON feedback;
-CREATE POLICY "feedback: doctor can read all" ON feedback
-  FOR SELECT USING (is_doctor());
+DROP POLICY IF EXISTS "feedback: doctor can read own" ON feedback;
+CREATE POLICY "feedback: doctor can read own" ON feedback
+  FOR SELECT USING (doctor_id = auth.uid());
 
 -- Allow doctors to change only the review status, not feedback content.
 CREATE OR REPLACE FUNCTION public.mark_feedback_reviewed(feedback_id uuid)
@@ -282,7 +295,8 @@ BEGIN
 
   UPDATE public.feedback
   SET status = 'reviewed'
-  WHERE id = feedback_id;
+  WHERE id = feedback_id
+    AND doctor_id = auth.uid();
 
   IF NOT FOUND THEN
     RAISE EXCEPTION 'Feedback not found';
@@ -418,6 +432,8 @@ CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW
   EXECUTE FUNCTION public.handle_new_auth_user();
+
+NOTIFY pgrst, 'reload schema';
 
 -- ============================================================
 -- Done! RLS policies and account profile signup trigger are active.
