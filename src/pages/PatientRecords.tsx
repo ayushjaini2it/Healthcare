@@ -18,8 +18,9 @@ const PatientRecords: React.FC = () => {
 
   useEffect(() => {
     const fetchRecords = async () => {
-      if (!currentUser?.id) {
-        setError('Your account could not be identified. Please sign in again.')
+      const patientId = currentUser?.profile?.id
+      if (!patientId) {
+        setError('Your patient profile could not be identified. Please sign in again.')
         setIsLoading(false)
         return
       }
@@ -27,12 +28,9 @@ const PatientRecords: React.FC = () => {
         setIsLoading(true);
         setError('')
         
-        const patientData = await supabaseServices.patientServices.getPatientByAuthId(currentUser.id);
-        if (!patientData) throw new Error('Patient profile not found');
-
         const [consultations, diagnoses] = await Promise.all([
-          supabaseServices.consultationServices.getPatientConsultations(patientData.id),
-          supabaseServices.diagnosisServices.getPatientDiagnoses(patientData.id)
+          supabaseServices.consultationServices.getPatientConsultations(patientId),
+          supabaseServices.diagnosisServices.getPatientDiagnoses(patientId)
         ]);
 
         const items: TimelineItem[] = [
@@ -109,7 +107,7 @@ const PatientRecords: React.FC = () => {
         </div>
       )}
 
-      {timeline.length === 0 ? (
+      {timeline.length === 0 && !error ? (
         <div className="text-center py-12 bg-white rounded-2xl border border-slate-200">
           <FileText className="h-12 w-12 text-slate-300 mx-auto mb-3" />
           <h3 className="text-lg font-medium text-slate-900">No records found</h3>

@@ -5,11 +5,12 @@ import { z } from 'zod'
 import { MessageSquare, Star, ThumbsUp, Users, AlertCircle, Stethoscope } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
+import { supabaseServices } from '../services/supabaseServices'
 
 
 const feedbackSchema = z.object({
   doctorId: z.string().min(1, 'Please select a doctor'),
-  rating: z.number().min(1).max(5, 'Rating must be between 1-5'),
+  rating: z.coerce.number().min(1, 'Please select a rating').max(5, 'Rating must be between 1-5'),
   comments: z.string().min(10, 'Comments must be at least 10 characters'),
   wouldRecommend: z.boolean(),
 })
@@ -46,19 +47,15 @@ const Feedback: React.FC = () => {
 
       const { data: appointmentsData, error: appointmentsError } = await supabase
         .from('appointments')
-        .select('*, doctors(*)')
+        .select('doctor_id')
         .eq('patient_id', patientId)
         .eq('status', 'completed')
       
       if (appointmentsError) throw appointmentsError
 
-      // Extract unique doctors from appointments
-      const uniqueDoctors = appointmentsData?.reduce((acc: any[], apt) => {
-        if (apt.doctors && !acc.some(d => d.id === apt.doctors.id)) {
-          acc.push(apt.doctors)
-        }
-        return acc
-      }, []) || []
+      const allDoctors = await supabaseServices.authServices.getAllDoctors()
+      const completedDoctorIds = new Set((appointmentsData || []).map(appointment => appointment.doctor_id))
+      const uniqueDoctors = (allDoctors || []).filter(doctor => completedDoctorIds.has(doctor.id))
 
       setDoctors(uniqueDoctors.map(d => ({
         id: d.id,
@@ -68,10 +65,10 @@ const Feedback: React.FC = () => {
         rating: 0 // Will be calculated from feedback
       })))
 
-      // Fetch all feedback
+      // Only load the current patient's feedback; map doctor names from completed visits.
       const { data: feedbackData, error: feedbackError } = await supabase
         .from('feedback')
-        .select('*, doctors(full_name, specialization)')
+        .select('*')
         .eq('patient_id', patientId)
         .order('created_at', { ascending: false })
       
@@ -79,11 +76,11 @@ const Feedback: React.FC = () => {
 
       const feedback = feedbackData?.map(f => ({
         id: f.id,
-        doctorName: f.doctors ? f.doctors.full_name : 'Unknown',
+        doctorName: uniqueDoctors.find(doctor => doctor.id === f.doctor_id)?.full_name || 'Unknown',
         rating: f.rating,
         comments: f.comments,
         date: new Date(f.created_at).toLocaleDateString(),
-        wouldRecommend: f.rating >= 4,
+        wouldRecommend: f.would_recommend ?? f.rating >= 4,
       })) || []
 
       setRecentFeedback(feedback)
@@ -97,7 +94,7 @@ const Feedback: React.FC = () => {
       ) || []
 
       const totalResponses = monthlyFeedback.length
-      const recommendationCount = monthlyFeedback.filter(f => f.rating >= 4).length
+      const recommendationCount = monthlyFeedback.filter(f => f.would_recommend ?? f.rating >= 4).length
       const avgRating = totalResponses > 0 
         ? (monthlyFeedback.reduce((sum: number, f: any) => sum + f.rating, 0) / totalResponses).toFixed(1)
         : 0
@@ -108,7 +105,7 @@ const Feedback: React.FC = () => {
         averageRating: parseFloat(avgRating as string)
       })
 
-      // Calculate doctor ratings from all feedback
+      // Calculate ratings from this patient's feedback.
       const updatedDoctors = uniqueDoctors.map(d => {
         const doctorFeedback = feedbackData?.filter(f => f.doctor_id === d.id) || []
         const avgDocRating = doctorFeedback.length > 0
@@ -163,6 +160,7 @@ const Feedback: React.FC = () => {
           patient_id: patientId,
           rating: data.rating,
           comments: data.comments,
+          would_recommend: data.wouldRecommend,
           created_at: new Date().toISOString()
         }])
       if (error) throw error
@@ -183,7 +181,7 @@ const Feedback: React.FC = () => {
 
   const handleRatingClick = (rating: number) => {
     setSelectedRating(rating)
-    setValue('rating', rating)
+    setValue('rating', rating, { shouldValidate: true })
   }
 
   if (feedbackSuccess) {
@@ -261,6 +259,11 @@ const Feedback: React.FC = () => {
                     </option>
                   ))}
                 </select>
+                {doctors.length === 0 && (
+                  <p className="mt-1 text-sm text-slate-500">
+                    Feedback is available after a doctor marks your appointment complete.
+                  </p>
+                )}
                 {errors.doctorId && (
                   <p className="text-red-500 text-sm mt-1">{errors.doctorId.message}</p>
                 )}
@@ -283,7 +286,7 @@ const Feedback: React.FC = () => {
                       <span className="text-teal-900 ml-2">{selectedDoctor.specialization}</span>
                     </div>
                     <div className="col-span-2">
-                      <span className="text-teal-700">Current Rating:</span>
+                      <span className="text-teal-700">Your rating:</span>
                       <span className="text-teal-900 ml-2 font-semibold flex items-center">
                         {selectedDoctor.rating > 0 ? (
                           <>
@@ -334,7 +337,7 @@ const Feedback: React.FC = () => {
                     {selectedRating > 0 ? `${selectedRating} out of 5` : 'Please select a rating'}
                   </span>
                 </div>
-                <input {...register('rating', { value: selectedRating })} type="hidden" />
+                <input {...register('rating', { valueAsNumber: true })} type="hidden" />
                 {errors.rating && (
                   <p className="text-red-500 text-sm mt-1">{errors.rating.message}</p>
                 )}
@@ -447,13 +450,13 @@ const Feedback: React.FC = () => {
 
           {/* Statistics */}
           <div className="card">
-            <h2 className="text-xl font-semibold text-slate-900 mb-6">This Month</h2>
+            <h2 className="text-xl font-semibold text-slate-900 mb-6">Your Feedback This Month</h2>
             
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <Users className="h-4 w-4 text-slate-400 mr-2" />
-                  <span className="text-sm text-slate-600">Total Responses</span>
+                  <span className="text-sm text-slate-600">Submissions</span>
                 </div>
                 <span className="text-lg font-semibold text-slate-900">{monthlyStats.totalResponses}</span>
               </div>

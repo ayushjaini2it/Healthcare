@@ -52,7 +52,7 @@ const PatientInvoices: React.FC = () => {
 
       {isLoading ? (
         <div className="card flex justify-center p-12"><Loader2 className="h-8 w-8 animate-spin text-teal-600" /></div>
-      ) : bills.length === 0 ? (
+      ) : !errorMessage && bills.length === 0 ? (
         <div className="card flex flex-col items-center justify-center p-12 text-slate-500 bg-slate-50">
           <FileText className="h-12 w-12 mb-3 text-slate-300" />
           <p className="text-lg font-medium text-slate-700">No bills found</p>

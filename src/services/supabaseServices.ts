@@ -523,6 +523,51 @@ export const treatmentServices = {
   },
 
   /**
+   * Get all treatment plans and their medications for a patient
+   */
+  async getPatientTreatments(patientId: string) {
+    const { data: treatments, error } = await supabase
+      .from('treatments')
+      .select('*')
+      .eq('patient_id', patientId)
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+    if (!treatments?.length) return []
+
+    const treatmentIds = treatments.map((treatment: any) => treatment.id)
+    const { data: medications, error: medicationError } = await supabase
+      .from('medications')
+      .select('*')
+      .in('treatment_id', treatmentIds)
+
+    if (medicationError) throw medicationError
+
+    return treatments.map((treatment: any) => ({
+      id: treatment.id,
+      patientId: treatment.patient_id,
+      consultationId: treatment.consultation_id,
+      diagnosisId: treatment.diagnosis_id,
+      plan: treatment.treatment_plan,
+      procedures: treatment.procedures ? treatment.procedures.split(',') : [],
+      followUpDate: treatment.follow_up_date,
+      createdAt: treatment.created_at,
+      status: treatment.status,
+      medications: (medications || [])
+        .filter((medication: any) => medication.treatment_id === treatment.id)
+        .map((medication: any) => ({
+          id: medication.id,
+          name: medication.medication_name,
+          dosage: medication.dosage,
+          frequency: medication.frequency,
+          duration: medication.duration,
+          instructions: medication.instructions,
+          status: medication.status
+        }))
+    }))
+  },
+
+  /**
    * Get medications for a treatment
    */
   async getTreatmentMedications(treatmentId: string) {
