@@ -128,7 +128,7 @@ const Feedback: React.FC = () => {
       
     } catch (error) {
       console.error('Error loading feedback data:', error)
-      setErrorMessage('Failed to load feedback data')
+      setErrorMessage(error instanceof Error ? error.message : 'Failed to load feedback data')
     } finally {
       setIsLoading(false)
     }

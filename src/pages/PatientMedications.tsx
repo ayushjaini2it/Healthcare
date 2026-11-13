@@ -17,6 +17,7 @@ const PatientMedications: React.FC = () => {
       loadMyPrescriptions()
     } else {
       setIsLoading(false)
+      setErrorMessage('Your patient profile could not be found. Please sign in again.')
     }
   }, [patientId])
 
