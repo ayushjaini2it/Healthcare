@@ -39,10 +39,16 @@ const Discharge: React.FC = () => {
   const loadDischargePatients = async () => {
     try {
       setIsLoading(true)
+      setErrorMessage('')
       
       // Fetch patients ready for discharge and recently discharged
       const [readyForDischarge, dischargedList] = await Promise.all([
-        supabaseServices.patientServices.getPatientsByStatus(['billing', 'treatment']),
+        supabaseServices.patientServices.getPatientsByStatus([
+          'diagnosed',
+          'treatment',
+          'pharmacy',
+          'billing'
+        ]),
         supabaseServices.patientServices.getPatientsByStatus(['discharged'])
       ])
       
@@ -53,8 +59,7 @@ const Discharge: React.FC = () => {
         age: p.age,
         admissionDate: p.registrationDate ? new Date(p.registrationDate).toLocaleDateString() : 'N/A',
         diagnosis: 'Check medical records',
-        status: p.status,
-        room: 'General Ward'
+        status: p.status
       })))
 
       // Map discharged patients 
@@ -69,7 +74,7 @@ const Discharge: React.FC = () => {
 
     } catch (error) {
       console.error('Error loading patients:', error)
-      setErrorMessage('Failed to load patient data')
+      setErrorMessage(error instanceof Error ? error.message : 'Failed to load patient data')
     } finally {
       setIsLoading(false)
     }
@@ -205,10 +210,13 @@ const Discharge: React.FC = () => {
                     {patients
                       .map(patient => (
                         <option key={patient.id} value={patient.id}>
-                          {patient.name} - Room {patient.room}
+                          {patient.name} — {patient.status.replace(/_/g, ' ')}
                         </option>
                       ))}
                   </select>
+                  {patients.length === 0 && !errorMessage && (
+                    <p className="mt-1 text-sm text-slate-500">Patients who have reached diagnosis or later in care will appear here.</p>
+                  )}
                   {errors.patientId && (
                     <p className="text-red-500 text-sm mt-1">{errors.patientId.message}</p>
                   )}
@@ -244,10 +252,6 @@ const Discharge: React.FC = () => {
                     <div>
                       <span className="text-teal-700">Age:</span>
                       <span className="text-teal-900 ml-2">{selectedPatient.age}</span>
-                    </div>
-                    <div>
-                      <span className="text-teal-700">Room:</span>
-                      <span className="text-teal-900 ml-2">{selectedPatient.room}</span>
                     </div>
                     <div>
                       <span className="text-teal-700">Admitted:</span>

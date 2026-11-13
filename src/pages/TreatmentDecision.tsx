@@ -112,11 +112,16 @@ const TreatmentDecision: React.FC = () => {
   const loadData = async () => {
     try {
       setIsLoading(true)
-      const patientsData = await supabaseServices.patientServices.getPatientsByStatus(['diagnosed', 'treatment'])
+      setErrorMessage('')
+      const patientsData = await supabaseServices.patientServices.getPatientsByStatus([
+        'in_consultation',
+        'diagnosed',
+        'treatment'
+      ])
       setPatients(patientsData || [])
     } catch (error) {
       console.error('Error loading data:', error)
-      setErrorMessage('Failed to load patient data')
+      setErrorMessage(error instanceof Error ? error.message : 'Failed to load patient data')
     } finally {
       setIsLoading(false)
     }
@@ -237,7 +242,7 @@ const TreatmentDecision: React.FC = () => {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-slate-900">Treatment Decision</h1>
         <p className="text-slate-600 mt-2">
-          Plan treatment and prescribe medications for diagnosed patients.
+          Select a patient with a consultation or diagnosis, then record their treatment plan and prescriptions.
         </p>
       </div>
 
@@ -267,10 +272,13 @@ const TreatmentDecision: React.FC = () => {
                   <option value="">Select patient</option>
                   {patients.map(patient => (
                     <option key={patient.id} value={patient.id}>
-                      {patient.name}
+                      {patient.name} — {patient.status.replace(/_/g, ' ')}
                     </option>
                   ))}
                 </select>
+                {patients.length === 0 && !isLoading && !errorMessage && (
+                  <p className="mt-1 text-sm text-slate-500">Patients with a consultation or diagnosis will appear here.</p>
+                )}
                 {errors.patientId && (
                   <p className="text-red-500 text-sm mt-1">{errors.patientId.message}</p>
                 )}
