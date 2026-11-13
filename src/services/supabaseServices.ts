@@ -734,15 +734,12 @@ export const feedbackServices = {
   /**
    * Update feedback status
    */
-  async updateFeedbackStatus(feedbackId: string, status: 'reviewed') {
-    const { data, error } = await supabase
-      .from('feedback')
-      .update({ status })
-      .eq('id', feedbackId)
-      .select()
-
+  async updateFeedbackStatus(feedbackId: string) {
+    const { error } = await supabase.rpc('mark_feedback_reviewed', {
+      feedback_id: feedbackId
+    })
     if (error) throw error
-    return data?.[0]
+    return { id: feedbackId, status: 'reviewed' as const }
   }
 }
 

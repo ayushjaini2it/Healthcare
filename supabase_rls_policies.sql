@@ -239,7 +239,15 @@ CREATE POLICY "billing_items: doctor can insert" ON billing_items
 -- ============================================================
 
 ALTER TABLE feedback
-  ADD COLUMN IF NOT EXISTS would_recommend BOOLEAN NOT NULL DEFAULT FALSE;
+  ADD COLUMN IF NOT EXISTS would_recommend BOOLEAN;
+
+UPDATE feedback
+SET would_recommend = COALESCE(rating >= 4, FALSE)
+WHERE would_recommend IS NULL;
+
+ALTER TABLE feedback
+  ALTER COLUMN would_recommend SET DEFAULT FALSE,
+  ALTER COLUMN would_recommend SET NOT NULL;
 
 -- A patient can read their own feedback
 DROP POLICY IF EXISTS "feedback: patient can read own" ON feedback;
@@ -260,11 +268,30 @@ DROP POLICY IF EXISTS "feedback: doctor can read all" ON feedback;
 CREATE POLICY "feedback: doctor can read all" ON feedback
   FOR SELECT USING (is_doctor());
 
--- A doctor can mark feedback as reviewed
-DROP POLICY IF EXISTS "feedback: doctor can update status" ON feedback;
-CREATE POLICY "feedback: doctor can update status" ON feedback
-  FOR UPDATE USING (is_doctor())
-  WITH CHECK (is_doctor());
+-- Allow doctors to change only the review status, not feedback content.
+CREATE OR REPLACE FUNCTION public.mark_feedback_reviewed(feedback_id uuid)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF NOT public.is_doctor() THEN
+    RAISE EXCEPTION 'Only doctors may review feedback';
+  END IF;
+
+  UPDATE public.feedback
+  SET status = 'reviewed'
+  WHERE id = feedback_id;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Feedback not found';
+  END IF;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.mark_feedback_reviewed(uuid) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.mark_feedback_reviewed(uuid) TO authenticated;
 
 
 -- ============================================================

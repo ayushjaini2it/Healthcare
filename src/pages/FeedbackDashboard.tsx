@@ -26,7 +26,7 @@ const FeedbackDashboard: React.FC = () => {
 
   const markAsReviewed = async (id: string) => {
     try {
-      await supabaseServices.feedbackServices.updateFeedbackStatus(id, 'reviewed');
+      await supabaseServices.feedbackServices.updateFeedbackStatus(id);
       setFeedbacks((prev) => 
         prev.map(f => f.id === id ? { ...f, status: 'reviewed' } : f)
       );
