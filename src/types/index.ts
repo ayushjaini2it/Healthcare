@@ -101,8 +101,10 @@ export interface BillingItem {
 export interface Feedback {
   id: string
   patientId: string
+  doctorId: string
   rating: number
   comments: string
+  wouldRecommend: boolean
   category: 'overall' | 'staff' | 'facility' | 'treatment'
   date: Date
   status: 'submitted' | 'reviewed'

@@ -49,15 +49,15 @@ const Feedback: React.FC = () => {
         .from('appointments')
         .select('doctor_id')
         .eq('patient_id', patientId)
-        .eq('status', 'completed')
+        .in('status', ['pending', 'accepted', 'completed'])
       
       if (appointmentsError) throw appointmentsError
 
       const allDoctors = await supabaseServices.authServices.getAllDoctors()
-      const completedDoctorIds = new Set((appointmentsData || []).map(appointment => appointment.doctor_id))
-      const uniqueDoctors = (allDoctors || []).filter(doctor => completedDoctorIds.has(doctor.id))
+      const bookedDoctorIds = new Set((appointmentsData || []).map(appointment => appointment.doctor_id))
+      const bookedDoctors = (allDoctors || []).filter(doctor => bookedDoctorIds.has(doctor.id))
 
-      setDoctors(uniqueDoctors.map(d => ({
+      setDoctors(bookedDoctors.map(d => ({
         id: d.id,
         name: d.full_name,
         specialization: d.specialization,
@@ -65,7 +65,7 @@ const Feedback: React.FC = () => {
         rating: 0 // Will be calculated from feedback
       })))
 
-      // Only load the current patient's feedback; map doctor names from completed visits.
+      // Only show this patient's reviews and allow reviews for doctors they booked.
       const { data: feedbackData, error: feedbackError } = await supabase
         .from('feedback')
         .select('*')
@@ -76,7 +76,7 @@ const Feedback: React.FC = () => {
 
       const feedback = feedbackData?.map(f => ({
         id: f.id,
-        doctorName: uniqueDoctors.find(doctor => doctor.id === f.doctor_id)?.full_name || 'Unknown',
+        doctorName: (allDoctors || []).find(doctor => doctor.id === f.doctor_id)?.full_name || 'Unknown',
         rating: f.rating,
         comments: f.comments,
         date: new Date(f.created_at).toLocaleDateString(),
@@ -106,7 +106,7 @@ const Feedback: React.FC = () => {
       })
 
       // Calculate ratings from this patient's feedback.
-      const updatedDoctors = uniqueDoctors.map(d => {
+      const updatedDoctors = bookedDoctors.map(d => {
         const doctorFeedback = feedbackData?.filter(f => f.doctor_id === d.id) || []
         const avgDocRating = doctorFeedback.length > 0
           ? (doctorFeedback.reduce((sum: number, f: any) => sum + f.rating, 0) / doctorFeedback.length).toFixed(1)
@@ -153,17 +153,14 @@ const Feedback: React.FC = () => {
       const patientId = currentUser?.profile?.id
       if (!patientId) throw new Error('Your patient profile could not be found. Please sign in again.')
 
-      const { error } = await supabase
-        .from('feedback')
-        .insert([{
-          doctor_id: data.doctorId,
-          patient_id: patientId,
-          rating: data.rating,
-          comments: data.comments,
-          would_recommend: data.wouldRecommend,
-          created_at: new Date().toISOString()
-        }])
-      if (error) throw error
+      await supabaseServices.feedbackServices.submitFeedback({
+        patientId,
+        doctorId: data.doctorId,
+        rating: data.rating,
+        comments: data.comments,
+        wouldRecommend: data.wouldRecommend,
+        category: 'overall'
+      })
       
       await loadFeedbackData()
       setFeedbackSuccess(true)
@@ -261,7 +258,7 @@ const Feedback: React.FC = () => {
                 </select>
                 {doctors.length === 0 && (
                   <p className="mt-1 text-sm text-slate-500">
-                    Feedback is available after a doctor marks your appointment complete.
+                    Book an appointment to add that doctor here.
                   </p>
                 )}
                 {errors.doctorId && (

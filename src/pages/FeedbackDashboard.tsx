@@ -1,30 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import { supabaseServices } from '../services/supabaseServices';
 import { MessageSquare, Star, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const FeedbackDashboard: React.FC = () => {
+  const { currentUser } = useAuth();
   const [feedbacks, setFeedbacks] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   const loadFeedback = async () => {
     try {
       setIsLoading(true);
-      const data = await supabaseServices.feedbackServices.getAllFeedback();
+      setError('');
+      const doctorId = currentUser?.role === 'doctor' ? currentUser.id : undefined;
+      const data = await supabaseServices.feedbackServices.getAllFeedback(doctorId);
       setFeedbacks(data || []);
     } catch (err) {
       console.error(err);
-      setError('Failed to load patient feedback.');
+      setError(err instanceof Error ? err.message : 'Failed to load patient feedback.');
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    loadFeedback();
-  }, []);
+    void loadFeedback();
+  }, [currentUser?.id, currentUser?.role]);
 
   const markAsReviewed = async (id: string) => {
+    setUpdatingId(id);
+    setError('');
     try {
       await supabaseServices.feedbackServices.updateFeedbackStatus(id);
       setFeedbacks((prev) => 
@@ -32,7 +39,9 @@ const FeedbackDashboard: React.FC = () => {
       );
     } catch (err) {
       console.error(err);
-      alert('Failed to update feedback status.');
+      setError(err instanceof Error ? err.message : 'Failed to update feedback status.');
+    } finally {
+      setUpdatingId(null);
     }
   };
 
@@ -52,9 +61,13 @@ const FeedbackDashboard: React.FC = () => {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
           <MessageSquare className="h-8 w-8 text-teal-600" />
-          Patient Satisfaction Dashboard
+          {currentUser?.role === 'doctor' ? 'Feedback About You' : 'Patient Satisfaction Dashboard'}
         </h1>
-        <p className="text-slate-600 mt-2">Monitor and respond to patient feedback to improve clinical operations.</p>
+        <p className="text-slate-600 mt-2">
+          {currentUser?.role === 'doctor'
+            ? 'Review feedback submitted by patients who booked appointments with you.'
+            : 'Review patient feedback across the clinic.'}
+        </p>
       </div>
 
       {error && (
@@ -98,7 +111,7 @@ const FeedbackDashboard: React.FC = () => {
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium uppercase tracking-wider bg-teal-100 text-teal-800">
-                        {item.category}
+                        {item.category || 'overall'}
                       </span>
                       <div className="flex text-yellow-400">
                         {[...Array(5)].map((_, i) => (
@@ -116,6 +129,9 @@ const FeedbackDashboard: React.FC = () => {
                     <p className="text-sm text-slate-500">
                       Submitted by: <span className="font-medium text-slate-700">{item.patients?.first_name || 'Unknown'} {item.patients?.last_name || ''}</span>
                     </p>
+                    <p className="text-sm text-slate-500 mt-1">
+                      Would recommend: <span className="font-medium text-slate-700">{item.would_recommend ? 'Yes' : 'No'}</span>
+                    </p>
                   </div>
                   
                   <div className="flex items-center md:flex-col md:items-end gap-3 shrink-0">
@@ -127,9 +143,10 @@ const FeedbackDashboard: React.FC = () => {
                     ) : (
                       <button 
                         onClick={() => markAsReviewed(item.id)}
+                        disabled={updatingId === item.id}
                         className="btn-primary py-1.5 px-4 text-sm font-medium"
                       >
-                        Mark as Reviewed
+                        {updatingId === item.id ? 'Updating...' : 'Mark as Reviewed'}
                       </button>
                     )}
                   </div>

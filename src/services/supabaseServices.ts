@@ -691,8 +691,10 @@ export const feedbackServices = {
       .insert([
         {
           patient_id: feedbackData.patientId,
+          doctor_id: feedbackData.doctorId,
           rating: feedbackData.rating,
           comments: feedbackData.comments,
+          would_recommend: feedbackData.wouldRecommend,
           category: feedbackData.category,
           created_at: new Date(),
           status: 'submitted'
@@ -721,12 +723,15 @@ export const feedbackServices = {
   /**
    * Get all feedback (admin view)
    */
-  async getAllFeedback() {
-    const { data, error } = await supabase
+  async getAllFeedback(doctorId?: string) {
+    let query = supabase
       .from('feedback')
       .select('*, patients(first_name, last_name)')
       .order('created_at', { ascending: false })
 
+    if (doctorId) query = query.eq('doctor_id', doctorId)
+
+    const { data, error } = await query
     if (error) throw error
     return data
   },
