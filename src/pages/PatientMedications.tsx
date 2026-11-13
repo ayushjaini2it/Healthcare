@@ -69,7 +69,7 @@ const PatientMedications: React.FC = () => {
           <div className="flex justify-between items-start border-b border-slate-100 pb-4">
             <div>
               <h2 className="text-2xl font-bold text-slate-900">Current Treatment Plan</h2>
-              <p className="text-slate-500 text-sm mt-1">Prescribed on: {new Date(treatment.created_at).toLocaleDateString()}</p>
+              <p className="text-slate-500 text-sm mt-1">Prescribed on: {treatment.createdAt ? new Date(treatment.createdAt).toLocaleDateString() : 'Date unavailable'}</p>
             </div>
             <div className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-medium border border-blue-100">
               {medications.length} Medication{medications.length !== 1 ? 's' : ''}

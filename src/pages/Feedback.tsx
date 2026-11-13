@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { MessageSquare, Star, ThumbsUp, Users, AlertCircle, Stethoscope } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import { useAuth } from '../context/AuthContext'
 
 
 const feedbackSchema = z.object({
@@ -16,6 +17,7 @@ const feedbackSchema = z.object({
 type FeedbackFormData = z.infer<typeof feedbackSchema>
 
 const Feedback: React.FC = () => {
+  const { currentUser } = useAuth()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [feedbackSuccess, setFeedbackSuccess] = useState(false)
   const [selectedRating, setSelectedRating] = useState(0)
@@ -31,31 +33,25 @@ const Feedback: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState('')
 
   useEffect(() => {
-    loadFeedbackData()
-  }, [])
+    void loadFeedbackData()
+  }, [currentUser?.id, currentUser?.profile?.id])
 
   const loadFeedbackData = async () => {
     try {
       setIsLoading(true)
-      
-      // Get current user
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        setErrorMessage('User not authenticated')
-        setIsLoading(false)
-        return
-      }
+      setErrorMessage('')
 
-      // Fetch appointments for the current user
-      const { data: patient } = await supabase.from('patients').select('id').eq('auth_user_id', user.id).single()
-      if (!patient) return;
+      const patientId = currentUser?.profile?.id
+      if (!patientId) throw new Error('Your patient profile could not be found. Please sign in again.')
 
-      const { data: appointmentsData } = await supabase
+      const { data: appointmentsData, error: appointmentsError } = await supabase
         .from('appointments')
         .select('*, doctors(*)')
-        .eq('patient_id', patient.id)
+        .eq('patient_id', patientId)
         .eq('status', 'completed')
       
+      if (appointmentsError) throw appointmentsError
+
       // Extract unique doctors from appointments
       const uniqueDoctors = appointmentsData?.reduce((acc: any[], apt) => {
         if (apt.doctors && !acc.some(d => d.id === apt.doctors.id)) {
@@ -73,11 +69,14 @@ const Feedback: React.FC = () => {
       })))
 
       // Fetch all feedback
-      const { data: feedbackData } = await supabase
+      const { data: feedbackData, error: feedbackError } = await supabase
         .from('feedback')
         .select('*, doctors(full_name, specialization)')
+        .eq('patient_id', patientId)
         .order('created_at', { ascending: false })
       
+      if (feedbackError) throw feedbackError
+
       const feedback = feedbackData?.map(f => ({
         id: f.id,
         doctorName: f.doctors ? f.doctors.full_name : 'Unknown',
@@ -154,23 +153,20 @@ const Feedback: React.FC = () => {
     setErrorMessage('')
     
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('User not authenticated')
+      const patientId = currentUser?.profile?.id
+      if (!patientId) throw new Error('Your patient profile could not be found. Please sign in again.')
 
-      const { data: patient } = await supabase.from('patients').select('id').eq('auth_user_id', user.id).single()
-      if (!patient) throw new Error('Patient profile not found')
-
-      await supabase
+      const { error } = await supabase
         .from('feedback')
         .insert([{
           doctor_id: data.doctorId,
-          patient_id: patient.id,
+          patient_id: patientId,
           rating: data.rating,
           comments: data.comments,
           created_at: new Date().toISOString()
         }])
+      if (error) throw error
       
-      console.log('Feedback submitted:', data)
       await loadFeedbackData()
       setFeedbackSuccess(true)
       setIsSubmitting(false)

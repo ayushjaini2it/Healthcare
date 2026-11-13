@@ -62,7 +62,15 @@ A modern, comprehensive healthcare supply chain and patient management system bu
 4. **Configure Supabase**
    Run `supabase_rls_policies.sql` in the Supabase SQL Editor. It enables the required row-level security policies and creates patient/doctor profiles during signup, including when email confirmation is enabled.
 
-5. **Start the development server**
+5. **Enable appointment email notifications**
+   Install the Supabase CLI, deploy the `appointment-notification` Edge Function, then configure a verified Resend sender:
+   ```bash
+   supabase functions deploy appointment-notification
+   supabase secrets set RESEND_API_KEY=your_resend_api_key APPOINTMENT_FROM_EMAIL="Health Connect <notifications@your-domain>"
+   ```
+   The function sends the assigned doctor's registered email address a generic alert; appointment details and medical information are not included in the email. The appointment is still saved in the doctor's dashboard if email delivery is unavailable.
+
+6. **Start the development server**
    ```bash
    npm run dev
    ```

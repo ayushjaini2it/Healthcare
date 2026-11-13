@@ -516,6 +516,7 @@ export const treatmentServices = {
       plan: treatmentData.treatment_plan,
       procedures: treatmentData.procedures ? treatmentData.procedures.split(',') : [],
       followUpDate: treatmentData.follow_up_date,
+      createdAt: treatmentData.created_at,
       status: treatmentData.status,
       medications: []
     }
@@ -597,6 +598,20 @@ export const billingServices = {
 
     if (error) throw error
     return data?.[0] || null
+  },
+
+  /**
+   * Get all bills for a patient, newest first
+   */
+  async getPatientBills(patientId: string) {
+    const { data, error } = await supabase
+      .from('bills')
+      .select('*, billing_items(*)')
+      .eq('patient_id', patientId)
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+    return data || []
   },
 
   /**

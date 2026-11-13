@@ -39,8 +39,8 @@ const DoctorAppointments: React.FC = () => {
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'appointments', filter: `doctor_id=eq.${currentUser?.id}` },
-        (payload) => {
-          setAppointments(prev => [payload.new as any, ...prev])
+        () => {
+          void loadAppointments()
           setNewNotif(true)
           setTimeout(() => setNewNotif(false), 5000)
         }

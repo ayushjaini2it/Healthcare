@@ -18,14 +18,14 @@ const PatientRecords: React.FC = () => {
 
   useEffect(() => {
     const fetchRecords = async () => {
-      if (!currentUser?.id) return;
+      if (!currentUser?.id) {
+        setError('Your account could not be identified. Please sign in again.')
+        setIsLoading(false)
+        return
+      }
       try {
         setIsLoading(true);
-        // Note: the services might expect auth_user_id (which is currentUser.id)
-        // Wait, getPatientConsultations takes patientId. Does it mean patient's ID in patients table or auth_user_id?
-        // Let's check how PatientMedications fetches: it uses currentUser.id, wait.
-        // Actually, let's fetch the patient profile first if needed, or if getPatientConsultations works with auth_user_id.
-        // Wait! In supabaseServices.ts, patientServices.getPatientByAuthId exists.
+        setError('')
         
         const patientData = await supabaseServices.patientServices.getPatientByAuthId(currentUser.id);
         if (!patientData) throw new Error('Patient profile not found');
@@ -61,7 +61,7 @@ const PatientRecords: React.FC = () => {
       }
     };
     fetchRecords();
-  }, [currentUser]);
+  }, [currentUser?.id]);
 
   if (isLoading) {
     return (

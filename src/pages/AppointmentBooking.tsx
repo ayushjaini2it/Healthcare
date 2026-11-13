@@ -50,6 +50,7 @@ const AppointmentBooking: React.FC = () => {
   const [appointmentType, setAppointmentType] = useState('general')
   const [reason, setReason] = useState('')
   const [bookingError, setBookingError] = useState('')
+  const [notificationWarning, setNotificationWarning] = useState('')
   const [bookingSuccess, setBookingSuccess] = useState('')
   const [isBooking, setIsBooking] = useState(false)
 
@@ -102,6 +103,7 @@ const AppointmentBooking: React.FC = () => {
     event.preventDefault()
     setBookingError('')
     setBookingSuccess('')
+    setNotificationWarning('')
 
     const patientId = currentUser?.profile?.id
     if (!patientId) {
@@ -115,7 +117,7 @@ const AppointmentBooking: React.FC = () => {
 
     setIsBooking(true)
     try {
-      const { error } = await supabase.from('appointments').insert({
+      const { data: appointment, error } = await supabase.from('appointments').insert({
         patient_id: patientId,
         doctor_id: selectedDoctor.id,
         appointment_date: appointmentDate,
@@ -123,11 +125,18 @@ const AppointmentBooking: React.FC = () => {
         appointment_type: appointmentType,
         reason: reason.trim(),
         status: 'pending',
-      })
+      }).select('id').single()
 
       if (error) throw error
 
       setBookingSuccess(`Your appointment request with ${selectedDoctor.full_name} has been sent.`)
+      const { error: emailError } = await supabase.functions.invoke('appointment-notification', {
+        body: { appointmentId: appointment.id },
+      })
+      if (emailError) {
+        console.error('Appointment saved, but doctor email notification failed:', emailError)
+        setNotificationWarning('Your appointment was booked, but the doctor email notification could not be sent. The request is available in the doctor dashboard.')
+      }
       setTimeSlot('')
       setReason('')
     } catch (error: unknown) {
@@ -168,6 +177,12 @@ const AppointmentBooking: React.FC = () => {
         <div role="alert" className="mb-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">
           <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
           <p>{bookingError}</p>
+        </div>
+      )}
+      {notificationWarning && (
+        <div role="status" className="mb-6 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-800">
+          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
+          <p>{notificationWarning}</p>
         </div>
       )}
 

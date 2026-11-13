@@ -286,6 +286,21 @@ DROP POLICY IF EXISTS "appointments: doctor can update own" ON appointments;
 CREATE POLICY "appointments: doctor can update own" ON appointments
   FOR UPDATE USING (doctor_id = auth.uid());
 
+-- Enable realtime delivery for new appointment requests to the assigned doctor.
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_publication WHERE pubname = 'supabase_realtime')
+     AND NOT EXISTS (
+       SELECT 1
+       FROM pg_publication_tables
+       WHERE pubname = 'supabase_realtime'
+         AND schemaname = 'public'
+         AND tablename = 'appointments'
+     ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.appointments;
+  END IF;
+END $$;
+
 
 -- ============================================================
 -- STEP 3: Foreign key constraint on doctors table (Step 7 of plan)
